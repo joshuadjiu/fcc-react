@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/fcc-react/static/css/main.09a1c174.css",
-    "main.js": "/fcc-react/static/js/main.3a0a9cc4.js",
+    "main.css": "/fcc-react/static/css/main.f69d1b4d.css",
+    "main.js": "/fcc-react/static/js/main.0d118c75.js",
     "static/js/453.1f73338e.chunk.js": "/fcc-react/static/js/453.1f73338e.chunk.js",
     "index.html": "/fcc-react/index.html",
-    "main.09a1c174.css.map": "/fcc-react/static/css/main.09a1c174.css.map",
-    "main.3a0a9cc4.js.map": "/fcc-react/static/js/main.3a0a9cc4.js.map",
+    "main.f69d1b4d.css.map": "/fcc-react/static/css/main.f69d1b4d.css.map",
+    "main.0d118c75.js.map": "/fcc-react/static/js/main.0d118c75.js.map",
     "453.1f73338e.chunk.js.map": "/fcc-react/static/js/453.1f73338e.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.09a1c174.css",
-    "static/js/main.3a0a9cc4.js"
+    "static/css/main.f69d1b4d.css",
+    "static/js/main.0d118c75.js"
   ]
 }
