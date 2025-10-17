@@ -1,52 +1,40 @@
-import React, { useState } from "react";
-import "./form.css";
+import React from "react";
 
 export default function PeerCounselorForm() {
-  const [data, setData] = useState({
-    nim: "",
-    nama: "",
-    jurusan: "",
-    tanggal: "",
-    jamMulai: "",
-    jamSelesai: "",
-    metode: "",
-    deskripsi: "",
-    kendala: "",
-    support: "",
-  });
-
-  const handleChange = (e) => setData({ ...data, [e.target.id]: e.target.value });
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const durasi = Math.abs(new Date(`1970-01-01T${data.jamSelesai}:00`) - new Date(`1970-01-01T${data.jamMulai}:00`)) / 60000;
-    alert(`Data tersimpan!\nDurasi: ${durasi} menit`);
-  };
-
   return (
-    <div className="container">
-      <h2>Form Peer Counselor</h2>
-      <form onSubmit={handleSubmit}>
-        <input id="nim" placeholder="NIM Buddy" onChange={handleChange} required />
-        <input id="nama" placeholder="Nama Buddy" onChange={handleChange} required />
-        <input id="jurusan" placeholder="Jurusan Buddy" onChange={handleChange} required />
-        <input id="tanggal" type="date" onChange={handleChange} required />
-        <label>Jam Mulai</label>
-        <input id="jamMulai" type="time" onChange={handleChange} required />
-        <label>Jam Selesai</label>
-        <input id="jamSelesai" type="time" onChange={handleChange} required />
-        <select id="metode" onChange={handleChange} required>
-          <option value="">Metode Konseling</option>
-          <option>Zoom</option>
-          <option>Tatap Muka</option>
-          <option>Chat (WA/Line)</option>
-          <option>Telepon</option>
-        </select>
-        <textarea id="deskripsi" placeholder="Deskripsi kegiatan" onChange={handleChange}></textarea>
-        <textarea id="kendala" placeholder="Kendala saat konseling" onChange={handleChange}></textarea>
-        <textarea id="support" placeholder="Support needed" onChange={handleChange}></textarea>
-        <button type="submit">Simpan</button>
-      </form>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-500 via-purple-500 to-indigo-600 text-white">
+      <div className="bg-white/10 backdrop-blur-md p-10 rounded-2xl shadow-lg max-w-lg w-full text-center">
+        <h2 className="text-3xl font-bold mb-6">Peer Counselor Form</h2>
+
+        <form className="space-y-4">
+          <div>
+            <input
+              type="text"
+              placeholder="Nama Lengkap"
+              className="w-full p-3 rounded-lg bg-white/20 placeholder-white/70 text-white focus:outline-none"
+            />
+          </div>
+          <div>
+            <input
+              type="email"
+              placeholder="Email BINUS"
+              className="w-full p-3 rounded-lg bg-white/20 placeholder-white/70 text-white focus:outline-none"
+            />
+          </div>
+          <div>
+            <textarea
+              placeholder="Alasan ingin menjadi Peer Counselor"
+              className="w-full p-3 rounded-lg bg-white/20 placeholder-white/70 text-white focus:outline-none h-24"
+            />
+          </div>
+          <button
+            type="submit"
+            className="w-full py-3 bg-white text-purple-700 font-bold rounded-lg hover:bg-purple-100 transition"
+          >
+            Kirim Form
+          </button>
+        </form>
+      </div>
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import "../styles/Form.css";
+import "../App.css";
 
 const PeerPartnerForm = () => {
   const [formData, setFormData] = useState({
@@ -35,7 +36,7 @@ const PeerPartnerForm = () => {
   };
 
   return (
-    <div className="container">
+    <div className="form-container">
       <h2>Peer Partner Form</h2>
       <form onSubmit={handleSubmit}>
         <label>Data Buddy</label>
