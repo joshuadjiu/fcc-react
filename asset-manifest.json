@@ -1,15 +1,17 @@
 {
   "files": {
-    "main.css": "/fcc-react/static/css/main.f69d1b4d.css",
-    "main.js": "/fcc-react/static/js/main.0d118c75.js",
-    "static/js/453.1f73338e.chunk.js": "/fcc-react/static/js/453.1f73338e.chunk.js",
-    "index.html": "/fcc-react/index.html",
-    "main.f69d1b4d.css.map": "/fcc-react/static/css/main.f69d1b4d.css.map",
-    "main.0d118c75.js.map": "/fcc-react/static/js/main.0d118c75.js.map",
-    "453.1f73338e.chunk.js.map": "/fcc-react/static/js/453.1f73338e.chunk.js.map"
+    "main.css": "./static/css/main.a318339a.css",
+    "main.js": "./static/js/main.8fde2435.js",
+    "static/js/453.1f73338e.chunk.js": "./static/js/453.1f73338e.chunk.js",
+    "static/media/Logo-Binus.jpg": "./static/media/Logo-Binus.2f0d82e46c05a9991b25.jpg",
+    "static/media/Logo-FCC.jpg": "./static/media/Logo-FCC.fe9cd25d2648fd33abab.jpg",
+    "index.html": "./index.html",
+    "main.a318339a.css.map": "./static/css/main.a318339a.css.map",
+    "main.8fde2435.js.map": "./static/js/main.8fde2435.js.map",
+    "453.1f73338e.chunk.js.map": "./static/js/453.1f73338e.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.f69d1b4d.css",
-    "static/js/main.0d118c75.js"
+    "static/css/main.a318339a.css",
+    "static/js/main.8fde2435.js"
   ]
 }
