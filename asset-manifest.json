@@ -1,18 +1,18 @@
 {
   "files": {
-    "main.css": "./static/css/main.82c9b6df.css",
-    "main.js": "./static/js/main.2aff74ab.js",
+    "main.css": "./static/css/main.5f136354.css",
+    "main.js": "./static/js/main.647f77f8.js",
     "static/js/488.d4a0d7d0.chunk.js": "./static/js/488.d4a0d7d0.chunk.js",
     "static/media/Logo-FCC.png": "./static/media/Logo-FCC.0df9c08f8df8c2056fb4.png",
     "static/media/Logo-Binus.png": "./static/media/Logo-Binus.c5c6a81328a9f4fe9432.png",
     "static/media/Teman-Ngumpul.jpg": "./static/media/Teman-Ngumpul.d4e6432cbb49c15ed036.jpg",
     "index.html": "./index.html",
-    "main.82c9b6df.css.map": "./static/css/main.82c9b6df.css.map",
-    "main.2aff74ab.js.map": "./static/js/main.2aff74ab.js.map",
+    "main.5f136354.css.map": "./static/css/main.5f136354.css.map",
+    "main.647f77f8.js.map": "./static/js/main.647f77f8.js.map",
     "488.d4a0d7d0.chunk.js.map": "./static/js/488.d4a0d7d0.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.82c9b6df.css",
-    "static/js/main.2aff74ab.js"
+    "static/css/main.5f136354.css",
+    "static/js/main.647f77f8.js"
   ]
 }
