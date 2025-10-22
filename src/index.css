@@ -3,5 +3,5 @@
 @tailwind utilities;
 
 body {
-  @apply bg-gradient-to-br from-purple-700 via-indigo-600 to-blue-500 text-white min-h-screen;
+  @apply antialiased;
 }
