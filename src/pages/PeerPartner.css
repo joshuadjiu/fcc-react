@@ -1,0 +1,94 @@
+.peerpartner-page {
+  display: flex;
+  min-height: 100vh;
+  background-color: #fffef9;
+  font-family: "Segoe UI", sans-serif;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 220px;
+  background-color: #b3e5fc;
+  padding: 20px;
+  color: #000;
+}
+.sidebar h3 {
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+}
+.sidebar li {
+  margin: 8px 0;
+  cursor: pointer;
+}
+
+/* Main Content */
+.main-content {
+  flex: 1;
+  padding: 30px;
+  background-color: #ffd64e;
+}
+.main-content h2 {
+  color: #000;
+  margin-bottom: 20px;
+}
+
+.form-container {
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+}
+
+label {
+  font-weight: 600;
+  color: #000;
+}
+
+input, select, textarea {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #aaa;
+  border-radius: 8px;
+}
+
+textarea {
+  min-height: 60px;
+}
+
+.verifikasi-section textarea {
+  margin-top: 5px;
+}
+
+.submit-btn {
+  background-color: #000;
+  color: #fff;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  margin-top: 20px;
+  cursor: pointer;
+}
+
+/* Profile Box */
+.profile-box {
+  width: 260px;
+  background-color: #fff;
+  border-left: 2px solid #eee;
+  padding: 20px;
+}
+.profile-box h3 {
+  color: #000;
+}
+.profile-box p {
+  margin: 8px 0;
+}

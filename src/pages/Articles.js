@@ -15,6 +15,10 @@ export default function Articles() {
       title: "Penerapan Sistem Dokumentasi Terintegrasi",
       desc: "Inovasi baru FCC dalam menyatukan seluruh dokumentasi ke dalam satu portal modern.",
     },
+    {
+      title: "Penerapan Sistem Dokumentasi Terintegrasi",
+      desc: "Inovasi baru FCC dalam menyatukan seluruh dokumentasi ke dalam satu portal modern.",
+    },
   ];
 
   return (
@@ -23,8 +27,8 @@ export default function Articles() {
       <Navbar />
 
       {/* 🔹 Konten utama */}
-      <main className="pt-24 pb-16 px-6 mt-16">
-        <h1 className="text-3xl font-bold text-center text-blue-700 mb-10">
+      <main className="py-24 px-8 text-center bg-gradient-to-b from-yellow-400 to-blue-500 text-black mt-16">
+        <h1 className="text-3xl font-bold text-center text-black-700 mb-10">
           FCC Articles
         </h1>
 

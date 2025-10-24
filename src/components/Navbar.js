@@ -8,25 +8,26 @@ export default function Navbar() {
 
   return (
     <nav className="flex justify-between items-center px-8 py-3 bg-white shadow-md fixed w-full top-0 z-20">
-      {/* 🔹 Logo Kiri */}
+
+      {/* Logo di pojok kiri atas */}
       <div className="flex items-center gap-4">
         <img
           src={binusLogo}
           alt="Binus Logo"
-          className="w-14 h-14 object-contain"
+          className="h-20 w-auto"
         />
         <div className="w-[2px] h-10 bg-gray-300" />
         <div className="flex items-center gap-3">
           <img
             src={fccLogo}
             alt="FCC Logo"
-            className="w-10 h-10 rounded-full object-cover"
+            className="w-10 h-12 rounded-full object-cover"
           />
           <div className="text-lg font-bold text-gray-800">Friends Care Community</div>
         </div>
       </div>
 
-      {/* 🔹 Menu Tengah */}
+      {/* Menu/fitur di posisi tengah */}
       <div className="flex gap-6 text-gray-700 font-medium">
         <Link
           to="/"
@@ -42,7 +43,7 @@ export default function Navbar() {
             location.pathname === "/articles" ? "text-blue-600 font-semibold" : ""
           }`}
         >
-          Article
+          Articles
         </Link>
         <Link
           to="/documents"
@@ -50,23 +51,17 @@ export default function Navbar() {
             location.pathname === "/documents" ? "text-blue-600 font-semibold" : ""
           }`}
         >
-          Dokumentasi
+          Documents
         </Link>
       </div>
 
-      {/* 🔹 Tombol Login & Register */}
+      {/* Login & Register di pojok kanan atas */}
       <div className="flex gap-3">
         <Link
           to="/login"
-          className="px-4 py-2 bg-white text-black border border-black rounded-lg hover:bg-blue-200 transition"
+          className="px-4 py-2 border border-black text-black rounded-lg hover:bg-black hover:text-white transition"
         >
-          Login
-        </Link>
-        <Link
-          to="/register"
-          className="px-4 py-2 bg-white text-black border border-black rounded-lg hover:bg-blue-200 transition"
-        >
-          Register
+          Login / Register
         </Link>
       </div>
     </nav>

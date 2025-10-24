@@ -1,13 +1,13 @@
 FCC (web) :
 
-1. Warna background binus (referensi : https://support.binus.ac.id/)
+1. Warna background binus (referensi : https://support.binus.ac.id/) v
 
-2. Home page (logo Binus dan FCC, article, dokumentasi, dan login/register)
+2. Home page (logo Binus dan FCC, article, dokumentasi, dan login/register) v
 
-3. Register (Nama, NIM, dan Password)
+3. Register (Nama, NIM, dan Password) v
 
-4. Login (NIM, password, dan halaman login diutamain student dan as staff))
+4. Login (NIM, password, dan halaman login diutamain student dan as staff)) v
 
-5. As student (coming soon)
+5. As student (docs)
 
-6. As staff (coming soon) 
+6. As staff (docs)

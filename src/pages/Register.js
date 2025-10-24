@@ -1,100 +1,160 @@
 import React, { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import fccLogo from "../Assets/Logo-FCC.png";
 
 export default function Register() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    name: "",
     nim: "",
+    nama: "",
+    faculty: "",
+    jurusan: "",
     password: "",
+    confirmPassword: "",
   });
-
-  const [errors, setErrors] = useState({});
-  const [success, setSuccess] = useState("");
+  const [message, setMessage] = useState({ text: "", type: "" });
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const validate = () => {
-    const newErrors = {};
-    if (!formData.name.trim()) newErrors.name = "Nama harus diisi";
-    if (!formData.nim.trim()) newErrors.nim = "NIM harus diisi";
-    if (!formData.password.trim()) newErrors.password = "Password harus diisi";
-    return newErrors;
-  };
-
-  const handleSubmit = (e) => {
+  const handleRegister = (e) => {
     e.preventDefault();
-    const validationErrors = validate();
-    setErrors(validationErrors);
+    setMessage({ text: "", type: "" });
 
-    if (Object.keys(validationErrors).length === 0) {
-      // Simpan data ke localStorage (simulasi backend)
-      localStorage.setItem("userData", JSON.stringify(formData));
-      setSuccess("Registrasi berhasil! Silakan login.");
-      setFormData({ name: "", nim: "", password: "" });
-      setTimeout(() => navigate("/login"), 2000);
-    }
+    {/* Validasi input */}
+    if (!formData.nim) return setMessage({ text: "NIM harus diisi!", type: "error" });
+    if (!formData.nama) return setMessage({ text: "Nama harus diisi!", type: "error" });
+    if (!formData.faculty) return setMessage({ text: "Fakultas harus dipilih!", type: "error" });
+    if (!formData.jurusan) return setMessage({ text: "Jurusan harus diisi!", type: "error" });
+    if (!formData.password) return setMessage({ text: "Password harus diisi!", type: "error" });
+    if (!formData.confirmPassword)
+      return setMessage({ text: "Konfirmasi password harus diisi!", type: "error" });
+    if (formData.password !== formData.confirmPassword)
+      return setMessage({ text: "Password dan konfirmasi password tidak cocok!", type: "error" });
+
+    {/* Menyimpan ke localstorage*/}
+    const users = JSON.parse(localStorage.getItem("users")) || [];
+    users.push({
+      nim: formData.nim,
+      nama: formData.nama,
+      faculty: formData.faculty,
+      jurusan: formData.jurusan,
+      password: formData.password,
+    });
+    localStorage.setItem("users", JSON.stringify(users));
+
+    setMessage({ text: "Registrasi berhasil! Silakan login.", type: "success" });
+    setTimeout(() => navigate("/login"), 1500);
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="bg-white shadow-lg rounded-2xl p-8 w-full max-w-md">
-        <h2 className="text-2xl font-bold text-center mb-6">Register FCC Student</h2>
+    // Card/Kotak Register
+    <div
+      className="min-h-screen flex items-center justify-center relative bg-cover bg-center"
+      style={{
+        backgroundImage: `url(${fccLogo})`,
+        backgroundSize: "contain",
+        backgroundRepeat: "no-repeat",
+        backgroundPosition: "center",
+      }}
+    >
+      <div className="absolute inset-0 backdrop-blur-md bg-white/70"></div>
+      <div className="relative bg-white rounded-2xl shadow-lg p-8 w-[400px] border-t-4 border-blue-500 z-10">
+        <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">
+          Register Student
+        </h2>
 
-        {success && <p className="text-green-600 text-center mb-3">{success}</p>}
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-gray-700">Nama</label>
-            <input
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              className="w-full p-2 border rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
-            />
-            {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
+        {message.text && (
+          <div
+            className={`p-2 text-sm rounded-md mb-3 text-center ${
+              message.type === "error"
+                ? "bg-red-100 text-red-600 border border-red-300"
+                : "bg-green-100 text-green-700 border border-green-300"
+            }`}
+          >
+            {message.text}
           </div>
+        )}
 
-          <div>
-            <label className="block text-gray-700">NIM</label>
-            <input
-              type="text"
-              name="nim"
-              value={formData.nim}
-              onChange={handleChange}
-              className="w-full p-2 border rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
-            />
-            {errors.nim && <p className="text-red-500 text-sm">{errors.nim}</p>}
-          </div>
+        <form onSubmit={handleRegister} className="space-y-4">
+          <input
+            type="text"
+            name="nim"
+            placeholder="NIM"
+            value={formData.nim}
+            onChange={handleChange}
+            className="border p-3 w-full rounded-lg focus:ring-2 focus:ring-blue-400"
+          />
 
-          <div>
-            <label className="block text-gray-700">Password</label>
-            <input
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              className="w-full p-2 border rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
-            />
-            {errors.password && <p className="text-red-500 text-sm">{errors.password}</p>}
-          </div>
+          <input
+            type="text"
+            name="nama"
+            placeholder="Nama Lengkap"
+            value={formData.nama}
+            onChange={handleChange}
+            className="border p-3 w-full rounded-lg focus:ring-2 focus:ring-blue-400"
+          />
+
+          <select
+            name="faculty"
+            value={formData.faculty}
+            onChange={handleChange}
+            className="border p-3 w-full rounded-lg focus:ring-2 focus:ring-blue-400"
+          >
+            <option value="">Pilih Fakultas</option>
+            <option value="School of Computer Science">School of Computer Science</option>
+            <option value="School of Information System">School of Information System</option>
+            <option value="Faculty of Humanities">Faculty of Humanities</option>
+            <option value="School of Design">School of Design</option>
+            <option value="Business School">Business School</option>
+            <option value="Faculty of Engineering">Faculty of Engineering</option>
+            <option value="Faculty of Economics & Communication">Faculty of Economics & Communication</option>
+          </select>
+
+          <input
+            type="text"
+            name="jurusan"
+            placeholder="Jurusan"
+            value={formData.jurusan}
+            onChange={handleChange}
+            className="border p-3 w-full rounded-lg focus:ring-2 focus:ring-blue-400"
+          />
+
+          <input
+            type="password"
+            name="password"
+            placeholder="Password"
+            value={formData.password}
+            onChange={handleChange}
+            className="border p-3 w-full rounded-lg focus:ring-2 focus:ring-blue-400"
+          />
+
+          <input
+            type="password"
+            name="confirmPassword"
+            placeholder="Konfirmasi Password"
+            value={formData.confirmPassword}
+            onChange={handleChange}
+            className="border p-3 w-full rounded-lg focus:ring-2 focus:ring-blue-400"
+          />
 
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700"
+            className="w-full py-3 bg-gradient-to-r from-blue-500 to-cyan-400 text-white font-semibold rounded-lg hover:from-blue-600 hover:to-cyan-500 transition"
           >
             Register
           </button>
         </form>
 
-        <p className="text-sm text-center mt-4">
+        <p className="text-center text-sm text-gray-600 mt-4">
           Sudah punya akun?{" "}
-          <Link to="/login" className="text-blue-600 hover:underline">
-            Login di sini
-          </Link>
+          <span
+            onClick={() => navigate("/login")}
+            className="text-blue-500 cursor-pointer hover:underline"
+          >
+            Login
+          </span>
         </p>
       </div>
     </div>

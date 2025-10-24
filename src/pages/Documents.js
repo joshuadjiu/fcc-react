@@ -15,8 +15,8 @@ export default function Documents() {
       <Navbar />
 
       {/* 🔹 Konten utama */}
-      <section className="py-24 px-8 text-center bg-gradient-to-b from-indigo-600 to-purple-700 text-white mt-16">
-        <h2 className="text-3xl font-bold mb-10">Dokumentasi Proses Kerja FCC</h2>
+      <section className="py-24 px-8 text-center bg-gradient-to-b from-blue-700 to-yellow-400 text-white mt-16">
+        <h2 className="text-3xl font-bold mb-10">Documents FCC</h2>
 
         <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-8">
           {steps.map((s, i) => (

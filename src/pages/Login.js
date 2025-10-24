@@ -1,78 +1,118 @@
 import React, { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import fccLogo from "../Assets/Logo-FCC.png";
 
-export default function LoginStudent() {
+export default function Login() {
   const navigate = useNavigate();
-  const [nim, setNim] = useState("");
+  const [emailOrNim, setEmailOrNim] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [message, setMessage] = useState({ text: "", type: "" });
+
+  {/* Akun Staff */}
+  const staffAccounts = [
+    { username: "admin", password: "123456" },
+    { username: "staff1", password: "654321" },
+  ];
 
   const handleLogin = (e) => {
     e.preventDefault();
-    const storedUser = JSON.parse(localStorage.getItem("userData"));
+    setMessage({ text: "", type: "" });
 
-    if (!nim || !password) {
-      setError("Semua field harus diisi!");
+    if (!emailOrNim) {
+      setMessage({ text: "NIM atau Username harus diisi!", type: "error" });
       return;
     }
 
-    if (storedUser && storedUser.nim === nim && storedUser.password === password) {
-      navigate("/home");
+    if (!password) {
+      setMessage({ text: "Password harus diisi!", type: "error" });
+      return;
+    }
+
+    const staff = staffAccounts.find(
+      (s) => s.username === emailOrNim && s.password === password
+    );
+    if (staff) {
+      setMessage({ text: "Login sebagai Staff berhasil!", type: "success" });
+      setTimeout(() => navigate("/sasc-staff"), 1500);
+      return;
+    }
+
+    const users = JSON.parse(localStorage.getItem("users")) || [];
+    const student = users.find(
+      (u) => u.nim === emailOrNim && u.password === password
+    );
+
+    if (student) {
+      setMessage({ text: "Login sebagai Student berhasil!", type: "success" });
+      setTimeout(() => navigate("/role-selection"), 1500);
     } else {
-      setError("NIM atau password salah!");
+      setMessage({ text: "NIM atau password salah!", type: "error" });
     }
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="bg-white shadow-lg rounded-2xl p-8 w-full max-w-md">
-        <h2 className="text-2xl font-bold text-center mb-6">Login FCC Student</h2>
+    // Card/Kotak Login
+    <div
+      className="min-h-screen flex items-center justify-center relative bg-cover bg-center"
+      style={{
+        backgroundImage: `url(${fccLogo})`,
+        backgroundSize: "contain",
+        backgroundRepeat: "no-repeat",
+        backgroundPosition: "center",
+      }}
+    >
+      <div className="absolute inset-0 backdrop-blur-md bg-white/70"></div>
+      <div className="relative bg-white rounded-2xl shadow-lg p-8 w-[380px] border-t-4 border-blue-500 z-10">
+        <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">
+          Login
+        </h2>
 
-        {error && <p className="text-red-500 text-center mb-3">{error}</p>}
+        {message.text && (
+          <div
+            className={`p-2 text-sm rounded-md mb-3 text-center ${
+              message.type === "error"
+                ? "bg-red-100 text-red-600 border border-red-300"
+                : "bg-green-100 text-green-700 border border-green-300"
+            }`}
+          >
+            {message.text}
+          </div>
+        )}
 
         <form onSubmit={handleLogin} className="space-y-4">
-          <div>
-            <label className="block text-gray-700">NIM</label>
-            <input
-              type="text"
-              value={nim}
-              onChange={(e) => setNim(e.target.value)}
-              className="w-full p-2 border rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
-            />
-          </div>
+          <input
+            type="text"
+            placeholder="NIM atau Username Staff"
+            value={emailOrNim}
+            onChange={(e) => setEmailOrNim(e.target.value)}
+            className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          />
 
-          <div>
-            <label className="block text-gray-700">Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full p-2 border rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
-            />
-          </div>
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          />
 
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700"
+            className="w-full py-3 bg-gradient-to-r from-blue-500 to-cyan-400 text-white font-semibold rounded-lg hover:from-blue-600 hover:to-cyan-500 transition"
           >
             Login
           </button>
         </form>
 
-        <div className="text-center mt-4">
-          <p className="text-sm">
-            Belum punya akun?{" "}
-            <Link to="/register" className="text-blue-600 hover:underline">
-              Register di sini
-            </Link>
-          </p>
-
-          <p className="text-sm mt-2">
-            <Link to="/staff-login" className="text-indigo-600 hover:underline">
-              Login sebagai SASC Staff
-            </Link>
-          </p>
-        </div>
+        <p className="text-center text-sm text-gray-600 mt-4">
+          Belum punya akun?{" "}
+          <span
+            onClick={() => navigate("/register")}
+            className="text-blue-500 cursor-pointer hover:underline"
+          >
+            Register
+          </span>
+        </p>
       </div>
     </div>
   );
