@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import binusLogo from "../Assets/Logo-Binus.png";
-import fccLogo from "../Assets/Logo-FCC.png";
+// import binusLogo from "../Assets/Logo-Binus.png";
+// import fccLogo from "../Assets/Logo-FCC.png";
 import temanNgumpul from "../Assets/Teman-Ngumpul.jpg";
 import Navbar from "../components/Navbar";
 
