@@ -1,5 +1,13 @@
 import React from "react";
-import { Home, Users, CheckSquare, Database, Gift, UserCog, Settings } from "lucide-react";
+import {
+  Home,
+  Users,
+  CheckSquare,
+  Database,
+  Gift,
+  UserCog,
+  Settings,
+} from "lucide-react";
 
 export default function SASCStaff() {
   return (
@@ -16,27 +24,27 @@ export default function SASCStaff() {
         </div>
 
         <nav className="flex-1 p-4 space-y-2 text-gray-700">
-          <a href="#" className="flex items-center gap-3 p-2 rounded-md hover:bg-blue-100">
+          <button className="flex items-center gap-3 p-2 w-full text-left rounded-md hover:bg-blue-100">
             <Home size={18} /> Dashboard
-          </a>
-          <a href="#" className="flex items-center gap-3 p-2 rounded-md hover:bg-blue-100">
+          </button>
+          <button className="flex items-center gap-3 p-2 w-full text-left rounded-md hover:bg-blue-100">
             <Users size={18} /> Pairing Buddy
-          </a>
-          <a href="#" className="flex items-center gap-3 p-2 rounded-md hover:bg-blue-100">
+          </button>
+          <button className="flex items-center gap-3 p-2 w-full text-left rounded-md hover:bg-blue-100">
             <CheckSquare size={18} /> Verifikasi Laporan
-          </a>
-          <a href="#" className="flex items-center gap-3 p-2 rounded-md hover:bg-blue-100">
+          </button>
+          <button className="flex items-center gap-3 p-2 w-full text-left rounded-md hover:bg-blue-100">
             <Database size={18} /> Data Report
-          </a>
-          <a href="#" className="flex items-center gap-3 p-2 rounded-md hover:bg-blue-100">
+          </button>
+          <button className="flex items-center gap-3 p-2 w-full text-left rounded-md hover:bg-blue-100">
             <Gift size={18} /> Souvenir Checklist
-          </a>
-          <a href="#" className="flex items-center gap-3 p-2 rounded-md hover:bg-blue-100">
+          </button>
+          <button className="flex items-center gap-3 p-2 w-full text-left rounded-md hover:bg-blue-100">
             <UserCog size={18} /> Manage Pembina
-          </a>
-          <a href="#" className="flex items-center gap-3 p-2 rounded-md hover:bg-blue-100">
+          </button>
+          <button className="flex items-center gap-3 p-2 w-full text-left rounded-md hover:bg-blue-100">
             <Settings size={18} /> Pengaturan
-          </a>
+          </button>
         </nav>
       </aside>
 
@@ -53,7 +61,7 @@ export default function SASCStaff() {
           </div>
         </div>
 
-        {/* Dashboard Content */}
+        {/* Dashboard Summary */}
         <div className="grid md:grid-cols-3 gap-6 mb-10">
           <div className="bg-white p-6 rounded-xl shadow">
             <h2 className="font-semibold mb-2">Total Reports</h2>
@@ -69,15 +77,27 @@ export default function SASCStaff() {
           </div>
         </div>
 
-        {/* Pairing Buddy + Verifikasi Laporan */}
+        {/* Pairing Buddy & Verifikasi Laporan */}
         <div className="grid md:grid-cols-2 gap-6 mb-10">
           {/* Pairing Buddy */}
           <div className="bg-white p-6 rounded-xl shadow">
             <h2 className="font-semibold mb-4">Pairing Buddy</h2>
             <form className="space-y-4">
-              <input type="text" placeholder="Nama Peer Counselor/Partner" className="w-full p-2 border rounded-md" />
-              <input type="text" placeholder="Nama Buddy" className="w-full p-2 border rounded-md" />
-              <input type="text" placeholder="Jurusan" className="w-full p-2 border rounded-md" />
+              <input
+                type="text"
+                placeholder="Nama Peer Counselor/Partner"
+                className="w-full p-2 border rounded-md"
+              />
+              <input
+                type="text"
+                placeholder="Nama Buddy"
+                className="w-full p-2 border rounded-md"
+              />
+              <input
+                type="text"
+                placeholder="Jurusan"
+                className="w-full p-2 border rounded-md"
+              />
               <button className="w-full py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
                 Simpan Pairing
               </button>
@@ -122,8 +142,16 @@ export default function SASCStaff() {
         <div className="grid md:grid-cols-2 gap-6">
           <div className="bg-white p-6 rounded-xl shadow">
             <h2 className="font-semibold mb-4">Data Report</h2>
-            <input type="text" placeholder="Periode Peran" className="w-full p-2 border rounded-md mb-3" />
-            <input type="text" placeholder="Role" className="w-full p-2 border rounded-md mb-3" />
+            <input
+              type="text"
+              placeholder="Periode Peran"
+              className="w-full p-2 border rounded-md mb-3"
+            />
+            <input
+              type="text"
+              placeholder="Role"
+              className="w-full p-2 border rounded-md mb-3"
+            />
             <button className="w-full py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
               Tampilkan Data
             </button>
@@ -141,14 +169,18 @@ export default function SASCStaff() {
               </thead>
               <tbody>
                 <tr>
-                  <td>Anisa</td>
+                  <td>Joko</td>
                   <td>Peer Counselor</td>
-                  <td><input type="checkbox" /></td>
+                  <td>
+                    <input type="checkbox" />
+                  </td>
                 </tr>
                 <tr>
                   <td>Beenmta</td>
                   <td>Peer Partner</td>
-                  <td><input type="checkbox" /></td>
+                  <td>
+                    <input type="checkbox" />
+                  </td>
                 </tr>
               </tbody>
             </table>
