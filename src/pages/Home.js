@@ -1,16 +1,15 @@
 import React from "react";
 import { Link } from "react-router-dom";
-// import binusLogo from "../Assets/Logo-Binus.png";
-// import fccLogo from "../Assets/Logo-FCC.png";
 import temanNgumpul from "../Assets/Teman-Ngumpul.jpg";
 import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 
 export default function Home() {
   return (
     <div className="min-h-screen flex flex-col bg-white">
       <Navbar />
 
-      {/* Backgroud slogan */}
+      {/* Background (slogan) */}
       <main
         className="flex-grow relative text-white pt-24"
         style={{
@@ -20,8 +19,6 @@ export default function Home() {
           backgroundRepeat: "no-repeat",
         }}
       >
-
-        {/* Slogan */}
         <div className="flex flex-col items-center justify-center text-center p-6 min-h-[80vh]">
           <h1 className="text-5xl font-bold mb-3">Welcome to FCC</h1>
           <p className="text-lg text-gray-100 max-w-xl">
@@ -30,71 +27,69 @@ export default function Home() {
         </div>
       </main>
 
-      {/* Articles di halaman Home */}
-      <section className="bg-white text-gray-800 py-16 px-6">
-        <h2 className="text-2xl font-semibold text-center mb-8 text-black">Articles</h2>
+      {/* Artikel (halaman Home) */}
+      <section className="bg-gray-50 py-16 px-8">
+        <h2 className="text-3xl font-bold text-center text-gray-900 mb-10">
+          Artikel
+        </h2>
 
-        <div className="flex gap-6 overflow-x-auto pb-4 px-2">
+        <div className="max-w-6xl text-center mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {[
             {
               title: "Pelatihan Internal FCC 2025",
-              desc: "Kegiatan pelatihan internal dalam meningkatkan kemampuan tim FCC.",
-              img: temanNgumpul,
             },
             {
               title: "Kolaborasi dengan Binus Support",
-              desc: "Proses kerja sama FCC dalam meningkatkan sistem dukungan mahasiswa.",
-              img: temanNgumpul,
             },
             {
               title: "Workshop Leadership FCC",
-              desc: "Kegiatan pengembangan soft skill dan kepemimpinan anggota FCC.",
-              img: temanNgumpul,
             },
             {
               title: "Event FCC & Student Clubs",
-              desc: "Kolaborasi antar organisasi dalam menciptakan komunitas yang inklusif.",
-              img: temanNgumpul,
             },
             {
-              title: "Event FCC & Student Clubs",
-              desc: "Kolaborasi antar organisasi dalam menciptakan komunitas yang inklusif.",
-              img: temanNgumpul,
+              title: "Rapat Koordinasi Mingguan",
+            },
+            {
+              title: "Sosialisasi Program Baru",
+            },
+            {
+              title: "Penerapan Sistem Digitalisasi",
+            },
+            {
+              title: "FCC Innovation Forum",
             },
           ].map((item, index) => (
             <div
               key={index}
-              className="min-w-[300px] bg-gray-100 rounded-xl shadow hover:shadow-lg transition flex-shrink-0"
+              className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition duration-300"
             >
-              <img
-                src={item.img}
-                alt={item.title}
-                className="h-40 w-full object-cover rounded-t-xl"
-              />
-              <div className="p-4 flex flex-col justify-between h-[180px]">
-                <div>
-                  <h3 className="font-semibold text-lg mb-2">{item.title}</h3>
-                  <p className="text-sm text-gray-600">{item.desc}</p>
-                </div>
-                <Link
-                  to="/articles"
-                  className="mt-4 bg-yellow-400 text-black font-semibold px-3 py-1.5 rounded-lg hover:bg-yellow-300 transition self-start"
-                >
-                  Lihat Selengkapnya
-                </Link>
-              </div>
+              <h3 className="text-gray-900 font-semibold text-lg mb-2">
+                {item.title}
+              </h3>
+              <p className="text-sm text-gray-600">{item.desc}</p>
             </div>
           ))}
+
+          {/* Fitur/menu lihat selengkapnya */}
+          <div className="flex items-center justify-center bg-white-400 rounded-xl border border-gray-200 p-6 hover:bg-cyan-500 transition duration-300">
+            <Link
+              to="/articles"
+              className="text-black font-semibold text-lg hover:text-white transition"
+            >
+              Lihat Selengkapnya →
+            </Link>
+          </div>
         </div>
       </section>
 
-      {/* Dokumentasi di halaman Home */}
-      <section className="bg-gradient-to-b from-cyan-500 text-yellow-400 py-16 px-6">
-        <h2 className="text-2xl font-semibold text-center mb-8">
+      {/* Dokumentasi (halaman Home) */}
+      <section className="bg-gradient-to-b from-cyan-500 to-blue-100 text-yellow-400 py-16 px-3">
+        <h2 className="text-3xl font-semibold text-center mb-9">
           Dokumentasi Proses Kerja
         </h2>
 
-        <div className="flex flex-col items-center gap-8 max-w-4xl mx-auto">
+        <div className="flex flex-col items-center gap-8 max-w-4xl mx-auto mb-8">
           {[
             {
               title: "Rapat Koordinasi Mingguan",
@@ -116,7 +111,11 @@ export default function Home() {
               key={index}
               className="bg-white text-gray-800 rounded-xl shadow-lg overflow-hidden w-full"
             >
-              <img src={doc.img} alt={doc.title} className="w-full h-56 object-cover" />
+              <img
+                src={doc.img}
+                alt={doc.title}
+                className="w-full h-56 object-cover"
+              />
               <div className="p-6">
                 <h3 className="text-xl font-semibold mb-2">{doc.title}</h3>
                 <p className="text-gray-700">{doc.desc}</p>
@@ -124,7 +123,17 @@ export default function Home() {
             </div>
           ))}
         </div>
+
+        <div className="text-center">
+          <Link
+            to="/documents"
+            className="inline-block text-black font-semibold px-5 py-2 rounded-lg hover:bg-yellow-300 transition"
+          >
+            Lihat Selengkapnya
+          </Link>
+        </div>
       </section>
+      <Footer/>
     </div>
   );
 }

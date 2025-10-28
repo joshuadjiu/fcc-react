@@ -9,7 +9,7 @@ export default function Navbar() {
   return (
     <nav className="flex justify-between items-center px-8 py-3 bg-white shadow-md fixed w-full top-0 z-20">
 
-      {/* Logo di pojok kiri atas */}
+      {/* Logo FCC dan Binus di pojok kiri atas */}
       <div className="flex items-center gap-4">
         <img
           src={binusLogo}
@@ -53,13 +53,21 @@ export default function Navbar() {
         >
           Documents
         </Link>
+        <Link
+          to="/contact"
+          className={`hover:text-blue-600 ${
+            location.pathname === "/contact" ? "text-blue-600 font-semibold" : ""
+          }`}
+        >
+          Contact Us
+        </Link>
       </div>
 
       {/* Login & Register di pojok kanan atas */}
       <div className="flex gap-3">
         <Link
           to="/login"
-          className="px-4 py-2 border border-black text-black rounded-lg hover:bg-black hover:text-white transition"
+          className="px-4 py-2 bg-gray-300 text-black rounded-lg hover:bg-black hover:text-white transition"
         >
           Login / Register
         </Link>

@@ -10,6 +10,7 @@ import PeerPartner from "./pages/PeerPartner";
 import CreativeTeam from "./pages/CreativeTeam";
 import RoleSelection from "./pages/RoleSelection";
 import NotFound from "./pages/NotFound";
+import ContactUs from "./pages/ContactUs";
 
 
 function App() {
@@ -26,6 +27,7 @@ function App() {
         <Route path="/peer-counselor" element={<PeerCounselor />} />
         <Route path="/peer-partner" element={<PeerPartner />} />
         <Route path="/creative-team" element={<CreativeTeam />} />
+        <Route path="/contact" element={<ContactUs />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>
