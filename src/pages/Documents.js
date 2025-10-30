@@ -113,7 +113,7 @@ export default function Documents() {
               exit={{ opacity: 0 }}
             >
               <motion.div
-                className="bg-white rounded-2xl shadow-xl max-w-lg w-full p-6 relative overflow-hidden"
+                className="bg-white rounded-2xl shadow-2xl max-w-5xl w-[90%] p-10 relative overflow-hidden"
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.8, opacity: 0 }}
@@ -123,20 +123,24 @@ export default function Documents() {
                 <img
                   src={temanNgumpulImg}
                   alt={documents[openIndex].title}
-                  className="rounded-lg w-full h-48 object-cover mb-4"
+                  className="rounded-xl w-full h-80 object-cover mb-6"
                 />
 
-                <h2 className="text-10xl font-bold mb-3 text-gray-800">
+                <h2 className="text-2xl font-bold mb-4 text-gray-800 text-center">
                   {documents[openIndex].title}
                 </h2>
-                <p className="text-gray-700 mb-5">{documents[openIndex].detail}</p>
+                <p className="text-gray-700 text-lg leading-relaxed mb-8 text-center">
+                  {documents[openIndex].detail}
+                </p>
 
-                <button
-                  onClick={() => setOpenIndex(null)}
-                  className="bg-blue-600 text-white px-5 py-2 rounded-md hover:bg-blue-700 transition"
-                >
-                  Tutup
-                </button>
+                <div className="flex justify-center">
+                  <button
+                    onClick={() => setOpenIndex(null)}
+                    className="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition-all duration-300"
+                  >
+                    Tutup
+                  </button>
+                </div>
               </motion.div>
             </motion.div>
           )}

@@ -1,284 +1,309 @@
-import React, { useState } from "react";
+// 📁 src/pages/PeerCounselor.js
+import React, { useState, useEffect } from "react";
+import { Bell, User } from "lucide-react";
 
 export default function PeerCounselor() {
-  const [form, setForm] = useState({
-    nim: "",
-    nama: "",
+  const [formData, setFormData] = useState({
+    nimBuddy: "",
+    namaBuddy: "",
     jurusan: "",
     tanggal: "",
-    waktuMulai: "",
-    waktuSelesai: "",
+    jamMulai: "",
+    jamSelesai: "",
     metode: "",
     deskripsi: "",
     kendala: "",
     support: "",
-    verifikasi: false,
-    komentar: "",
-    periodeMulai: "",
-    periodeSelesai: "",
   });
 
-  const [durasi, setDurasi] = useState(0);
+  const [errors, setErrors] = useState({});
+  const [riwayat, setRiwayat] = useState([]);
 
-  // Hitung durasi otomatis
-  const hitungDurasi = (mulai, selesai) => {
-    if (!mulai || !selesai) return 0;
-    const start = new Date(`1970-01-01T${mulai}:00`);
-    const end = new Date(`1970-01-01T${selesai}:00`);
-    const diff = (end - start) / 60000; // menit
-    return diff > 0 ? diff : 0;
-  };
+  useEffect(() => {
+    const savedData = JSON.parse(localStorage.getItem("peerCounselingData")) || [];
+    setRiwayat(savedData);
+  }, []);
+
+  const profile = JSON.parse(localStorage.getItem("registerData")) || {};
 
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    const val = type === "checkbox" ? checked : value;
-    setForm((prev) => ({ ...prev, [name]: val }));
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
-    if (name === "waktuMulai" || name === "waktuSelesai") {
-      const dur = hitungDurasi(
-        name === "waktuMulai" ? value : form.waktuMulai,
-        name === "waktuSelesai" ? value : form.waktuSelesai
-      );
-      setDurasi(dur);
+  const hitungDurasi = () => {
+    if (formData.jamMulai && formData.jamSelesai) {
+      const mulai = new Date(`2025-01-01T${formData.jamMulai}`);
+      const selesai = new Date(`2025-01-01T${formData.jamSelesai}`);
+      const durasi = (selesai - mulai) / 60000;
+      return durasi > 0 ? durasi : 0;
     }
+    return 0;
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+    Object.keys(formData).forEach((key) => {
+      if (!formData[key]) newErrors[key] = "Wajib diisi";
+    });
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = (e) => {
-    e.preventDefault();
-    alert("Data konseling berhasil disimpan!");
+  e.preventDefault();
+  if (!validateForm()) return;
+
+  const durasi = hitungDurasi();
+
+    // ✅ Samakan key dengan yang digunakan di halaman Staff
+    const newEntry = {
+      nim: formData.nimBuddy,
+      nama: formData.namaBuddy,
+      jurusan: formData.jurusan,
+      tanggalKonseling: formData.tanggal,
+      jamMulai: formData.jamMulai,
+      jamSelesai: formData.jamSelesai,
+      durasi,
+      metode: formData.metode,
+      deskripsi: formData.deskripsi,
+      kendala: formData.kendala,
+      supportNeeded: formData.support,
+      verifikasi: false,
+      komentarStaff: "",
+    };
+
+    const updatedData = [...riwayat, newEntry];
+    setRiwayat(updatedData);
+    localStorage.setItem("peerCounselingData", JSON.stringify(updatedData));
+
+    // Reset form
+    setFormData({
+      nimBuddy: "",
+      namaBuddy: "",
+      jurusan: "",
+      tanggal: "",
+      jamMulai: "",
+      jamSelesai: "",
+      metode: "",
+      deskripsi: "",
+      kendala: "",
+      support: "",
+    });
+    setErrors({});
   };
 
   return (
-    <div className="flex min-h-screen bg-purple-50">
+    <div className="min-h-screen flex bg-gray-50">
       {/* Sidebar */}
-      <aside className="w-64 bg-white shadow-md p-6">
-        <h2 className="text-xl font-bold mb-6 text-purple-700">
+      <aside className="w-64 bg-white shadow-lg p-6">
+        <h2 className="text-lg font-bold text-gray-800 mb-6">
           Peer Counselor
         </h2>
-        <nav className="space-y-3">
-          <button className="w-full text-left text-gray-700 hover:text-purple-600">
-            Dashboard
-          </button>
-          <button className="w-full text-left text-gray-700 hover:text-purple-600">
-            Input Konseling
-          </button>
-          <button className="w-full text-left text-gray-700 hover:text-purple-600">
-            Riwayat Konseling
-          </button>
-          <button className="w-full text-left text-gray-700 hover:text-purple-600">
-            Profil Saya
-          </button>
-        </nav>
+        <ul className="space-y-3 text-gray-700">
+          <li className="hover:text-blue-500 cursor-pointer font-semibold">Dashboard</li>
+          <li className="hover:text-blue-500 cursor-pointer">Input Konseling</li>
+          <li className="hover:text-blue-500 cursor-pointer">Riwayat Konseling</li>
+        </ul>
       </aside>
 
       {/* Konten utama */}
       <main className="flex-1 p-10">
-        <h1 className="text-2xl font-bold mb-6 text-purple-800">
+        {/* Topbar */}
+        <div className="flex justify-end items-center mb-8 space-x-6">
+          <Bell className="text-gray-700 cursor-pointer" />
+          <div className="flex items-center space-x-2">
+            <User className="text-gray-700" />
+            <div>
+              <p className="font-semibold text-gray-800">
+                {profile.nama || "Student Name"}
+              </p>
+              <p className="text-sm text-gray-600">
+                {profile.nim || "NIM"}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <h1 className="text-2xl font-bold mb-6 text-gray-800">
           Input Data Konseling
         </h1>
 
+        {/* Form Input */}
         <form
           onSubmit={handleSubmit}
-          className="bg-white p-6 rounded-2xl shadow-md grid grid-cols-2 gap-6"
+          className="bg-white p-6 rounded-2xl shadow space-y-5 max-w-3xl"
         >
-          {/* Kolom kiri */}
-          <div className="space-y-4">
-            <div>
-              <label className="block font-medium">NIM</label>
-              <input
-                type="text"
-                name="nim"
-                value={form.nim}
-                onChange={handleChange}
-                className="w-full p-2 border rounded-lg"
-              />
-            </div>
-            <div>
-              <label className="block font-medium">Nama</label>
-              <input
-                type="text"
-                name="nama"
-                value={form.nama}
-                onChange={handleChange}
-                className="w-full p-2 border rounded-lg"
-              />
-            </div>
-            <div>
-              <label className="block font-medium">Jurusan</label>
-              <input
-                type="text"
-                name="jurusan"
-                value={form.jurusan}
-                onChange={handleChange}
-                className="w-full p-2 border rounded-lg"
-              />
-            </div>
+          {/* 🔹 Field-field input (sama seperti versi sebelumnya) */}
+          {/* (tidak dihapus, tetap sama) */}
 
-            <div>
-              <label className="block font-medium">Periode Peran</label>
-              <div className="flex space-x-2">
-                <input
-                  type="number"
-                  name="periodeMulai"
-                  placeholder="2025"
-                  value={form.periodeMulai}
-                  onChange={handleChange}
-                  className="w-1/2 p-2 border rounded-lg"
-                />
-                <span className="self-center">-</span>
-                <input
-                  type="number"
-                  name="periodeSelesai"
-                  placeholder="2026"
-                  value={form.periodeSelesai}
-                  onChange={handleChange}
-                  className="w-1/2 p-2 border rounded-lg"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block font-medium">Tanggal Konseling</label>
-              <input
-                type="date"
-                name="tanggal"
-                value={form.tanggal}
-                onChange={handleChange}
-                className="w-full p-2 border rounded-lg"
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block font-medium">Waktu Mulai</label>
-                <input
-                  type="time"
-                  name="waktuMulai"
-                  value={form.waktuMulai}
-                  onChange={handleChange}
-                  className="w-full p-2 border rounded-lg"
-                />
-              </div>
-              <div>
-                <label className="block font-medium">Waktu Selesai</label>
-                <input
-                  type="time"
-                  name="waktuSelesai"
-                  value={form.waktuSelesai}
-                  onChange={handleChange}
-                  className="w-full p-2 border rounded-lg"
-                />
-              </div>
-            </div>
-            <p className="text-sm text-gray-500">
-              Durasi: <span className="font-semibold">{durasi}</span> menit
-            </p>
+          <div>
+            <label className="font-medium">NIM</label>
+            <input
+              type="text"
+              name="nimBuddy"
+              value={formData.nimBuddy}
+              onChange={handleChange}
+              className="w-full border p-2 rounded-lg"
+            />
+            {errors.nimBuddy && <p className="text-red-500 text-sm">{errors.nimBuddy}</p>}
           </div>
 
-          {/* Kolom kanan */}
-          <div className="space-y-4">
-            <div>
-              <label className="block font-medium">Metode Konseling</label>
-              <select
-                name="metode"
-                value={form.metode}
-                onChange={handleChange}
-                className="w-full p-2 border rounded-lg"
-              >
-                <option value="">Pilih metode</option>
-                <option value="zoom">Zoom</option>
-                <option value="tatap muka">Tatap Muka</option>
-                <option value="chat">Chat (WA/Line)</option>
-                <option value="telpon">Telepon</option>
-              </select>
-            </div>
+          <div>
+            <label className="font-medium">Nama</label>
+            <input
+              type="text"
+              name="namaBuddy"
+              value={formData.namaBuddy}
+              onChange={handleChange}
+              className="w-full border p-2 rounded-lg"
+            />
+            {errors.namaBuddy && <p className="text-red-500 text-sm">{errors.namaBuddy}</p>}
+          </div>
 
-            <div>
-              <label className="block font-medium">Deskripsi Kegiatan</label>
-              <textarea
-                name="deskripsi"
-                value={form.deskripsi}
-                onChange={handleChange}
-                rows="3"
-                className="w-full p-2 border rounded-lg"
-              />
-            </div>
+          <div>
+            <label className="font-medium">Jurusan</label>
+            <input
+              type="text"
+              name="jurusan"
+              value={formData.jurusan}
+              onChange={handleChange}
+              className="w-full border p-2 rounded-lg"
+            />
+            {errors.jurusan && <p className="text-red-500 text-sm">{errors.jurusan}</p>}
+          </div>
 
-            <div>
-              <label className="block font-medium">
-                Kendala Saat Konseling
-              </label>
-              <textarea
-                name="kendala"
-                value={form.kendala}
-                onChange={handleChange}
-                rows="2"
-                className="w-full p-2 border rounded-lg"
-              />
-            </div>
+          <div>
+            <label className="font-medium">Tanggal Konseling</label>
+            <input
+              type="date"
+              name="tanggal"
+              value={formData.tanggal}
+              onChange={handleChange}
+              className="w-full border p-2 rounded-lg"
+            />
+            {errors.tanggal && <p className="text-red-500 text-sm">{errors.tanggal}</p>}
+          </div>
 
-            <div>
-              <label className="block font-medium">Support Needed</label>
+          <div className="flex space-x-4">
+            <div className="flex-1">
+              <label className="font-medium">Jam Mulai</label>
               <input
-                type="text"
-                name="support"
-                value={form.support}
+                type="time"
+                name="jamMulai"
+                value={formData.jamMulai}
                 onChange={handleChange}
-                className="w-full p-2 border rounded-lg"
+                className="w-full border p-2 rounded-lg"
               />
             </div>
-
-            <div className="border-t pt-4">
-              <label className="block font-medium">Verifikasi SASC</label>
-              <div className="flex items-center space-x-2 mt-1">
-                <input
-                  type="checkbox"
-                  name="verifikasi"
-                  checked={form.verifikasi}
-                  onChange={handleChange}
-                />
-                <span>Terverifikasi</span>
-              </div>
-              <textarea
-                name="komentar"
-                value={form.komentar}
+            <div className="flex-1">
+              <label className="font-medium">Jam Selesai</label>
+              <input
+                type="time"
+                name="jamSelesai"
+                value={formData.jamSelesai}
                 onChange={handleChange}
-                placeholder="Komentar Staff"
-                className="w-full p-2 border rounded-lg mt-2"
+                className="w-full border p-2 rounded-lg"
               />
             </div>
+          </div>
 
-            <button
-              type="submit"
-              className="w-full bg-purple-600 text-white p-2 rounded-lg hover:bg-purple-700 mt-4"
+          <p className="text-gray-700 text-sm">
+            Durasi: <span className="font-semibold">{hitungDurasi()} menit</span>
+          </p>
+
+          <div>
+            <label className="font-medium">Metode Konseling</label>
+            <select
+              name="metode"
+              value={formData.metode}
+              onChange={handleChange}
+              className="w-full border p-2 rounded-lg"
             >
-              Simpan Data
-            </button>
+              <option value="">-- Pilih Metode --</option>
+              <option value="zoom">Zoom</option>
+              <option value="tatap muka">Tatap Muka</option>
+              <option value="chat">Chat WA/Line</option>
+              <option value="telpon">Telepon</option>
+            </select>
           </div>
-        </form>
-      </main>
 
-      {/* Profil kanan */}
-      <aside className="w-72 bg-white shadow-md p-6">
-        <h2 className="font-semibold mb-4 text-purple-700">Profil Saya</h2>
-        <div className="space-y-2 text-sm">
-          <p>
-            <strong>Nama:</strong> {form.nama || "-"}
-          </p>
-          <p>
-            <strong>NIM:</strong> {form.nim || "-"}
-          </p>
-          <p>
-            <strong>Jurusan:</strong> {form.jurusan || "-"}
-          </p>
-          <p>
-            <strong>Periode Peran:</strong>{" "}
-            {form.periodeMulai && form.periodeSelesai
-              ? `${form.periodeMulai} - ${form.periodeSelesai}`
-              : "-"}
-          </p>
+          <div>
+            <label className="font-medium">Deskripsi Kegiatan</label>
+            <textarea
+              name="deskripsi"
+              value={formData.deskripsi}
+              onChange={handleChange}
+              className="w-full border p-2 rounded-lg"
+            />
+          </div>
+
+          <div>
+            <label className="font-medium">Kendala Saat Konseling</label>
+            <textarea
+              name="kendala"
+              value={formData.kendala}
+              onChange={handleChange}
+              className="w-full border p-2 rounded-lg"
+            />
+          </div>
+
+          <div>
+            <label className="font-medium">Support Needed</label>
+            <textarea
+              name="support"
+              value={formData.support}
+              onChange={handleChange}
+              className="w-full border p-2 rounded-lg"
+            />
+          </div>
+
+          <button
+            type="submit"
+            className="w-full bg-blue-500 text-white p-2 rounded-lg hover:bg-blue-600 transition"
+          >
+            Simpan
+          </button>
+        </form>
+
+        {/* 🔹 Riwayat Konseling + Verifikasi */}
+        <div className="mt-10">
+          <h2 className="text-xl font-semibold mb-3">Riwayat Konseling</h2>
+          <div className="bg-white p-5 rounded-xl shadow overflow-x-auto">
+            <table className="min-w-full text-left text-sm">
+              <thead>
+                <tr className="border-b">
+                  <th className="py-2 px-3">Nama Buddy</th>
+                  <th className="py-2 px-3">Tanggal</th>
+                  <th className="py-2 px-3">Durasi</th>
+                  <th className="py-2 px-3">Metode</th>
+                  <th className="py-2 px-3">Verifikasi</th>
+                  <th className="py-2 px-3">Komentar Staff</th>
+                </tr>
+              </thead>
+              <tbody>
+                {riwayat.map((item, i) => (
+                  <tr key={i} className="border-b hover:bg-gray-50">
+                    <td className="py-2 px-3">{item.namaBuddy}</td>
+                    <td className="py-2 px-3">{item.tanggal}</td>
+                    <td className="py-2 px-3">{item.durasi} menit</td>
+                    <td className="py-2 px-3 capitalize">{item.metode}</td>
+                    <td className="py-2 px-3">
+                      {item.verifikasi ? (
+                        <span className="text-green-600 font-semibold">Disetujui</span>
+                      ) : (
+                        <span className="text-yellow-600">Menunggu</span>
+                      )}
+                    </td>
+                    <td className="py-2 px-3">
+                      {item.komentarStaff || "-"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </aside>
+      </main>
     </div>
   );
 }
