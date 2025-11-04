@@ -1,4 +1,3 @@
-// 📁 src/pages/PeerCounselor.js
 import React, { useState, useEffect } from "react";
 import { Bell, User } from "lucide-react";
 
@@ -16,20 +15,30 @@ export default function PeerCounselor() {
     support: "",
   });
 
-  const [errors, setErrors] = useState({});
   const [riwayat, setRiwayat] = useState([]);
+  const [roleData, setRoleData] = useState({});
 
+  // 🔹 Ambil data role (periode & kampus) dan filter riwayat sesuai
   useEffect(() => {
-    const savedData = JSON.parse(localStorage.getItem("peerCounselingData")) || [];
-    setRiwayat(savedData);
+    const savedRole = JSON.parse(localStorage.getItem("roleData"));
+    const savedCounselor = JSON.parse(localStorage.getItem("counselorData")) || [];
+
+    if (savedRole) setRoleData(savedRole);
+
+    // 🔹 Filter hanya data yang sesuai periode & kampus
+    if (savedRole) {
+      const filtered = savedCounselor.filter(
+        (item) =>
+          item.periode === savedRole.periode &&
+          item.kampus === (savedRole.campus || savedRole.kampus)
+      );
+      setRiwayat(filtered);
+    } else {
+      setRiwayat(savedCounselor);
+    }
   }, []);
 
-  const profile = JSON.parse(localStorage.getItem("registerData")) || {};
-
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
+  // 🔹 Hitung durasi otomatis
   const hitungDurasi = () => {
     if (formData.jamMulai && formData.jamSelesai) {
       const mulai = new Date(`2025-01-01T${formData.jamMulai}`);
@@ -40,22 +49,38 @@ export default function PeerCounselor() {
     return 0;
   };
 
-  const validateForm = () => {
-    const newErrors = {};
-    Object.keys(formData).forEach((key) => {
-      if (!formData[key]) newErrors[key] = "Wajib diisi";
-    });
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+  // 🔹 Handle input
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  // 🔹 Submit form
   const handleSubmit = (e) => {
-  e.preventDefault();
-  if (!validateForm()) return;
+    e.preventDefault();
 
-  const durasi = hitungDurasi();
+    const durasi = hitungDurasi();
+    const requiredFields = [
+      "nimBuddy",
+      "namaBuddy",
+      "jurusan",
+      "tanggal",
+      "jamMulai",
+      "jamSelesai",
+      "metode",
+      "deskripsi",
+      "kendala",
+      "support",
+    ];
 
-    // ✅ Samakan key dengan yang digunakan di halaman Staff
+    const emptyFields = requiredFields.filter((field) => !formData[field]);
+    if (emptyFields.length > 0) {
+      alert("Harap isi semua kolom!");
+      return;
+    }
+
+    // 🔹 Ambil semua data counselor di localStorage
+    const allData = JSON.parse(localStorage.getItem("counselorData")) || [];
+
     const newEntry = {
       nim: formData.nimBuddy,
       nama: formData.namaBuddy,
@@ -70,11 +95,23 @@ export default function PeerCounselor() {
       supportNeeded: formData.support,
       verifikasi: false,
       komentarStaff: "",
+      periode: roleData.periode || "-",
+      kampus: roleData.kampus || roleData.campus || "-",
     };
 
-    const updatedData = [...riwayat, newEntry];
-    setRiwayat(updatedData);
-    localStorage.setItem("peerCounselingData", JSON.stringify(updatedData));
+    // 🔹 Simpan ke localStorage (tanpa filter, agar SASC Staff bisa lihat semua)
+    const updatedAll = [...allData, newEntry];
+    localStorage.setItem("counselorData", JSON.stringify(updatedAll));
+
+    // 🔹 Perbarui tampilan hanya dengan data sesuai periode & kampus aktif
+    const filtered = updatedAll.filter(
+      (item) =>
+        item.periode === roleData.periode &&
+        item.kampus === (roleData.kampus || roleData.campus)
+    );
+    setRiwayat(filtered);
+
+    alert("Data berhasil disimpan!");
 
     // Reset form
     setFormData({
@@ -89,24 +126,19 @@ export default function PeerCounselor() {
       kendala: "",
       support: "",
     });
-    setErrors({});
   };
 
   return (
     <div className="min-h-screen flex bg-gray-50">
       {/* Sidebar */}
       <aside className="w-64 bg-white shadow-lg p-6">
-        <h2 className="text-lg font-bold text-gray-800 mb-6">
-          Peer Counselor
-        </h2>
+        <h2 className="text-lg font-bold text-gray-800 mb-6">Peer Counselor</h2>
         <ul className="space-y-3 text-gray-700">
-          <li className="hover:text-blue-500 cursor-pointer font-semibold">Dashboard</li>
-          <li className="hover:text-blue-500 cursor-pointer">Input Konseling</li>
-          <li className="hover:text-blue-500 cursor-pointer">Riwayat Konseling</li>
+          <li className="font-semibold text-blue-600">Dashboard</li>
         </ul>
       </aside>
 
-      {/* Konten utama */}
+      {/* Main */}
       <main className="flex-1 p-10">
         {/* Topbar */}
         <div className="flex justify-end items-center mb-8 space-x-6">
@@ -114,18 +146,30 @@ export default function PeerCounselor() {
           <div className="flex items-center space-x-2">
             <User className="text-gray-700" />
             <div>
-              <p className="font-semibold text-gray-800">
-                {profile.nama || "Student Name"}
-              </p>
-              <p className="text-sm text-gray-600">
-                {profile.nim || "NIM"}
-              </p>
+              <p className="font-semibold text-gray-800">Nama</p>
+              <p className="text-sm text-gray-600">NIM</p>
             </div>
           </div>
         </div>
 
+        {/* Info Kampus & Periode */}
+        {roleData && (
+          <div className="mb-6 p-3 rounded-lg bg-blue-100 border border-blue-300 max-w-lg">
+            <p className="font-semibold text-gray-800">
+              Periode:{" "}
+              <span className="font-normal">{roleData.periode || "-"}</span>
+            </p>
+            <p className="font-semibold text-gray-800">
+              Kampus:{" "}
+              <span className="font-normal">
+                {roleData.kampus || roleData.campus || "Tidak ada data kampus"}
+              </span>
+            </p>
+          </div>
+        )}
+
         <h1 className="text-2xl font-bold mb-6 text-gray-800">
-          Input Data Konseling
+          Isi Form Data Peer Counselor
         </h1>
 
         {/* Form Input */}
@@ -133,9 +177,6 @@ export default function PeerCounselor() {
           onSubmit={handleSubmit}
           className="bg-white p-6 rounded-2xl shadow space-y-5 max-w-3xl"
         >
-          {/* 🔹 Field-field input (sama seperti versi sebelumnya) */}
-          {/* (tidak dihapus, tetap sama) */}
-
           <div>
             <label className="font-medium">NIM</label>
             <input
@@ -145,7 +186,6 @@ export default function PeerCounselor() {
               onChange={handleChange}
               className="w-full border p-2 rounded-lg"
             />
-            {errors.nimBuddy && <p className="text-red-500 text-sm">{errors.nimBuddy}</p>}
           </div>
 
           <div>
@@ -157,7 +197,6 @@ export default function PeerCounselor() {
               onChange={handleChange}
               className="w-full border p-2 rounded-lg"
             />
-            {errors.namaBuddy && <p className="text-red-500 text-sm">{errors.namaBuddy}</p>}
           </div>
 
           <div>
@@ -169,7 +208,6 @@ export default function PeerCounselor() {
               onChange={handleChange}
               className="w-full border p-2 rounded-lg"
             />
-            {errors.jurusan && <p className="text-red-500 text-sm">{errors.jurusan}</p>}
           </div>
 
           <div>
@@ -181,7 +219,6 @@ export default function PeerCounselor() {
               onChange={handleChange}
               className="w-full border p-2 rounded-lg"
             />
-            {errors.tanggal && <p className="text-red-500 text-sm">{errors.tanggal}</p>}
           </div>
 
           <div className="flex space-x-4">
@@ -234,6 +271,7 @@ export default function PeerCounselor() {
               value={formData.deskripsi}
               onChange={handleChange}
               className="w-full border p-2 rounded-lg"
+              placeholder="Isi kegiatan konseling..."
             />
           </div>
 
@@ -265,38 +303,50 @@ export default function PeerCounselor() {
           </button>
         </form>
 
-        {/* 🔹 Riwayat Konseling + Verifikasi */}
+        {/* Riwayat */}
         <div className="mt-10">
-          <h2 className="text-xl font-semibold mb-3">Riwayat Konseling</h2>
+          <h2 className="text-xl font-semibold mb-3">Riwayat Form Peer Counselor</h2>
           <div className="bg-white p-5 rounded-xl shadow overflow-x-auto">
             <table className="min-w-full text-left text-sm">
               <thead>
                 <tr className="border-b">
-                  <th className="py-2 px-3">Nama Buddy</th>
-                  <th className="py-2 px-3">Tanggal</th>
+                  <th className="py-2 px-3">NIM</th>
+                  <th className="py-2 px-3">Nama</th>
+                  <th className="py-2 px-3">Jurusan</th>
+                  <th className="py-2 px-3">Tanggal Konseling</th>
+                  <th className="py-2 px-3">Jam Mulai</th>
+                  <th className="py-2 px-3">Jam Selesai</th>
                   <th className="py-2 px-3">Durasi</th>
                   <th className="py-2 px-3">Metode</th>
-                  <th className="py-2 px-3">Verifikasi</th>
-                  <th className="py-2 px-3">Komentar Staff</th>
+                  <th className="py-2 px-3">Deskripsi Kegiatan</th>
+                  <th className="py-2 px-3">Kendala Konseling</th>
+                  <th className="py-2 px-3">Support Needed</th>
+                  <th className="py-2 px-3">Status Verifikasi</th>
+                  <th className="py-2 px-3">Komentar</th>
                 </tr>
               </thead>
               <tbody>
                 {riwayat.map((item, i) => (
                   <tr key={i} className="border-b hover:bg-gray-50">
-                    <td className="py-2 px-3">{item.namaBuddy}</td>
-                    <td className="py-2 px-3">{item.tanggal}</td>
+                    <td className="py-2 px-3">{item.nim}</td>
+                    <td className="py-2 px-3">{item.nama}</td>
+                    <td className="py-2 px-3">{item.jurusan}</td>
+                    <td className="py-2 px-3">{item.tanggalKonseling}</td>
+                    <td className="py-2 px-3">{item.jamMulai}</td>
+                    <td className="py-2 px-3">{item.jamSelesai}</td>
                     <td className="py-2 px-3">{item.durasi} menit</td>
                     <td className="py-2 px-3 capitalize">{item.metode}</td>
-                    <td className="py-2 px-3">
-                      {item.verifikasi ? (
-                        <span className="text-green-600 font-semibold">Disetujui</span>
-                      ) : (
-                        <span className="text-yellow-600">Menunggu</span>
-                      )}
+                    <td className="py-2 px-3">{item.deskripsi}</td>
+                    <td className="py-2 px-3">{item.kendala}</td>
+                    <td className="py-2 px-3">{item.supportNeeded}</td>
+                    <td
+                      className={`py-2 px-3 font-semibold ${
+                        item.verifikasi ? "text-green-600" : "text-yellow-600"
+                      }`}
+                    >
+                      {item.verifikasi ? "Disetujui" : "Menunggu"}
                     </td>
-                    <td className="py-2 px-3">
-                      {item.komentarStaff || "-"}
-                    </td>
+                    <td className="py-2 px-3">{item.komentarStaff || "-"}</td>
                   </tr>
                 ))}
               </tbody>

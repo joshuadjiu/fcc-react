@@ -13,15 +13,32 @@ export default function PeerPartner() {
     kendala: "",
     support: "",
   });
+
   const [riwayat, setRiwayat] = useState([]);
   const [buddyList, setBuddyList] = useState([]);
+  const [roleData, setRoleData] = useState({}); // 🔹 untuk ambil periode & kampus
 
   // === Ambil data dari localStorage ===
   useEffect(() => {
     const savedBuddy = JSON.parse(localStorage.getItem("buddyData")) || [];
-    const savedCounseling = JSON.parse(localStorage.getItem("peerCounselingData")) || [];
+    const savedPartner = JSON.parse(localStorage.getItem("partnerData")) || [];
+    const savedRole = JSON.parse(localStorage.getItem("roleData"));
+
+    if (savedRole) setRoleData(savedRole);
+
+    // 🔹 Filter riwayat sesuai periode & kampus
+    if (savedRole) {
+      const filtered = savedPartner.filter(
+        (item) =>
+          item.periode === savedRole.periode &&
+          item.kampus === (savedRole.kampus || savedRole.campus)
+      );
+      setRiwayat(filtered);
+    } else {
+      setRiwayat(savedPartner);
+    }
+
     setBuddyList(savedBuddy);
-    setRiwayat(savedCounseling);
   }, []);
 
   // === Hitung durasi otomatis ===
@@ -29,46 +46,64 @@ export default function PeerPartner() {
     if (formData.jamMulai && formData.jamSelesai) {
       const [startH, startM] = formData.jamMulai.split(":").map(Number);
       const [endH, endM] = formData.jamSelesai.split(":").map(Number);
-      const durasi = (endH * 60 + endM) - (startH * 60 + startM);
+      const durasi = endH * 60 + endM - (startH * 60 + startM);
       setFormData((prev) => ({ ...prev, durasi: durasi > 0 ? durasi : 0 }));
     }
   }, [formData.jamMulai, formData.jamSelesai]);
 
-  // === Fungsi untuk submit form konseling ===
+  // === Submit form ===
   const handleSubmit = (e) => {
-  e.preventDefault();
+    e.preventDefault();
+    const requiredFields = [
+      "namaBuddy",
+      "tanggal",
+      "jamMulai",
+      "jamSelesai",
+      "metode",
+      "deskripsi",
+      "kendala",
+      "support",
+    ];
+    const emptyFields = requiredFields.filter((f) => !formData[f]);
+    if (emptyFields.length > 0) {
+      alert("Harap isi semua kolom!");
+      return;
+    }
 
-  // cari buddy yang sesuai dari list
-  const selectedBuddy = buddyList.find((b) => b.nama === formData.namaBuddy);
+    const selectedBuddy = buddyList.find((b) => b.nama === formData.namaBuddy);
 
-  if (!selectedBuddy) {
-    alert("Silakan pilih Data Buddy terlebih dahulu!");
-    return;
-  }
+    const newEntry = {
+      ...formData,
+      nimBuddy: selectedBuddy?.nim || "-",
+      jurusan: selectedBuddy?.jurusan || "-",
+      verifikasi: false,
+      komentarStaff: "",
+      periode: roleData.periode || "-", // 🔹 simpan periode
+      kampus: roleData.kampus || roleData.campus || "-", // 🔹 simpan kampus
+    };
 
-  // buat data baru dengan tambahan NIM & Jurusan
-  const newEntry = {
-    ...formData,
-    nimBuddy: selectedBuddy.nim,
-    jurusan: selectedBuddy.jurusan,
-    verifikasi: false,
-  };
+    // Tambahkan ke data lama
+    const existing = JSON.parse(localStorage.getItem("partnerData")) || [];
+    const updated = [...existing, newEntry];
 
-  const updated = [...riwayat, newEntry];
-  setRiwayat(updated);
-  localStorage.setItem("peerCounselingData", JSON.stringify(updated));
+    localStorage.setItem("partnerData", JSON.stringify(updated));
+    setRiwayat(updated.filter(
+      (item) =>
+        item.periode === roleData.periode &&
+        item.kampus === (roleData.kampus || roleData.campus)
+    ));
 
-  alert("Data konseling berhasil disimpan!");
-  setFormData({
-    namaBuddy: "",
-    tanggal: "",
-    jamMulai: "",
-    jamSelesai: "",
-    durasi: 0,
-    metode: "",
-    deskripsi: "",
-    kendala: "",
-    support: "",
+    alert("Data konseling berhasil disimpan!");
+    setFormData({
+      namaBuddy: "",
+      tanggal: "",
+      jamMulai: "",
+      jamSelesai: "",
+      durasi: 0,
+      metode: "",
+      deskripsi: "",
+      kendala: "",
+      support: "",
     });
   };
 
@@ -84,8 +119,7 @@ export default function PeerPartner() {
       <aside className="w-64 bg-white shadow-lg p-6">
         <h2 className="text-lg font-bold text-gray-800 mb-6">Peer Partner</h2>
         <ul className="space-y-3 text-gray-700">
-          <li className="font-semibold text-blue-600">Input Konseling</li>
-          <li className="font-semibold hover:text-blue-500 cursor-pointer">Riwayat Konseling</li>
+          <li className="font-semibold text-blue-600">Dashboard</li>
         </ul>
       </aside>
 
@@ -97,21 +131,42 @@ export default function PeerPartner() {
           <div className="flex items-center space-x-2">
             <User className="text-gray-700" />
             <div>
-              <p className="font-semibold text-gray-800">Student Name</p>
+              <p className="font-semibold text-gray-800">Nama</p>
               <p className="text-sm text-gray-600">NIM</p>
             </div>
           </div>
         </div>
 
+        {/* 🔹 Info Kampus & Periode */}
+        {roleData && (
+          <div className="mb-6 p-3 rounded-lg bg-blue-100 border border-blue-300 max-w-lg">
+            <p className="font-semibold text-gray-800">
+              Periode:{" "}
+              <span className="font-normal">{roleData.periode || "-"}</span>
+            </p>
+            <p className="font-semibold text-gray-800">
+              Kampus:{" "}
+              <span className="font-normal">
+                {roleData.kampus || roleData.campus || "Tidak ada data kampus"}
+              </span>
+            </p>
+          </div>
+        )}
+
         {/* Input Form */}
-        <h1 className="text-2xl font-bold mb-6 text-gray-800">Input Data Konseling</h1>
+        <h1 className="text-2xl font-bold mb-6 text-gray-800">
+          Isi Form Data Peer Partner
+        </h1>
+
         <form
           onSubmit={handleSubmit}
           className="bg-white p-6 rounded-2xl shadow mb-8"
         >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1">Data Buddy</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">
+                Data Buddy
+              </label>
               <select
                 name="namaBuddy"
                 value={formData.namaBuddy}
@@ -128,7 +183,9 @@ export default function PeerPartner() {
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1">Tanggal Konseling</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">
+                Tanggal Konseling
+              </label>
               <input
                 type="date"
                 name="tanggal"
@@ -139,7 +196,9 @@ export default function PeerPartner() {
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1">Jam Mulai</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">
+                Jam Mulai
+              </label>
               <input
                 type="time"
                 name="jamMulai"
@@ -150,7 +209,9 @@ export default function PeerPartner() {
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1">Jam Selesai</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">
+                Jam Selesai
+              </label>
               <input
                 type="time"
                 name="jamSelesai"
@@ -166,7 +227,9 @@ export default function PeerPartner() {
           </p>
 
           <div className="mt-4">
-            <label className="block text-sm font-semibold text-gray-700 mb-1">Metode Konseling</label>
+            <label className="block text-sm font-semibold text-gray-700 mb-1">
+              Metode Konseling
+            </label>
             <select
               name="metode"
               value={formData.metode}
@@ -182,13 +245,15 @@ export default function PeerPartner() {
           </div>
 
           <div className="mt-4">
-            <label className="block text-sm font-semibold text-gray-700 mb-1">Deskripsi Kegiatan</label>
+            <label className="block text-sm font-semibold text-gray-700 mb-1">
+              Deskripsi Kegiatan
+            </label>
             <textarea
               name="deskripsi"
               value={formData.deskripsi}
               onChange={handleChange}
               className="border rounded-lg p-2 w-full"
-              placeholder="Tuliskan hasil atau isi kegiatan konseling..."
+              placeholder="Tuliskan kegiatan konseling..."
             />
           </div>
 
@@ -232,7 +297,9 @@ export default function PeerPartner() {
 
         {/* Riwayat Konseling */}
         <div className="bg-white p-6 rounded-2xl shadow">
-          <h2 className="text-lg font-bold mb-4 text-gray-800">Riwayat Konseling</h2>
+          <h2 className="text-lg font-bold mb-4 text-gray-800">
+            Riwayat Form Peer Partner
+          </h2>
           {riwayat.length === 0 ? (
             <p className="text-gray-500">Belum ada data konseling.</p>
           ) : (
@@ -240,28 +307,42 @@ export default function PeerPartner() {
               <thead>
                 <tr className="border-b">
                   <th className="py-2 px-3">Nama</th>
-                  <th className="py-2 px-3">Tanggal</th>
+                  <th className="py-2 px-3">Tanggal Konseling</th>
+                  <th className="py-2 px-3">Jam Mulai</th>
+                  <th className="py-2 px-3">Jam Selesai</th>
                   <th className="py-2 px-3">Durasi</th>
                   <th className="py-2 px-3">Metode</th>
-                  <th className="py-2 px-3">Verifikasi</th>
-                  <th className="py-2 px-3">Komentar Staff</th>
+                  <th className="py-2 px-3">Deskripsi Kegiatan</th>
+                  <th className="py-2 px-3">Kendala Konseling</th>
+                  <th className="py-2 px-3">Support Needed</th>
+                  <th className="py-2 px-3">Status Verifikasi</th>
+                  <th className="py-2 px-3">Komentar</th>
                 </tr>
               </thead>
               <tbody>
-                {riwayat.map((r, i) => (
+                {riwayat.map((item, i) => (
                   <tr key={i} className="border-b hover:bg-gray-50">
-                    <td className="py-2 px-3">{r.namaBuddy}</td>
-                    <td className="py-2 px-3">{r.tanggal}</td>
-                    <td className="py-2 px-3">{r.durasi} menit</td>
-                    <td className="py-2 px-3 capitalize">{r.metode}</td>
+                    <td className="py-2 px-3">{item.nama || item.namaBuddy}</td>
+                    <td className="py-2 px-3">
+                      {item.tanggalKonseling || item.tanggal}
+                    </td>
+                    <td className="py-2 px-3">{item.jamMulai}</td>
+                    <td className="py-2 px-3">{item.jamSelesai}</td>
+                    <td className="py-2 px-3">{item.durasi} menit</td>
+                    <td className="py-2 px-3 capitalize">{item.metode}</td>
+                    <td className="py-2 px-3">{item.deskripsi}</td>
+                    <td className="py-2 px-3">{item.kendala}</td>
+                    <td className="py-2 px-3">
+                      {item.supportNeeded || item.support}
+                    </td>
                     <td
                       className={`py-2 px-3 font-semibold ${
-                        r.verifikasi ? "text-green-600" : "text-yellow-600"
+                        item.verifikasi ? "text-green-600" : "text-yellow-600"
                       }`}
                     >
-                      {r.verifikasi ? "Disetujui" : "Menunggu"}
+                      {item.verifikasi ? "Disetujui" : "Menunggu"}
                     </td>
-                    <td className="py-2 px-3">{r.komentarStaff || "-"}</td>
+                    <td className="py-2 px-3">{item.komentarStaff || "-"}</td>
                   </tr>
                 ))}
               </tbody>

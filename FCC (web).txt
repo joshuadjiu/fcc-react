@@ -2,14 +2,34 @@ FCC (web) :
 
 1. Warna background binus (referensi : https://support.binus.ac.id/)
 
-2. Home page (logo Binus dan FCC, article, dokumentasi, dan login/register) v
+2. Peer Counselor (docs) :
 
-3. Register (Nama, NIM, dan Password) v
+- Tampilan halaman (docx)
 
-4. Login (NIM, password, dan halaman login diutamain student dibandingkan as staff)) v
+3. Peer Counselor (docs) :
 
-5. As student (docs)
+- Tampilan halaman (docx)
 
-6. As staff (docs)
+4. Creative Team (docs) :
 
-7. Tambahan navigasi (contact us dan info pada homepage Bawah (referensi : https://binus.ac.id/contact-us/)) v
+- Periode
+- Tampilan halaman (docx)
+
+5. SASC Staff (docs) :
+
+- Input nama buddy pariring (pp) v
+- Verifikasi SASC -> checklist & komentar
+- Tambahkan status menunggu, disetujui, dan tidak disetujui
+- Tambahkan deskripsi peran di Riwayat konseling
+- Berikan animasi dan notifikasi verifikasi
+- Tambahkan tombol submit komentar
+- Tambahin fitur peer partner
+- Tambahkan periode dari student
+- Tarik data report -> berdasar periode peran
+- Checklist pendataan pengambilan souvenir
+- Tampilan halaman (docs)
+- Periode (creative team)
+
+6. Pilih peran (docs) :
+
+- Pada bagian Creative Team hubungkan dengan SASC Staff

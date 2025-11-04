@@ -1,61 +1,95 @@
+// 📁 src/pages/SASCStaff.js
 import React, { useEffect, useState } from "react";
 import { Bell, User, CheckCircle, PlusCircle } from "lucide-react";
 
 export default function SASCStaff() {
   const [activePage, setActivePage] = useState("verifikasi");
-  const [riwayat, setRiwayat] = useState(
-    JSON.parse(localStorage.getItem("peerCounselingData")) || []
-);
 
-  const [dataKonseling, setDataKonseling] = useState([]);
+  // Data konseling (peer counselor / partner) yang akan diverifikasi oleh SASC
+  const [dataCounselor, setDataCounselor] = useState([]);
+  const [dataPartner, setDataPartner] = useState([]);
+
+  // Buddy & creative (tetap utuh, tampilan tidak diubah)
   const [dataBuddy, setDataBuddy] = useState([]);
   const [dataCreative, setDataCreative] = useState([]);
   const [formBuddy, setFormBuddy] = useState({ nim: "", nama: "", jurusan: "" });
 
+  // Notifikasi pusat (animasi di tengah)
+  const [notif, setNotif] = useState({ show: false, message: "", type: "" });
+
   // ======== LOAD DATA DARI LOCALSTORAGE ========
   useEffect(() => {
-    const savedKonseling = JSON.parse(localStorage.getItem("peerCounselingData")) || [];
+    // pastikan nama key konsisten: gunakan peerCounselingData (format yang kamu pakai di page lain)
+    const savedCounselor = JSON.parse(localStorage.getItem("counselorData")) || [];
+    const savedPartner = JSON.parse(localStorage.getItem("partnerData")) || [];
     const savedBuddy = JSON.parse(localStorage.getItem("buddyData")) || [];
     const savedCreative = JSON.parse(localStorage.getItem("creativeData")) || [];
-    setDataKonseling(savedKonseling);
+    
+     const updatedCounselor = savedCounselor.map((item) => ({
+      ...item,
+      status: item.status || "Menunggu",
+    }));
+    const updatedPartner = savedPartner.map((item) => ({
+      ...item,
+      status: item.status || "Menunggu",
+    }));
+    
+    setDataCounselor(updatedCounselor);
+    setDataPartner(updatedPartner);
     setDataBuddy(savedBuddy);
     setDataCreative(savedCreative);
   }, []);
 
-  // ======== FUNGSI VERIFIKASI KONSELING ========
-  const handleVerifikasiChange = (index) => {
-    const updated = [...dataKonseling];
-    updated[index].verifikasi = !updated[index].verifikasi;
-    setDataKonseling(updated);
-    localStorage.setItem("peerCounselingData", JSON.stringify(updated));
+  // ======== NOTIFIKASI ========
+  const showNotif = (message, type = "info") => {
+    setNotif({ show: true, message, type });
+    // otomatis hilang setelah 2s
+    setTimeout(() => setNotif({ show: false, message: "", type: "" }), 2000);
   };
 
-  const handleKomentarChange = (index, value) => {
-    const updated = [...dataKonseling];
+  // ======== FUNGSI UPDATE VERIFIKASI DAN KOMENTAR STAFF ========
+  const updateVerifikasiCounselor = (index, statusType) => {
+    const updated = [...dataCounselor];
+    if (!updated[index]) return;
+    updated[index].status = statusType === "setuju" ? "Disetujui" : "Tidak Disetujui";
+    updated[index].verifikasi = statusType === "setuju";
+    setDataCounselor(updated);
+    localStorage.setItem("counselorData", JSON.stringify(updated));
+    showNotif(`Data counselor ${statusType === "setuju" ? "disetujui ✅" : "tidak disetujui ❌"}`, "info");
+  };
+
+  const handleKomentarCounselor = (index, value) => {
+    const updated = [...dataCounselor];
     updated[index].komentarStaff = value;
-    setDataKonseling(updated);
-    localStorage.setItem("peerCounselingData", JSON.stringify(updated));
+    setDataCounselor(updated);
+    localStorage.setItem("counselorData", JSON.stringify(updated));
   };
 
-  const updateVerifikasi = (index, statusType) => {
-    const updatedData = [...riwayat];
-    if (statusType === "setuju") {
-      updatedData[index].verifikasi = true;
-      updatedData[index].status = "Disetujui";
-    } else if (statusType === "tidak") {
-      updatedData[index].verifikasi = false;
-      updatedData[index].status = "Tidak Disetujui";
-    }
-    setRiwayat(updatedData);
-    localStorage.setItem("peerCounselingData", JSON.stringify(updatedData));
+  const updateVerifikasiPartner = (index, statusType) => {
+    const updated = [...dataPartner];
+    if (!updated[index]) return;
+    updated[index].status = statusType === "setuju" ? "Disetujui" : "Tidak Disetujui";
+    updated[index].verifikasi = statusType === "setuju";
+    setDataPartner(updated);
+    localStorage.setItem("partnerData", JSON.stringify(updated));
+    showNotif(`Data partner ${statusType === "setuju" ? "disetujui ✅" : "tidak disetujui ❌"}`, "info");
   };
 
-  // ======== FUNGSI VERIFIKASI CREATIVE TEAM ========
+  const handleKomentarPartner = (index, value) => {
+    const updated = [...dataPartner];
+    updated[index].komentarStaff = value;
+    setDataPartner(updated);
+    localStorage.setItem("partnerData", JSON.stringify(updated));
+  };
+
+
+  // ======== FUNGSI VERIFIKASI CREATIVE TEAM (tetap) ========
   const handleVerifikasiCreative = (index) => {
     const updated = [...dataCreative];
     updated[index].verifikasi = !updated[index].verifikasi;
     setDataCreative(updated);
     localStorage.setItem("creativeData", JSON.stringify(updated));
+    showNotif(updated[index].verifikasi ? "Creative disetujui ✅" : "Creative dibatalkan verifikasi", "info");
   };
 
   const handleKomentarCreative = (index, value) => {
@@ -65,7 +99,7 @@ export default function SASCStaff() {
     localStorage.setItem("creativeData", JSON.stringify(updated));
   };
 
-  // ======== FUNGSI INPUT BUDDY ========
+  // ======== FUNGSI INPUT BUDDY (tetap) ========
   const handleBuddyChange = (e) => {
     const { name, value } = e.target;
     setFormBuddy({ ...formBuddy, [name]: value });
@@ -74,43 +108,62 @@ export default function SASCStaff() {
   const handleAddBuddy = (e) => {
     e.preventDefault();
     if (!formBuddy.nim || !formBuddy.nama || !formBuddy.jurusan) {
-      alert("Harap isi semua kolom!");
+      showNotif("Harap isi semua kolom Buddy!", "error");
       return;
     }
     const updated = [...dataBuddy, formBuddy];
     setDataBuddy(updated);
     localStorage.setItem("buddyData", JSON.stringify(updated));
     setFormBuddy({ nim: "", nama: "", jurusan: "" });
-    alert("Data buddy berhasil ditambahkan!");
+    showNotif("Data buddy berhasil ditambahkan!", "success");
   };
 
   return (
     <div className="min-h-screen flex bg-gray-50">
+      {/* Notifikasi tengah (animasi scale + fade) */}
+      {notif.show && (
+        <div
+          className={`fixed inset-0 z-50 flex items-center justify-center pointer-events-none`}
+          aria-live="polite"
+        >
+          <div
+            className={`pointer-events-auto px-6 py-4 rounded-2xl shadow-lg transform transition-all duration-300 ${
+              notif.show ? "opacity-100 scale-100" : "opacity-0 scale-90"
+            } ${notif.type === "success" ? "bg-green-50" : notif.type === "error" ? "bg-red-50" : "bg-white"}`}
+            style={{ minWidth: 280, maxWidth: 520 }}
+          >
+            <p className="text-center font-medium text-sm">
+              {notif.message}
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Sidebar */}
       <aside className="w-64 bg-white shadow-lg p-6">
         <h2 className="text-lg font-bold text-gray-800 mb-6">SASC Staff</h2>
         <ul className="space-y-3 text-gray-700">
           <li
             onClick={() => setActivePage("buddy")}
-            className={`cursor-pointer font-semibold ${
-              activePage === "buddy" ? "text-blue-600" : "hover:text-blue-500"
-            }`}
+            className={`cursor-pointer font-semibold ${activePage === "buddy" ? "text-blue-600" : "hover:text-blue-500"}`}
           >
             Input Data Buddy
           </li>
           <li
-            onClick={() => setActivePage("verifikasi")}
-            className={`cursor-pointer font-semibold ${
-              activePage === "verifikasi" ? "text-blue-600" : "hover:text-blue-500"
-            }`}
+            onClick={() => setActivePage("counselor")}
+            className={`cursor-pointer font-semibold ${activePage === "verifikasi" ? "text-blue-600" : "hover:text-blue-500"}`}
           >
-            Verifikasi Konseling
+            Verifikasi Peer Counselor
+          </li>
+          <li
+            onClick={() => setActivePage("partner")}
+            className={`cursor-pointer font-semibold ${activePage === "verifikasi" ? "text-blue-600" : "hover:text-blue-500"}`}
+          >
+            Verifikasi Peer Partner
           </li>
           <li
             onClick={() => setActivePage("creative")}
-            className={`cursor-pointer font-semibold ${
-              activePage === "creative" ? "text-blue-600" : "hover:text-blue-500"
-            }`}
+            className={`cursor-pointer font-semibold ${activePage === "creative" ? "text-blue-600" : "hover:text-blue-500"}`}
           >
             Verifikasi Creative Team
           </li>
@@ -131,7 +184,7 @@ export default function SASCStaff() {
           </div>
         </div>
 
-        {/* ======= PAGE: INPUT DATA BUDDY ======= */}
+        {/* PAGE: INPUT DATA BUDDY */}
         {activePage === "buddy" && (
           <>
             <h1 className="text-2xl font-bold mb-6 text-gray-800">Input Data Buddy</h1>
@@ -139,44 +192,20 @@ export default function SASCStaff() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">NIM</label>
-                  <input
-                    type="text"
-                    name="nim"
-                    value={formBuddy.nim}
-                    onChange={handleBuddyChange}
-                    className="border rounded-lg p-2 w-full"
-                    placeholder="Masukkan NIM"
-                  />
+                  <input type="text" name="nim" value={formBuddy.nim} onChange={handleBuddyChange} className="border rounded-lg p-2 w-full" placeholder="Masukkan NIM" />
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">Nama</label>
-                  <input
-                    type="text"
-                    name="nama"
-                    value={formBuddy.nama}
-                    onChange={handleBuddyChange}
-                    className="border rounded-lg p-2 w-full"
-                    placeholder="Masukkan Nama"
-                  />
+                  <input type="text" name="nama" value={formBuddy.nama} onChange={handleBuddyChange} className="border rounded-lg p-2 w-full" placeholder="Masukkan Nama" />
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">Jurusan</label>
-                  <input
-                    type="text"
-                    name="jurusan"
-                    value={formBuddy.jurusan}
-                    onChange={handleBuddyChange}
-                    className="border rounded-lg p-2 w-full"
-                    placeholder="Masukkan Jurusan"
-                  />
+                  <input type="text" name="jurusan" value={formBuddy.jurusan} onChange={handleBuddyChange} className="border rounded-lg p-2 w-full" placeholder="Masukkan Jurusan" />
                 </div>
               </div>
 
               <div className="flex justify-end mt-6">
-                <button
-                  type="submit"
-                  className="flex items-center bg-blue-500 text-white px-5 py-2 rounded-lg hover:bg-blue-600 transition"
-                >
+                <button type="submit" className="flex items-center bg-blue-500 text-white px-5 py-2 rounded-lg hover:bg-blue-600 transition">
                   <PlusCircle className="w-5 h-5 mr-2" />
                   Tambah Buddy
                 </button>
@@ -211,69 +240,61 @@ export default function SASCStaff() {
           </>
         )}
 
-        {/* ======= PAGE: VERIFIKASI PEER COUNSELING ======= */}
-        {activePage === "verifikasi" && (
+        {/* PAGE: VERIFIKASI PEER COUNSELOR */}
+        {activePage === "counselor" && (
           <>
-            <h1 className="text-2xl font-bold mb-6 text-gray-800">
-              Verifikasi Data Konseling
-            </h1>
+            <h1 className="text-2xl font-bold mb-6 text-gray-800">Verifikasi Peer Counselor</h1>
             <div className="bg-white p-6 rounded-2xl shadow overflow-x-auto">
-              {dataKonseling.length === 0 ? (
-                <p className="text-gray-500">Belum ada data konseling.</p>
+              {dataCounselor.length === 0 ? (
+                <p className="text-gray-500">Belum ada data peer counselor.</p>
               ) : (
                 <table className="min-w-full text-left text-sm">
                   <thead>
                     <tr className="border-b bg-gray-100">
+                      <th className="py-2 px-3">Periode</th>
+                      <th className="py-2 px-3">Kampus</th>
                       <th className="py-2 px-3">NIM</th>
                       <th className="py-2 px-3">Nama</th>
                       <th className="py-2 px-3">Jurusan</th>
-                      <th className="py-2 px-3">Tanggal</th>
+                      <th className="py-2 px-3">Tanggal Konseling</th>
                       <th className="py-2 px-3">Jam Mulai</th>
                       <th className="py-2 px-3">Jam Selesai</th>
                       <th className="py-2 px-3">Durasi</th>
                       <th className="py-2 px-3">Metode</th>
-                      <th className="py-2 px-3">Deskripsi</th>
-                      <th className="py-2 px-3">Kendala</th>
+                      <th className="py-2 px-3">Deskripsi Kegiatan</th>
+                      <th className="py-2 px-3">Kendala Konseling</th>
                       <th className="py-2 px-3">Support Needed</th>
                       <th className="py-2 px-3 text-center">Verifikasi</th>
                       <th className="py-2 px-3">Komentar Staff</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {dataKonseling.map((item, i) => (
+                    {dataCounselor.map((item, i) => (
                       <tr key={i} className="border-b hover:bg-gray-50">
-                        <td className="py-2 px-3">{item.nimBuddy}</td>
-                        <td className="py-2 px-3">{item.namaBuddy}</td>
+                        <td className="py-2 px-3">{item.periode || "-"}</td>
+                        <td className="py-2 px-3">{item.kampus || "-"}</td>
+                        <td className="py-2 px-3">{item.nim}</td>
+                        <td className="py-2 px-3">{item.nama}</td>
                         <td className="py-2 px-3">{item.jurusan}</td>
-                        <td className="py-2 px-3">{item.tanggal}</td>
+                        <td className="py-2 px-3">{item.tanggalKonseling}</td>
                         <td className="py-2 px-3">{item.jamMulai}</td>
                         <td className="py-2 px-3">{item.jamSelesai}</td>
                         <td className="py-2 px-3">{item.durasi} menit</td>
                         <td className="py-2 px-3 capitalize">{item.metode}</td>
                         <td className="py-2 px-3">{item.deskripsi}</td>
                         <td className="py-2 px-3">{item.kendala}</td>
-                        <td className="py-2 px-3">{item.support}</td>
+                        <td className="py-2 px-3">{item.supportNeeded}</td>
                         <td className="py-2 px-3 text-center">
-                        <div className="flex justify-center space-x-2">
-                          <button
-                            onClick={() => updateVerifikasi(i, "setuju")}
-                            className="text-green-600 hover:text-green-800 text-xl"
-                          >
-                            ✔️
-                          </button>
-                          <button
-                            onClick={() => updateVerifikasi(i, "tidak")}
-                            className="text-red-600 hover:text-red-800 text-xl"
-                          >
-                            ❌
-                          </button>
-                        </div>
-                      </td>
+                          <div className="flex justify-center space-x-2">
+                            <button onClick={() => updateVerifikasiCounselor(i, "setuju")} className="text-green-600 text-xl">✔️</button>
+                            <button onClick={() => updateVerifikasiCounselor(i, "tidak")} className="text-red-600 text-xl">❌</button>
+                          </div>
+                        </td>
                         <td className="py-2 px-3">
                           <input
                             type="text"
                             value={item.komentarStaff || ""}
-                            onChange={(e) => handleKomentarChange(i, e.target.value)}
+                            onChange={(e) => handleKomentarCounselor(i, e.target.value)}
                             className="border rounded-lg p-2 w-full"
                             placeholder="Tulis komentar..."
                           />
@@ -287,11 +308,79 @@ export default function SASCStaff() {
           </>
         )}
 
-        {/* ======= PAGE: VERIFIKASI CREATIVE TEAM ======= */}
+        {/* PAGE: VERIFIKASI Peer Partner */}
+        {activePage === "partner" && (
+          <>
+            <h1 className="text-2xl font-bold mb-6 text-gray-800">Verifikasi Peer Partner</h1>
+            <div className="bg-white p-6 rounded-2xl shadow overflow-x-auto">
+              {dataPartner.length === 0 ? (
+                <p className="text-gray-500">Belum ada data peer partner.</p>
+              ) : (
+                <table className="min-w-full text-left text-sm">
+                  <thead>
+                    <tr className="border-b bg-gray-100">
+                      <th className="py-2 px-3">Periode</th>
+                      <th className="py-2 px-3">Kampus</th>
+                      <th className="py-2 px-3">Nama</th>
+                      <th className="py-2 px-3">Tanggal Konseling</th>
+                      <th className="py-2 px-3">Jam Mulai</th>
+                      <th className="py-2 px-3">Jam Selesai</th>
+                      <th className="py-2 px-3">Durasi</th>
+                      <th className="py-2 px-3">Metode</th>
+                      <th className="py-2 px-3">Deskripsi Kegiatan</th>
+                      <th className="py-2 px-3">Kendala Konseling</th>
+                      <th className="py-2 px-3">Support Needed</th>
+                      <th className="py-2 px-3">Verifikasi</th>
+                      <th className="py-2 px-3">Komentar Staff</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {dataPartner.map((item, i) => (
+                      <tr key={i} className="border-b hover:bg-gray-50">
+                        <td className="py-2 px-3">{item.periode || "-"}</td>
+                        <td className="py-2 px-3">{item.kampus || "-"}</td>
+                        <td className="py-2 px-3">{item.nama || item.namaBuddy}</td>
+                    <td className="py-2 px-3">
+                      {item.tanggalKonseling || item.tanggal}
+                    </td>
+                    <td className="py-2 px-3">{item.jamMulai}</td>
+                    <td className="py-2 px-3">{item.jamSelesai}</td>
+                    <td className="py-2 px-3">{item.durasi} menit</td>
+                    <td className="py-2 px-3 capitalize">{item.metode}</td>
+                    <td className="py-2 px-3">{item.deskripsi}</td>
+                    <td className="py-2 px-3">{item.kendala}</td>
+                    <td className="py-2 px-3">
+                      {item.supportNeeded || item.support}
+                    </td>
+                        <td className="py-2 px-3 text-center">
+                          <div className="flex justify-center space-x-2">
+                            <button onClick={() => updateVerifikasiPartner(i, "setuju")} className="text-green-600 text-xl">✔️</button>
+                            <button onClick={() => updateVerifikasiPartner(i, "tidak")} className="text-red-600 text-xl">❌</button>
+                          </div>
+                        </td>
+                        <td className="py-2 px-3">
+                          <input
+                            type="text"
+                            value={item.komentarStaff || ""}
+                            onChange={(e) => handleKomentarPartner(i, e.target.value)}
+                            className="border rounded-lg p-2 w-full"
+                            placeholder="Tulis komentar..."
+                          />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          </>
+        )}
+
+
+        {/* PAGE: VERIFIKASI CREATIVE TEAM */}
         {activePage === "creative" && (
           <>
             <h1 className="text-2xl font-bold mb-6 text-gray-800">Verifikasi Creative Team</h1>
-
             <div className="bg-white p-6 rounded-2xl shadow overflow-x-auto">
               {dataCreative.length === 0 ? (
                 <p className="text-gray-500">Belum ada data creative team.</p>
@@ -305,6 +394,8 @@ export default function SASCStaff() {
                       <th className="py-2 px-3">Status</th>
                       <th className="py-2 px-3 text-center">Verifikasi</th>
                       <th className="py-2 px-3">Komentar Staff</th>
+                      <th className="py-2 px-3">Support Needed</th>
+                      <th className="py-2 px-3 text-center">Status</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -315,21 +406,23 @@ export default function SASCStaff() {
                         <td className="py-2 px-3">{item.mediaDiskusi}</td>
                         <td className="py-2 px-3">{item.status}</td>
                         <td className="py-2 px-3 text-center">
-                          <input
-                            type="checkbox"
-                            checked={item.verifikasi || false}
-                            onChange={() => handleVerifikasiCreative(i)}
-                            className="w-5 h-5 accent-green-600 cursor-pointer"
-                          />
+                          <input type="checkbox" checked={item.verifikasi || false} onChange={() => handleVerifikasiCreative(i)} className="w-5 h-5 accent-green-600 cursor-pointer" />
                         </td>
                         <td className="py-2 px-3">
-                          <input
-                            type="text"
-                            value={item.komentarStaff || ""}
-                            onChange={(e) => handleKomentarCreative(i, e.target.value)}
-                            className="border rounded-lg p-2 w-full"
-                            placeholder="Tulis komentar..."
-                          />
+                          <input type="text" value={item.komentarStaff || ""} onChange={(e) => handleKomentarCreative(i, e.target.value)} className="border rounded-lg p-2 w-full" placeholder="Tulis komentar..." />
+                        </td>
+                        <td className="py-2 px-3 text-center">
+                          <span
+                            className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                              item.status === "Disetujui"
+                                ? "bg-green-100 text-green-700"
+                                : item.status === "Tidak Disetujui"
+                                ? "bg-red-100 text-red-700"
+                                : "bg-yellow-100 text-yellow-700"
+                            }`}
+                          >
+                            {item.status || "Menunggu"}
+                          </span>
                         </td>
                       </tr>
                     ))}

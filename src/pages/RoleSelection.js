@@ -14,7 +14,7 @@ export default function RoleSelection() {
     e.preventDefault();
 
     let newErrors = {};
-
+    
     if (!role) newErrors.role = "Harap pilih peran terlebih dahulu!";
     if (!periodeMulai || !periodeSelesai)
       newErrors.periode = "Periode harus diisi!";
