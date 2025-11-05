@@ -335,12 +335,18 @@ export default function PeerPartner() {
                     <td className="py-2 px-3">
                       {item.supportNeeded || item.support}
                     </td>
-                    <td
-                      className={`py-2 px-3 font-semibold ${
-                        item.verifikasi ? "text-green-600" : "text-yellow-600"
-                      }`}
-                    >
-                      {item.verifikasi ? "Disetujui" : "Menunggu"}
+                    <td className="py-2 px-3">
+                      <span
+                        className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${
+                          item.status === "Disetujui"
+                            ? "bg-green-100 text-green-700"
+                            : item.status === "Tidak Disetujui"
+                            ? "bg-red-100 text-red-700"
+                            : "bg-yellow-100 text-yellow-700"
+                        }`}
+                      >
+                        {item.status || "Menunggu"}
+                      </span>
                     </td>
                     <td className="py-2 px-3">{item.komentarStaff || "-"}</td>
                   </tr>

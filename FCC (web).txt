@@ -12,24 +12,12 @@ FCC (web) :
 
 4. Creative Team (docs) :
 
-- Periode
 - Tampilan halaman (docx)
 
 5. SASC Staff (docs) :
 
-- Input nama buddy pariring (pp) v
-- Verifikasi SASC -> checklist & komentar
-- Tambahkan status menunggu, disetujui, dan tidak disetujui
-- Tambahkan deskripsi peran di Riwayat konseling
-- Berikan animasi dan notifikasi verifikasi
+- Tambahkan fungsi hasil upload (creative team)
 - Tambahkan tombol submit komentar
-- Tambahin fitur peer partner
-- Tambahkan periode dari student
 - Tarik data report -> berdasar periode peran
 - Checklist pendataan pengambilan souvenir
 - Tampilan halaman (docs)
-- Periode (creative team)
-
-6. Pilih peran (docs) :
-
-- Pada bagian Creative Team hubungkan dengan SASC Staff

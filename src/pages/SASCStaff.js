@@ -5,13 +5,17 @@ import { Bell, User, CheckCircle, PlusCircle } from "lucide-react";
 export default function SASCStaff() {
   const [activePage, setActivePage] = useState("verifikasi");
 
-  // Data konseling (peer counselor / partner) yang akan diverifikasi oleh SASC
+  // Data pembina
+  const [pembinaList, setPembinaList] = useState([]);
+  const [formPembina, setFormPembina] = useState("");
+
+  // Data peran (peer counselor, peer partner, dan creatuve team) yang akan diverifikasi oleh SASC
   const [dataCounselor, setDataCounselor] = useState([]);
   const [dataPartner, setDataPartner] = useState([]);
-
-  // Buddy & creative (tetap utuh, tampilan tidak diubah)
-  const [dataBuddy, setDataBuddy] = useState([]);
   const [dataCreative, setDataCreative] = useState([]);
+
+  // Buddy (tetap utuh, tampilan tidak diubah)
+  const [dataBuddy, setDataBuddy] = useState([]);
   const [formBuddy, setFormBuddy] = useState({ nim: "", nama: "", jurusan: "" });
 
   // Notifikasi pusat (animasi di tengah)
@@ -24,12 +28,19 @@ export default function SASCStaff() {
     const savedPartner = JSON.parse(localStorage.getItem("partnerData")) || [];
     const savedBuddy = JSON.parse(localStorage.getItem("buddyData")) || [];
     const savedCreative = JSON.parse(localStorage.getItem("creativeData")) || [];
+    const savedPembina = JSON.parse(localStorage.getItem("pembinaList")) || [];
     
-     const updatedCounselor = savedCounselor.map((item) => ({
+    const updatedCounselor = savedCounselor.map((item) => ({
       ...item,
       status: item.status || "Menunggu",
     }));
+
     const updatedPartner = savedPartner.map((item) => ({
+      ...item,
+      status: item.status || "Menunggu",
+    }));
+
+    const updatedCreative = savedCreative.map((item) => ({
       ...item,
       status: item.status || "Menunggu",
     }));
@@ -37,7 +48,8 @@ export default function SASCStaff() {
     setDataCounselor(updatedCounselor);
     setDataPartner(updatedPartner);
     setDataBuddy(savedBuddy);
-    setDataCreative(savedCreative);
+    setDataCreative(updatedCreative);
+    setPembinaList(savedPembina);
   }, []);
 
   // ======== NOTIFIKASI ========
@@ -55,7 +67,7 @@ export default function SASCStaff() {
     updated[index].verifikasi = statusType === "setuju";
     setDataCounselor(updated);
     localStorage.setItem("counselorData", JSON.stringify(updated));
-    showNotif(`Data counselor ${statusType === "setuju" ? "disetujui ✅" : "tidak disetujui ❌"}`, "info");
+    showNotif(`Data counselor ${statusType === "setuju" ? "Disetujui ✅" : "Tidak Disetujui ❌"}`, "info");
   };
 
   const handleKomentarCounselor = (index, value) => {
@@ -72,7 +84,7 @@ export default function SASCStaff() {
     updated[index].verifikasi = statusType === "setuju";
     setDataPartner(updated);
     localStorage.setItem("partnerData", JSON.stringify(updated));
-    showNotif(`Data partner ${statusType === "setuju" ? "disetujui ✅" : "tidak disetujui ❌"}`, "info");
+    showNotif(`Data partner ${statusType === "setuju" ? "Disetujui ✅" : "Tidak Disetujui ❌"}`, "info");
   };
 
   const handleKomentarPartner = (index, value) => {
@@ -82,14 +94,27 @@ export default function SASCStaff() {
     localStorage.setItem("partnerData", JSON.stringify(updated));
   };
 
-
-  // ======== FUNGSI VERIFIKASI CREATIVE TEAM (tetap) ========
-  const handleVerifikasiCreative = (index) => {
+  const updateVerifikasiCreative = (index, statusType) => {
     const updated = [...dataCreative];
-    updated[index].verifikasi = !updated[index].verifikasi;
-    setDataCreative(updated);
+    if (!updated[index]) return;
+
+    // 🔧 Perbaikan penting
+    updated[index].statusVerifikasi = statusType === "setuju" ? "Disetujui" : "Tidak Disetujui";
+    updated[index].verifikasi = statusType === "setuju";
+    updated[index].komentarStaff = updated[index].komentarStaff || "";
+
+    // Simpan ke localStorage
     localStorage.setItem("creativeData", JSON.stringify(updated));
-    showNotif(updated[index].verifikasi ? "Creative disetujui ✅" : "Creative dibatalkan verifikasi", "info");
+    setDataCreative(updated);
+
+    // 🔔 Tampilkan notifikasi
+    showNotif(
+      `Creative Team ${statusType === "setuju" ? "Disetujui ✅" : "Tidak Disetujui ❌"}`,
+      "info"
+    );
+
+    // 🚀 Trigger event agar halaman CreativeTeam ikut update (untuk listener "storage")
+    window.dispatchEvent(new Event("storage"));
   };
 
   const handleKomentarCreative = (index, value) => {
@@ -98,6 +123,28 @@ export default function SASCStaff() {
     setDataCreative(updated);
     localStorage.setItem("creativeData", JSON.stringify(updated));
   };
+
+  // Fungsi Input & Hapus Pembina
+  const handleAddPembina = (e) => {
+    e.preventDefault();
+    if (!formPembina.trim()) {
+      showNotif("Nama pembina tidak boleh kosong!", "error");
+      return;
+    }
+    const updated = [...pembinaList, formPembina.trim()];
+    setPembinaList(updated);
+    localStorage.setItem("pembinaList", JSON.stringify(updated));
+    setFormPembina("");
+    showNotif("Pembina berhasil ditambahkan!", "success");
+  };
+
+  const handleDeletePembina = (index) => {
+    const updated = pembinaList.filter((_, i) => i !== index);
+    setPembinaList(updated);
+    localStorage.setItem("pembinaList", JSON.stringify(updated));
+    showNotif("Pembina dihapus!", "info");
+  };
+
 
   // ======== FUNGSI INPUT BUDDY (tetap) ========
   const handleBuddyChange = (e) => {
@@ -116,6 +163,13 @@ export default function SASCStaff() {
     localStorage.setItem("buddyData", JSON.stringify(updated));
     setFormBuddy({ nim: "", nama: "", jurusan: "" });
     showNotif("Data buddy berhasil ditambahkan!", "success");
+  };
+
+  const handleDeleteBuddy = (index) => {
+    const updated = dataBuddy.filter((_, i) => i !== index);
+    setDataBuddy(updated);
+    localStorage.setItem("buddyData", JSON.stringify(updated));
+    showNotif("Data buddy berhasil dihapus!", "info");
   };
 
   return (
@@ -144,6 +198,12 @@ export default function SASCStaff() {
         <h2 className="text-lg font-bold text-gray-800 mb-6">SASC Staff</h2>
         <ul className="space-y-3 text-gray-700">
           <li
+            onClick={() => setActivePage("pembina")}
+            className={`cursor-pointer font-semibold ${activePage === "pembina" ? "text-blue-600" : "hover:text-blue-500"}`}
+          >
+            Input Pembina
+          </li>
+          <li
             onClick={() => setActivePage("buddy")}
             className={`cursor-pointer font-semibold ${activePage === "buddy" ? "text-blue-600" : "hover:text-blue-500"}`}
           >
@@ -151,13 +211,13 @@ export default function SASCStaff() {
           </li>
           <li
             onClick={() => setActivePage("counselor")}
-            className={`cursor-pointer font-semibold ${activePage === "verifikasi" ? "text-blue-600" : "hover:text-blue-500"}`}
+            className={`cursor-pointer font-semibold ${activePage === "counselor" ? "text-blue-600" : "hover:text-blue-500"}`}
           >
             Verifikasi Peer Counselor
           </li>
           <li
             onClick={() => setActivePage("partner")}
-            className={`cursor-pointer font-semibold ${activePage === "verifikasi" ? "text-blue-600" : "hover:text-blue-500"}`}
+            className={`cursor-pointer font-semibold ${activePage === "partner" ? "text-blue-600" : "hover:text-blue-500"}`}
           >
             Verifikasi Peer Partner
           </li>
@@ -219,10 +279,11 @@ export default function SASCStaff() {
               ) : (
                 <table className="min-w-full text-left text-sm">
                   <thead>
-                    <tr className="border-b">
+                    <tr className="border-b bg-gray-100">
                       <th className="py-2 px-3">NIM</th>
                       <th className="py-2 px-3">Nama</th>
                       <th className="py-2 px-3">Jurusan</th>
+                      <th className="py-2 px-3 text-center">Aksi</th> {/* 🔹 Tambah kolom aksi */}
                     </tr>
                   </thead>
                   <tbody>
@@ -231,10 +292,69 @@ export default function SASCStaff() {
                         <td className="py-2 px-3">{b.nim}</td>
                         <td className="py-2 px-3">{b.nama}</td>
                         <td className="py-2 px-3">{b.jurusan}</td>
+                        <td className="py-2 px-3 text-center">
+                          <button
+                            onClick={() => handleDeleteBuddy(i)}
+                            className="text-red-500 hover:text-red-700 text-sm font-medium"
+                          >
+                            Hapus
+                          </button>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
+              )}
+            </div>
+          </>
+        )}
+
+        {/* PAGE: INPUT PEMBINA */}
+        {activePage === "pembina" && (
+          <>
+            <h1 className="text-2xl font-bold mb-6 text-gray-800">Input Pembina</h1>
+
+            <form onSubmit={handleAddPembina} className="bg-white p-6 rounded-2xl shadow mb-8">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">Nama Pembina</label>
+                <input
+                  type="text"
+                  value={formPembina}
+                  onChange={(e) => setFormPembina(e.target.value)}
+                  className="border rounded-lg p-2 w-full"
+                  placeholder="Masukkan nama pembina"
+                />
+              </div>
+
+              <div className="flex justify-end mt-6">
+                <button
+                  type="submit"
+                  className="flex items-center bg-blue-500 text-white px-5 py-2 rounded-lg hover:bg-blue-600 transition"
+                >
+                  <PlusCircle className="w-5 h-5 mr-2" />
+                  Tambah Pembina
+                </button>
+              </div>
+            </form>
+
+            <div className="bg-white p-6 rounded-2xl shadow">
+              <h2 className="text-lg font-bold mb-4 text-gray-800">Daftar Pembina</h2>
+              {pembinaList.length === 0 ? (
+                <p className="text-gray-500">Belum ada pembina yang ditambahkan.</p>
+              ) : (
+                <ul className="space-y-2">
+                  {pembinaList.map((nama, i) => (
+                    <li key={i} className="flex justify-between items-center border-b pb-2">
+                      <span>{nama}</span>
+                      <button
+                        onClick={() => handleDeletePembina(i)}
+                        className="text-red-500 hover:text-red-700 text-sm"
+                      >
+                        Hapus
+                      </button>
+                    </li>
+                  ))}
+                </ul>
               )}
             </div>
           </>
@@ -376,53 +496,58 @@ export default function SASCStaff() {
           </>
         )}
 
-
         {/* PAGE: VERIFIKASI CREATIVE TEAM */}
         {activePage === "creative" && (
           <>
-            <h1 className="text-2xl font-bold mb-6 text-gray-800">Verifikasi Creative Team</h1>
+            <h1 className="text-2xl font-bold mb-6 text-gray-800">Verifikasi Creative team</h1>
             <div className="bg-white p-6 rounded-2xl shadow overflow-x-auto">
               {dataCreative.length === 0 ? (
-                <p className="text-gray-500">Belum ada data creative team.</p>
+                <p className="text-gray-500">Belum ada data Creative Team.</p>
               ) : (
                 <table className="min-w-full text-left text-sm">
                   <thead>
-                    <tr className="border-b">
+                    <tr className="border-b bg-gray-100">
+                      <th className="py-2 px-3">Periode</th>
+                      <th className="py-2 px-3">Pembina</th>
                       <th className="py-2 px-3">Topik</th>
-                      <th className="py-2 px-3">Tanggal</th>
-                      <th className="py-2 px-3">Media</th>
-                      <th className="py-2 px-3">Status</th>
-                      <th className="py-2 px-3 text-center">Verifikasi</th>
+                      <th className="py-2 px-3">Status Topik</th>
+                      <th className="py-2 px-3">Tanggal Diskusi</th>
+                      <th className="py-2 px-3">Media Diskusi</th>
+                      <th className="py-2 px-3">Hasil Diskusi</th>
+                      <th className="py-2 px-3">Status Proses</th>
+                      <th className="py-2 px-3">Hasil Upload</th>
+                      <th className="py-2 px-3">Verifikasi</th>
                       <th className="py-2 px-3">Komentar Staff</th>
-                      <th className="py-2 px-3">Support Needed</th>
-                      <th className="py-2 px-3 text-center">Status</th>
                     </tr>
                   </thead>
                   <tbody>
                     {dataCreative.map((item, i) => (
                       <tr key={i} className="border-b hover:bg-gray-50">
+                        <td className="py-2 px-3">{item.periode || "-"}</td>
+                        <td className="py-2 px-3">{item.pembina || "-"}</td>
                         <td className="py-2 px-3">{item.topik}</td>
+                        <td className="py-2 px-3">{item.statusTopik}</td>
                         <td className="py-2 px-3">{item.tanggalDiskusi}</td>
                         <td className="py-2 px-3">{item.mediaDiskusi}</td>
+                        <td className="py-2 px-3">{item.hasilDiskusi}</td>
                         <td className="py-2 px-3">{item.status}</td>
+                        <td className="py-2 px-3 text-blue-600">
+                        {item.uploadName || "-"}
+                        </td>
                         <td className="py-2 px-3 text-center">
-                          <input type="checkbox" checked={item.verifikasi || false} onChange={() => handleVerifikasiCreative(i)} className="w-5 h-5 accent-green-600 cursor-pointer" />
+                          <div className="flex justify-center space-x-2">
+                            <button onClick={() => updateVerifikasiCreative(i, "setuju")} className="text-green-600 text-xl">✔️</button>
+                            <button onClick={() => updateVerifikasiCreative(i, "tidak")} className="text-red-600 text-xl">❌</button>
+                          </div>
                         </td>
                         <td className="py-2 px-3">
-                          <input type="text" value={item.komentarStaff || ""} onChange={(e) => handleKomentarCreative(i, e.target.value)} className="border rounded-lg p-2 w-full" placeholder="Tulis komentar..." />
-                        </td>
-                        <td className="py-2 px-3 text-center">
-                          <span
-                            className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                              item.status === "Disetujui"
-                                ? "bg-green-100 text-green-700"
-                                : item.status === "Tidak Disetujui"
-                                ? "bg-red-100 text-red-700"
-                                : "bg-yellow-100 text-yellow-700"
-                            }`}
-                          >
-                            {item.status || "Menunggu"}
-                          </span>
+                          <input
+                            type="text"
+                            value={item.komentarStaff || ""}
+                            onChange={(e) => handleKomentarCreative(i, e.target.value)}
+                            className="border rounded-lg p-2 w-full"
+                            placeholder="Tulis komentar..."
+                          />
                         </td>
                       </tr>
                     ))}

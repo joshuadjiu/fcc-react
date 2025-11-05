@@ -116,9 +116,9 @@ export default function RoleSelection() {
                 }`}
               >
                 <option value="">-- Pilih Pembina --</option>
-                <option value="pembina1">Pembina 1</option>
-                <option value="pembina2">Pembina 2</option>
-                <option value="pembina3">Pembina 3</option>
+                {(JSON.parse(localStorage.getItem("pembinaList")) || []).map((nama, i) => (
+                  <option key={i} value={nama}>{nama}</option>
+                ))}
               </select>
               {errors.pembina && (
                 <p className="text-red-500 text-sm mt-1">{errors.pembina}</p>
