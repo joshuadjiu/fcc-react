@@ -37,7 +37,6 @@ export default function PeerPartner() {
     } else {
       setRiwayat(savedPartner);
     }
-
     setBuddyList(savedBuddy);
   }, []);
 
@@ -93,7 +92,8 @@ export default function PeerPartner() {
         item.kampus === (roleData.kampus || roleData.campus)
     ));
 
-    alert("Data konseling berhasil disimpan!");
+    alert("Form data peer partner berhasil disimpan");
+    
     setFormData({
       namaBuddy: "",
       tanggal: "",

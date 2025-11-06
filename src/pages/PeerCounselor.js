@@ -111,9 +111,8 @@ export default function PeerCounselor() {
     );
     setRiwayat(filtered);
 
-    alert("Data berhasil disimpan!");
+    alert("Form data peer counselor berhasil disimpan");
 
-    // Reset form
     setFormData({
       nimBuddy: "",
       namaBuddy: "",

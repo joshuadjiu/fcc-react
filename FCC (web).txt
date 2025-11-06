@@ -4,20 +4,17 @@ FCC (web) :
 
 2. Peer Counselor (docs) :
 
-- Tampilan halaman (docx)
-
 3. Peer Counselor (docs) :
 
-- Tampilan halaman (docx)
-
 4. Creative Team (docs) :
-
-- Tampilan halaman (docx)
 
 5. SASC Staff (docs) :
 
 - Tambahkan fungsi hasil upload (creative team)
-- Tambahkan tombol submit komentar
 - Tarik data report -> berdasar periode peran
-- Checklist pendataan pengambilan souvenir
-- Tampilan halaman (docs)
+
+6. Semuanya (docs)
+
+- Notifikasi
+- Register/Login mengarah ke Nama/NIM
+- Tampilan halaman (docx)

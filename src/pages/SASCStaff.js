@@ -21,6 +21,8 @@ export default function SASCStaff() {
   // Notifikasi pusat (animasi di tengah)
   const [notif, setNotif] = useState({ show: false, message: "", type: "" });
 
+  const [isChanged, setIsChanged] = useState(false);
+
   // ======== LOAD DATA DARI LOCALSTORAGE ========
   useEffect(() => {
     // pastikan nama key konsisten: gunakan peerCounselingData (format yang kamu pakai di page lain)
@@ -67,6 +69,7 @@ export default function SASCStaff() {
     updated[index].verifikasi = statusType === "setuju";
     setDataCounselor(updated);
     localStorage.setItem("counselorData", JSON.stringify(updated));
+    setIsChanged(true);
     showNotif(`Data counselor ${statusType === "setuju" ? "Disetujui ✅" : "Tidak Disetujui ❌"}`, "info");
   };
 
@@ -75,6 +78,7 @@ export default function SASCStaff() {
     updated[index].komentarStaff = value;
     setDataCounselor(updated);
     localStorage.setItem("counselorData", JSON.stringify(updated));
+    setIsChanged(true);
   };
 
   const updateVerifikasiPartner = (index, statusType) => {
@@ -84,6 +88,7 @@ export default function SASCStaff() {
     updated[index].verifikasi = statusType === "setuju";
     setDataPartner(updated);
     localStorage.setItem("partnerData", JSON.stringify(updated));
+    setIsChanged(true);
     showNotif(`Data partner ${statusType === "setuju" ? "Disetujui ✅" : "Tidak Disetujui ❌"}`, "info");
   };
 
@@ -92,6 +97,7 @@ export default function SASCStaff() {
     updated[index].komentarStaff = value;
     setDataPartner(updated);
     localStorage.setItem("partnerData", JSON.stringify(updated));
+    setIsChanged(true);
   };
 
   const updateVerifikasiCreative = (index, statusType) => {
@@ -106,6 +112,7 @@ export default function SASCStaff() {
     // Simpan ke localStorage
     localStorage.setItem("creativeData", JSON.stringify(updated));
     setDataCreative(updated);
+    setIsChanged(true);
 
     // 🔔 Tampilkan notifikasi
     showNotif(
@@ -122,6 +129,7 @@ export default function SASCStaff() {
     updated[index].komentarStaff = value;
     setDataCreative(updated);
     localStorage.setItem("creativeData", JSON.stringify(updated));
+    setIsChanged(true);
   };
 
   // Fungsi Input & Hapus Pembina
@@ -170,6 +178,108 @@ export default function SASCStaff() {
     setDataBuddy(updated);
     localStorage.setItem("buddyData", JSON.stringify(updated));
     showNotif("Data buddy berhasil dihapus!", "info");
+  };
+
+  const [selectedRole, setSelectedRole] = useState("");
+  const [selectedPeriod, setSelectedPeriod] = useState("");
+  const [selectedCampus, setSelectedCampus] = useState("");
+  const [filteredData, setFilteredData] = useState([]);
+
+  const campusOptions = [
+    "Kemanggisan (KG)",
+    "Alam Sutera (AS)",
+    "Bekasi (BKS)",
+    "Bandung (BDG)",
+    "Malang (MLG)",
+    "Semarang (SMG)",
+    "Medan (MDN)"
+  ];
+
+  const handleTarikData = () => {
+    let data = [];
+    if (selectedRole === "counselor") data = dataCounselor;
+    if (selectedRole === "partner") data = dataPartner;
+    if (selectedRole === "creative") data = dataCreative;
+
+    if (!selectedPeriod.trim()) {
+      showNotif("Masukkan periode terlebih dahulu!", "error");
+      return;
+    }
+
+    const filtered = data.filter((d) => d.periode === selectedPeriod.trim() &&
+    (selectedCampus ? d.kampus === selectedCampus : true));
+    setFilteredData(filtered);
+    showNotif(`Data ${selectedRole} periode ${selectedPeriod} berhasil dimuat! ✅`, "success");
+  };
+
+  const handleSouvenirChange = (item, checked, index) => {
+    const updateData = (data, key) => {
+      const updated = [...data];
+      updated[index].souvenir = checked;
+      localStorage.setItem(key, JSON.stringify(updated));
+      return updated;
+    };
+
+    if (item.role === "Peer Counselor") {
+      setDataCounselor((prev) => updateData(prev, "counselorData"));
+    } else if (item.role === "Peer Partner") {
+      setDataPartner((prev) => updateData(prev, "partnerData"));
+    } else if (item.role === "Creative Team") {
+      setDataCreative((prev) => updateData(prev, "creativeData"));
+    }
+
+    showNotif(
+      `Souvenir ${item.nama || item.namaBuddy || "-"} ${checked ? "✅ Sudah diambil" : "❌ Belum diambil"}`,
+      "info"
+    );
+  };
+
+  // ======== FORM TAMBAH USER SOUVENIR ========
+  const [formSouvenir, setFormSouvenir] = useState({
+    nama: "",
+    role: "",
+    periode: "",
+    souvenir: false,
+  });
+
+  const handleSouvenirInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormSouvenir({ ...formSouvenir, [name]: value });
+  };
+
+  const handleAddSouvenirUser = (e) => {
+    e.preventDefault();
+    if (!formSouvenir.nama || !formSouvenir.role || !formSouvenir.periode) {
+      showNotif("Harap isi semua kolom user souvenir!", "error");
+      return;
+    }
+
+    // simpan ke data sesuai role
+    const dataMap = {
+      "Peer Counselor": { data: dataCounselor, key: "counselorData", set: setDataCounselor },
+      "Peer Partner": { data: dataPartner, key: "partnerData", set: setDataPartner },
+      "Creative Team": { data: dataCreative, key: "creativeData", set: setDataCreative },
+    };
+
+    const target = dataMap[formSouvenir.role];
+    if (!target) {
+      showNotif("Role tidak valid!", "error");
+      return;
+    }
+
+    const newEntry = {
+      nama: formSouvenir.nama,
+      periode: formSouvenir.periode,
+      role: formSouvenir.role,
+      souvenir: false,
+    };
+
+    const updated = [...target.data, newEntry];
+    target.set(updated);
+    localStorage.setItem(target.key, JSON.stringify(updated));
+
+    setFormSouvenir({ nama: "", role: "", periode: "", souvenir: false });
+    showNotif(`User baru (${formSouvenir.nama}) berhasil ditambahkan ke ${formSouvenir.role}! ✅`, "success");
   };
 
   return (
@@ -227,6 +337,18 @@ export default function SASCStaff() {
           >
             Verifikasi Creative Team
           </li>
+          <li
+            onClick={() => setActivePage("report")}
+            className={`cursor-pointer font-semibold ${activePage === "report" ? "text-blue-600" : "hover:text-blue-500"}`}
+          >
+            Tarik Data Report
+          </li>
+          <li
+            onClick={() => setActivePage("souvenir")}
+            className={`cursor-pointer font-semibold ${activePage === "souvenir" ? "text-blue-600" : "hover:text-blue-500"}`}
+          >
+            Checklist Pengambilan Souvenir
+          </li>
         </ul>
       </aside>
 
@@ -243,71 +365,6 @@ export default function SASCStaff() {
             </div>
           </div>
         </div>
-
-        {/* PAGE: INPUT DATA BUDDY */}
-        {activePage === "buddy" && (
-          <>
-            <h1 className="text-2xl font-bold mb-6 text-gray-800">Input Data Buddy</h1>
-            <form onSubmit={handleAddBuddy} className="bg-white p-6 rounded-2xl shadow mb-8">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">NIM</label>
-                  <input type="text" name="nim" value={formBuddy.nim} onChange={handleBuddyChange} className="border rounded-lg p-2 w-full" placeholder="Masukkan NIM" />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">Nama</label>
-                  <input type="text" name="nama" value={formBuddy.nama} onChange={handleBuddyChange} className="border rounded-lg p-2 w-full" placeholder="Masukkan Nama" />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">Jurusan</label>
-                  <input type="text" name="jurusan" value={formBuddy.jurusan} onChange={handleBuddyChange} className="border rounded-lg p-2 w-full" placeholder="Masukkan Jurusan" />
-                </div>
-              </div>
-
-              <div className="flex justify-end mt-6">
-                <button type="submit" className="flex items-center bg-blue-500 text-white px-5 py-2 rounded-lg hover:bg-blue-600 transition">
-                  <PlusCircle className="w-5 h-5 mr-2" />
-                  Tambah Buddy
-                </button>
-              </div>
-            </form>
-
-            <div className="bg-white p-6 rounded-2xl shadow">
-              <h2 className="text-lg font-bold mb-4 text-gray-800">Daftar Buddy</h2>
-              {dataBuddy.length === 0 ? (
-                <p className="text-gray-500">Belum ada data buddy.</p>
-              ) : (
-                <table className="min-w-full text-left text-sm">
-                  <thead>
-                    <tr className="border-b bg-gray-100">
-                      <th className="py-2 px-3">NIM</th>
-                      <th className="py-2 px-3">Nama</th>
-                      <th className="py-2 px-3">Jurusan</th>
-                      <th className="py-2 px-3 text-center">Aksi</th> {/* 🔹 Tambah kolom aksi */}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {dataBuddy.map((b, i) => (
-                      <tr key={i} className="border-b hover:bg-gray-50">
-                        <td className="py-2 px-3">{b.nim}</td>
-                        <td className="py-2 px-3">{b.nama}</td>
-                        <td className="py-2 px-3">{b.jurusan}</td>
-                        <td className="py-2 px-3 text-center">
-                          <button
-                            onClick={() => handleDeleteBuddy(i)}
-                            className="text-red-500 hover:text-red-700 text-sm font-medium"
-                          >
-                            Hapus
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )}
-            </div>
-          </>
-        )}
 
         {/* PAGE: INPUT PEMBINA */}
         {activePage === "pembina" && (
@@ -360,6 +417,70 @@ export default function SASCStaff() {
           </>
         )}
 
+        {/* PAGE: INPUT DATA BUDDY */}
+        {activePage === "buddy" && (
+          <>
+            <h1 className="text-2xl font-bold mb-6 text-gray-800">Input Data Buddy</h1>
+            <form onSubmit={handleAddBuddy} className="bg-white p-6 rounded-2xl shadow mb-8">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">NIM</label>
+                  <input type="text" name="nim" value={formBuddy.nim} onChange={handleBuddyChange} className="border rounded-lg p-2 w-full" placeholder="Masukkan NIM" />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">Nama</label>
+                  <input type="text" name="nama" value={formBuddy.nama} onChange={handleBuddyChange} className="border rounded-lg p-2 w-full" placeholder="Masukkan Nama" />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">Jurusan</label>
+                  <input type="text" name="jurusan" value={formBuddy.jurusan} onChange={handleBuddyChange} className="border rounded-lg p-2 w-full" placeholder="Masukkan Jurusan" />
+                </div>
+              </div>
+              <div className="flex justify-end mt-6">
+                <button type="submit" className="flex items-center bg-blue-500 text-white px-5 py-2 rounded-lg hover:bg-blue-600 transition">
+                  <PlusCircle className="w-5 h-5 mr-2" />
+                  Tambah Buddy
+                </button>
+              </div>
+            </form>
+
+            <div className="bg-white p-6 rounded-2xl shadow">
+              <h2 className="text-lg font-bold mb-4 text-gray-800">Daftar Buddy</h2>
+              {dataBuddy.length === 0 ? (
+                <p className="text-gray-500">Belum ada data buddy.</p>
+              ) : (
+                <table className="min-w-full text-left text-sm">
+                  <thead>
+                    <tr className="border-b bg-gray-100">
+                      <th className="py-2 px-3">NIM</th>
+                      <th className="py-2 px-3">Nama</th>
+                      <th className="py-2 px-3">Jurusan</th>
+                      <th className="py-2 px-3 text-center">Aksi</th> {/* 🔹 Tambah kolom aksi */}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {dataBuddy.map((b, i) => (
+                      <tr key={i} className="border-b hover:bg-gray-50">
+                        <td className="py-2 px-3">{b.nim}</td>
+                        <td className="py-2 px-3">{b.nama}</td>
+                        <td className="py-2 px-3">{b.jurusan}</td>
+                        <td className="py-2 px-3 text-center">
+                          <button
+                            onClick={() => handleDeleteBuddy(i)}
+                            className="text-red-500 hover:text-red-700 text-sm font-medium"
+                          >
+                            Hapus
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          </>
+        )}
+
         {/* PAGE: VERIFIKASI PEER COUNSELOR */}
         {activePage === "counselor" && (
           <>
@@ -406,8 +527,18 @@ export default function SASCStaff() {
                         <td className="py-2 px-3">{item.supportNeeded}</td>
                         <td className="py-2 px-3 text-center">
                           <div className="flex justify-center space-x-2">
-                            <button onClick={() => updateVerifikasiCounselor(i, "setuju")} className="text-green-600 text-xl">✔️</button>
-                            <button onClick={() => updateVerifikasiCounselor(i, "tidak")} className="text-red-600 text-xl">❌</button>
+                            <button
+                              onClick={() => updateVerifikasiCounselor(i, "setuju")}
+                              className="text-green-600 text-xl transition-transform transform hover:scale-125 hover:rotate-12 cursor-pointer"
+                            >
+                              ✔️
+                            </button>
+                            <button
+                              onClick={() => updateVerifikasiCounselor(i, "tidak")}
+                              className="text-red-600 text-xl transition-transform transform hover:scale-125 hover:-rotate-12 cursor-pointer"
+                            >
+                              ❌
+                            </button>
                           </div>
                         </td>
                         <td className="py-2 px-3">
@@ -428,7 +559,7 @@ export default function SASCStaff() {
           </>
         )}
 
-        {/* PAGE: VERIFIKASI Peer Partner */}
+        {/* PAGE: VERIFIKASI PEER PARTNER */}
         {activePage === "partner" && (
           <>
             <h1 className="text-2xl font-bold mb-6 text-gray-800">Verifikasi Peer Partner</h1>
@@ -474,8 +605,18 @@ export default function SASCStaff() {
                     </td>
                         <td className="py-2 px-3 text-center">
                           <div className="flex justify-center space-x-2">
-                            <button onClick={() => updateVerifikasiPartner(i, "setuju")} className="text-green-600 text-xl">✔️</button>
-                            <button onClick={() => updateVerifikasiPartner(i, "tidak")} className="text-red-600 text-xl">❌</button>
+                            <button
+                              onClick={() => updateVerifikasiPartner(i, "setuju")}
+                              className="text-green-600 text-xl transition-transform transform hover:scale-125 hover:rotate-12 cursor-pointer"
+                            >
+                              ✔️
+                            </button>
+                            <button
+                              onClick={() => updateVerifikasiPartner(i, "tidak")}
+                              className="text-red-600 text-xl transition-transform transform hover:scale-125 hover:-rotate-12 cursor-pointer"
+                            >
+                              ❌
+                            </button>
                           </div>
                         </td>
                         <td className="py-2 px-3">
@@ -536,8 +677,18 @@ export default function SASCStaff() {
                         </td>
                         <td className="py-2 px-3 text-center">
                           <div className="flex justify-center space-x-2">
-                            <button onClick={() => updateVerifikasiCreative(i, "setuju")} className="text-green-600 text-xl">✔️</button>
-                            <button onClick={() => updateVerifikasiCreative(i, "tidak")} className="text-red-600 text-xl">❌</button>
+                            <button
+                              onClick={() => updateVerifikasiCreative(i, "setuju")}
+                              className="text-green-600 text-xl transition-transform transform hover:scale-125 hover:rotate-12 cursor-pointer"
+                            >
+                              ✔️
+                            </button>
+                            <button
+                              onClick={() => updateVerifikasiCreative(i, "tidak")}
+                              className="text-red-600 text-xl transition-transform transform hover:scale-125 hover:-rotate-12 cursor-pointer"
+                            >
+                              ❌
+                            </button>
                           </div>
                         </td>
                         <td className="py-2 px-3">
@@ -547,6 +698,221 @@ export default function SASCStaff() {
                             onChange={(e) => handleKomentarCreative(i, e.target.value)}
                             className="border rounded-lg p-2 w-full"
                             placeholder="Tulis komentar..."
+                          />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          </>
+        )}
+
+        {/* PAGE: TARIK DATA REPORT */}
+        {activePage === "report" && (
+          <>
+            <h1 className="text-2xl font-bold mb-6 text-gray-800">Tarik Data Report</h1>
+            <div className="bg-white p-6 rounded-2xl shadow mb-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">Pilih Peran</label>
+                  <select
+                    value={selectedRole}
+                    onChange={(e) => setSelectedRole(e.target.value)}
+                    className="border rounded-lg p-2 w-full"
+                  >
+                    <option value="">-- Pilih Peran --</option>
+                    <option value="counselor">Peer Counselor</option>
+                    <option value="partner">Peer Partner</option>
+                    <option value="creative">Creative Team</option>
+                  </select>
+                </div>
+              <div>
+                <div classname="flex-1">
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">Isi Periode</label>
+                  <input
+                    type="text"
+                    value={selectedPeriod}
+                    onChange={(e) => setSelectedPeriod(e.target.value)}
+                    placeholder="Contoh: 2022 - 2026"
+                    className="border rounded-lg p-2 w-full"
+                  />
+                </div>
+              </div>
+              <div className="flex-1">
+                <label className="block text-sm font-semibold text-gray-700 mb-1">
+                  Pilih Kampus
+                </label>
+                <select
+                  value={selectedCampus}
+                  onChange={(e) => setSelectedCampus(e.target.value)}
+                  className="border rounded-lg p-2 w-full"
+                >
+                  <option value="">-- Pilih Kampus --</option>
+                  {campusOptions.map((campus, i) => (
+                    <option key={i} value={campus}>
+                      {campus}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+              <button
+                onClick={handleTarikData}
+                className="bg-blue-500 text-white px-5 py-2 rounded-lg hover:bg-blue-600 transition"
+              >
+                Tarik Data
+              </button>
+            </div>
+
+            <div className="bg-white p-6 rounded-2xl shadow">
+              <h2 className="text-lg font-bold mb-4 text-gray-800">Hasil Data</h2>
+              {filteredData.length === 0 ? (
+                <p className="text-gray-500">Belum ada data yang sesuai.</p>
+              ) : (
+                <table className="min-w-full text-left text-sm">
+                  <thead>
+                    <tr className="border-b bg-gray-100">
+                      {Object.keys(filteredData[0]).map((key) => (
+                        <th key={key} className="py-2 px-3 capitalize">
+                          {key}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredData.map((item, i) => (
+                      <tr key={i} className="border-b hover:bg-gray-50">
+                        {Object.values(item).map((val, j) => (
+                          <td key={j} className="py-2 px-3">
+                            {typeof val === "boolean" ? (val ? "✅" : "❌") : val?.toString()}
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          </>
+        )}
+
+        {/* PAGE: CHECKLIST PENGAMBILAN SOUVENIR */}
+        {activePage === "souvenir" && (
+          <>
+            <h1 className="text-2xl font-bold mb-6 text-gray-800">Checklist Pengambilan Souvenir</h1>
+            <form onSubmit={handleAddSouvenirUser} className="bg-white p-6 rounded-2xl shadow mb-8">
+              <h2 className="text-lg font-semibold mb-4">Data Baru untuk Pengambilan Souvenir (manual)</h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Nama</label>
+                  <input
+                    type="text"
+                    name="nama"
+                    value={formSouvenir.nama}
+                    onChange={handleSouvenirInputChange}
+                    className="border rounded-lg p-2 w-full"
+                    placeholder="Masukkan nama user"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
+                  <select
+                    name="role"
+                    value={formSouvenir.role}
+                    onChange={handleSouvenirInputChange}
+                    className="border rounded-lg p-2 w-full"
+                  >
+                    <option value="">Pilih role</option>
+                    <option value="Peer Counselor">Peer Counselor</option>
+                    <option value="Peer Partner">Peer Partner</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Periode</label>
+                  <input
+                    type="text"
+                    name="periode"
+                    value={formSouvenir.periode}
+                    onChange={handleSouvenirInputChange}
+                    className="border rounded-lg p-2 w-full"
+                    placeholder="Contoh: 2022 - 2026"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end mt-6">
+                <button
+                  type="submit"
+                  className="flex items-center bg-blue-500 text-white px-5 py-2 rounded-lg hover:bg-blue-600 transition"
+                >
+                  <PlusCircle className="w-5 h-5 mr-2" />
+                  Tambah
+                </button>
+              </div>
+            </form>
+            <div className="bg-white p-6 rounded-2xl shadow">
+            <h1 className="text-2xl font-bold mb-6 text-gray-800">Data Checklist Souvenir Diterima</h1> 
+              {dataCounselor.length === 0 && dataPartner.length === 0 && dataCreative.length === 0 ? (
+                <p className="text-gray-500">Belum ada data mahasiswa untuk pendataan souvenir.</p>
+              ) : (
+                <table className="min-w-full text-left text-sm">
+                  <thead>
+                    <tr className="border-b bg-gray-100">
+                      <th className="py-2 px-3">Nama</th>
+                      <th className="py-2 px-3">Peran</th>
+                      <th className="py-2 px-3">Periode</th>
+                      <th className="py-2 px-3 text-center">Souvenir Telah Diterima</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {/* Peer Counselor */}
+                    {dataCounselor.map((item, i) => (
+                      <tr key={`counselor-${i}`} className="border-b hover:bg-gray-50">
+                        <td className="py-2 px-3">{item.nama || "-"}</td>
+                        <td className="py-2 px-3">Peer Counselor</td>
+                        <td className="py-2 px-3">{item.periode || "-"}</td>
+                        <td className="py-2 px-3 text-center">
+                          <input
+                            type="checkbox"
+                            checked={item.souvenir === true}
+                            onChange={(e) => handleSouvenirChange({ ...item, role: "Peer Counselor" }, e.target.checked, i)}
+                          />
+                        </td>
+                      </tr>
+                    ))}
+
+                    {/* Peer Partner */}
+                    {dataPartner.map((item, i) => (
+                      <tr key={`partner-${i}`} className="border-b hover:bg-gray-50">
+                        <td className="py-2 px-3">
+                          {dataBuddy.find((b) => b.nim === item.nim)?.nama || item.namaBuddy || "-"}
+                        </td>
+                        <td className="py-2 px-3">Peer Partner</td>
+                        <td className="py-2 px-3">{item.periode || "-"}</td>
+                        <td className="py-2 px-3 text-center">
+                          <input
+                            type="checkbox"
+                            checked={item.souvenir === true}
+                            onChange={(e) => handleSouvenirChange({ ...item, role: "Peer Partner" }, e.target.checked, i)}
+                          />
+                        </td>
+                      </tr>
+                    ))}
+
+                    {/* Creative Team */}
+                    {dataCreative.map((item, i) => (
+                      <tr key={`creative-${i}`} className="border-b hover:bg-gray-50">
+                        <td className="py-2 px-3">{item.nama || "-"}</td>
+                        <td className="py-2 px-3">Creative Team</td>
+                        <td className="py-2 px-3">{item.periode || "-"}</td>
+                        <td className="py-2 px-3 text-center">
+                          <input
+                            type="checkbox"
+                            checked={item.souvenir === true}
+                            onChange={(e) => handleSouvenirChange({ ...item, role: "Creative Team" }, e.target.checked, i)}
                           />
                         </td>
                       </tr>

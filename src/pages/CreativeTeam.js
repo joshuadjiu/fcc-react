@@ -110,7 +110,8 @@ export default function CreativeTeam() {
       )
     );
 
-    alert("Data Creative Team berhasil disimpan!");
+    alert("Form data creative team berhasil disimpan");
+
     setFormData({
       topik: "",
       statusTopik: "New",
