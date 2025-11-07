@@ -131,8 +131,12 @@ export default function PeerPartner() {
           <div className="flex items-center space-x-2">
             <User className="text-gray-700" />
             <div>
-              <p className="font-semibold text-gray-800">Nama</p>
-              <p className="text-sm text-gray-600">NIM</p>
+              <p className="font-semibold text-gray-800">
+                {localStorage.getItem("userName") || "Nama"}
+              </p>
+              <p className="text-sm text-gray-600">
+                {localStorage.getItem("userNIM") || "NIM"}
+              </p>
             </div>
           </div>
         </div>

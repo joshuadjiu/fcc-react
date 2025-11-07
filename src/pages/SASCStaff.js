@@ -1,5 +1,8 @@
 // 📁 src/pages/SASCStaff.js
 import React, { useEffect, useState } from "react";
+import Swal from "sweetalert2";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 import { Bell, User, CheckCircle, PlusCircle } from "lucide-react";
 
 export default function SASCStaff() {
@@ -182,34 +185,91 @@ export default function SASCStaff() {
 
   const [selectedRole, setSelectedRole] = useState("");
   const [selectedPeriod, setSelectedPeriod] = useState("");
-  const [selectedCampus, setSelectedCampus] = useState("");
   const [filteredData, setFilteredData] = useState([]);
-
-  const campusOptions = [
-    "Kemanggisan (KG)",
-    "Alam Sutera (AS)",
-    "Bekasi (BKS)",
-    "Bandung (BDG)",
-    "Malang (MLG)",
-    "Semarang (SMG)",
-    "Medan (MDN)"
-  ];
+  const [riwayat, setRiwayat] = useState([]);
 
   const handleTarikData = () => {
-    let data = [];
-    if (selectedRole === "counselor") data = dataCounselor;
-    if (selectedRole === "partner") data = dataPartner;
-    if (selectedRole === "creative") data = dataCreative;
+    const counselorData = JSON.parse(localStorage.getItem("counselorData")) || [];
+    const partnerData = JSON.parse(localStorage.getItem("partnerData")) || [];
+    const creativeData = JSON.parse(localStorage.getItem("creativeData")) || [];
 
-    if (!selectedPeriod.trim()) {
-      showNotif("Masukkan periode terlebih dahulu!", "error");
-      return;
-    }
+    const allData = [
+      ...counselorData.map((d) => ({ ...d, role: "Peer Counselor" })),
+      ...partnerData.map((d) => ({ ...d, role: "Peer Partner" })),
+      ...creativeData.map((d) => ({ ...d, role: "Creative Team" })),
+    ];
 
-    const filtered = data.filter((d) => d.periode === selectedPeriod.trim() &&
-    (selectedCampus ? d.kampus === selectedCampus : true));
-    setFilteredData(filtered);
-    showNotif(`Data ${selectedRole} periode ${selectedPeriod} berhasil dimuat! ✅`, "success");
+    const filtered = allData.filter((d) => {
+      const matchPeriode = !selectedPeriod || d.periode === selectedPeriod;
+      const matchRole = !selectedRole || d.role === selectedRole;
+      return matchPeriode && matchRole;
+    });
+
+    setRiwayat(filtered);
+
+    Swal.fire({
+      icon: "success",
+      title: "Data berhasil ditarik!",
+      showConfirmButton: false,
+      timer: 5000,
+      position: "center",
+    });
+  };
+
+  // Export PDF per baris
+  const handleExportSinglePDF = (item) => {
+    const doc = new jsPDF();
+      doc.setFontSize(14);
+      doc.text("Laporan Data", 14, 15);
+
+      const entries = Object.entries(item);
+      const tableData = entries.map(([key, value]) => [
+        key,
+        typeof value === "boolean" ? (value ? "✅" : "❌") : value || "-",
+      ]);
+
+      autoTable(doc, {
+        startY: 30,
+        head: [["Field", "Value"]],
+        body: tableData,
+        styles: { fontSize: 9, cellPadding: 3 },
+      });
+
+      doc.save(`${item.nama || "Data"}_${item.role || "Role"}.pdf`);
+    };
+
+  const handleExportPDF = () => {
+  if (riwayat.length === 0) {
+    Swal.fire({
+      icon: "warning",
+      title: "Tidak ada data",
+      text: "Tarik data terlebih dahulu sebelum ekspor PDF.",
+    });
+    return;
+  }
+
+  const doc = new jsPDF();
+    doc.setFontSize(14);
+    doc.text("Laporan Data Peer", 14, 15);
+    doc.setFontSize(10);
+    doc.text(`Periode: ${selectedPeriod || "-"}`, 14, 22);
+    doc.text(`Peran: ${selectedRole || "-"}`, 14, 28);
+
+    const tableColumn = Object.keys(riwayat[0]);
+    const tableRows = riwayat.map((item) =>
+      tableColumn.map((key) =>
+        typeof item[key] === "boolean" ? (item[key] ? "✅" : "❌") : item[key] || "-"
+      )
+    );
+
+    autoTable(doc, {
+      startY: 40,
+      head: [tableColumn],
+      body: tableRows,
+      styles: { fontSize: 8, cellPadding: 3 },
+    });
+
+    doc.save(`Report_${selectedRole || "Semua"}_${selectedPeriod || "All"}.pdf`);
   };
 
   const handleSouvenirChange = (item, checked, index) => {
@@ -723,13 +783,13 @@ export default function SASCStaff() {
                     className="border rounded-lg p-2 w-full"
                   >
                     <option value="">-- Pilih Peran --</option>
-                    <option value="counselor">Peer Counselor</option>
-                    <option value="partner">Peer Partner</option>
-                    <option value="creative">Creative Team</option>
+                    <option value="Peer Counselor">Peer Counselor</option>
+                    <option value="Peer Partner">Peer Partner</option>
+                    <option value="Creative Team">Creative Team</option>
                   </select>
                 </div>
               <div>
-                <div classname="flex-1">
+                <div className="flex-1">
                   <label className="block text-sm font-semibold text-gray-700 mb-1">Isi Periode</label>
                   <input
                     type="text"
@@ -739,23 +799,6 @@ export default function SASCStaff() {
                     className="border rounded-lg p-2 w-full"
                   />
                 </div>
-              </div>
-              <div className="flex-1">
-                <label className="block text-sm font-semibold text-gray-700 mb-1">
-                  Pilih Kampus
-                </label>
-                <select
-                  value={selectedCampus}
-                  onChange={(e) => setSelectedCampus(e.target.value)}
-                  className="border rounded-lg p-2 w-full"
-                >
-                  <option value="">-- Pilih Kampus --</option>
-                  {campusOptions.map((campus, i) => (
-                    <option key={i} value={campus}>
-                      {campus}
-                    </option>
-                  ))}
-                </select>
               </div>
             </div>
 
@@ -769,27 +812,36 @@ export default function SASCStaff() {
 
             <div className="bg-white p-6 rounded-2xl shadow">
               <h2 className="text-lg font-bold mb-4 text-gray-800">Hasil Data</h2>
-              {filteredData.length === 0 ? (
+              {riwayat.length === 0 ? (
                 <p className="text-gray-500">Belum ada data yang sesuai.</p>
               ) : (
                 <table className="min-w-full text-left text-sm">
                   <thead>
                     <tr className="border-b bg-gray-100">
-                      {Object.keys(filteredData[0]).map((key) => (
+                      {Object.keys(riwayat[0] || {}).map((key) => (
                         <th key={key} className="py-2 px-3 capitalize">
                           {key}
                         </th>
                       ))}
+                      <th className="py-2 px-3 text-center">Aksi</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredData.map((item, i) => (
+                    {riwayat.map((item, i) => (
                       <tr key={i} className="border-b hover:bg-gray-50">
-                        {Object.values(item).map((val, j) => (
+                        {Object.values(item || {}).map((val, j) => (
                           <td key={j} className="py-2 px-3">
                             {typeof val === "boolean" ? (val ? "✅" : "❌") : val?.toString()}
                           </td>
                         ))}
+                        <td className="py-2 px-3 text-center">
+                          <button
+                            onClick={() => handleExportSinglePDF(item)}
+                            className="bg-green-500 text-white px-3 py-1 rounded-lg hover:bg-green-600 transition text-sm"
+                          >
+                            Export PDF
+                          </button>
+                        </td>
                       </tr>
                     ))}
                   </tbody>

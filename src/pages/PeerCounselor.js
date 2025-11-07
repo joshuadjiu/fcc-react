@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Bell, User } from "lucide-react";
+import { useNavigate } from "react-router-dom"
 
 export default function PeerCounselor() {
   const [formData, setFormData] = useState({
@@ -17,13 +18,36 @@ export default function PeerCounselor() {
 
   const [riwayat, setRiwayat] = useState([]);
   const [roleData, setRoleData] = useState({});
+  const [notifications, setNotifications] = useState([]); // 🔹 pindahkan ke sini
+  const [showDropdown, setShowDropdown] = useState(false); // 🔹 pindahkan juga
 
   // 🔹 Ambil data role (periode & kampus) dan filter riwayat sesuai
   useEffect(() => {
     const savedRole = JSON.parse(localStorage.getItem("roleData"));
     const savedCounselor = JSON.parse(localStorage.getItem("counselorData")) || [];
+    const saved = JSON.parse(localStorage.getItem("notifications")) || [];
 
-    if (savedRole) setRoleData(savedRole);
+    // Ambil role sebelumnya
+    const lastRole = JSON.parse(localStorage.getItem("lastRoleData"));
+
+    // Cek apakah periode/kampus berubah
+    if (
+      lastRole &&
+      (lastRole.periode !== savedRole?.periode ||
+        lastRole.kampus !== (savedRole?.kampus || savedRole?.campus))
+    ) {
+      // Jika berubah, kosongkan notifikasi
+      localStorage.setItem("notifications", JSON.stringify([]));
+      setNotifications([]);
+    } else {
+      setNotifications(saved);
+    }
+
+    // Simpan role sekarang sebagai role terakhir
+    if (savedRole) {
+      localStorage.setItem("lastRoleData", JSON.stringify(savedRole));
+      setRoleData(savedRole);
+    }
 
     // 🔹 Filter hanya data yang sesuai periode & kampus
     if (savedRole) {
@@ -57,6 +81,22 @@ export default function PeerCounselor() {
   // 🔹 Submit form
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    // simpan data form ke localStorage
+    const existing = JSON.parse(localStorage.getItem("peerCounselorData")) || [];
+    existing.push(formData);
+    localStorage.setItem("peerCounselorData", JSON.stringify(existing));
+
+    // tambahkan notifikasi otomatis
+    const newNotif = {
+      message: "Form Peer Counselor berhasil dikirim!",
+      date: new Date().toLocaleString(),
+    };
+
+    const saved = JSON.parse(localStorage.getItem("notifications")) || [];
+    saved.push(newNotif);
+    localStorage.setItem("notifications", JSON.stringify(saved));
+    setNotifications(saved);
 
     const durasi = hitungDurasi();
     const requiredFields = [
@@ -127,6 +167,16 @@ export default function PeerCounselor() {
     });
   };
 
+  const navigate = useNavigate();
+
+  const handleViewAll = () => {
+   navigate("/notifications"); // arahkan ke halaman baru
+  };
+
+  const toggleDropdown = () => {
+    setShowDropdown(!showDropdown);
+  };
+
   return (
     <div className="min-h-screen flex bg-gray-50">
       {/* Sidebar */}
@@ -141,12 +191,51 @@ export default function PeerCounselor() {
       <main className="flex-1 p-10">
         {/* Topbar */}
         <div className="flex justify-end items-center mb-8 space-x-6">
-          <Bell className="text-gray-700 cursor-pointer" />
+          <div className="relative">
+            <Bell
+              className="text-gray-700 cursor-pointer"
+              onClick={toggleDropdown}
+            />
+            
+            {showDropdown && (
+              <div className="absolute right-0 mt-2 w-64 bg-white border rounded-lg shadow-lg z-20">
+                <div className="px-4 py-2 border-b font-semibold text-gray-700">
+                  Notification
+                </div>
+
+                {notifications.length === 0 ? (
+                  <div className="px-4 py-6 text-center text-gray-500 text-sm">
+                    No New Notification
+                  </div>
+                ) : (
+                  notifications.map((notif, i) => (
+                    <div
+                      key={i}
+                      className="px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer"
+                    >
+                      {notif.message}
+                    </div>
+                  ))
+                )}
+
+                <button
+                  onClick={handleViewAll}
+                  className="w-full text-center text-blue-600 py-2 border-t hover:bg-gray-50 text-sm font-medium"
+                >
+                  VIEW ALL
+                </button>
+              </div>
+            )}
+          </div>
           <div className="flex items-center space-x-2">
             <User className="text-gray-700" />
             <div>
-              <p className="font-semibold text-gray-800">Nama</p>
-              <p className="text-sm text-gray-600">NIM</p>
+              <p className="font-semibold text-gray-800">
+                {localStorage.getItem("userName") || "Nama"}
+              </p>
+              <p className="text-sm text-gray-600">
+                {localStorage.getItem("userNIM") || "NIM"}
+              </p>
             </div>
           </div>
         </div>

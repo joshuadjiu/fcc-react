@@ -44,6 +44,9 @@ export default function Register() {
     });
     localStorage.setItem("users", JSON.stringify(users));
 
+    localStorage.setItem("userName", formData.nama);
+    localStorage.setItem("userNIM", formData.nim);
+    
     setMessage({ text: "Registrasi berhasil! Silakan login.", type: "success" });
     setTimeout(() => navigate("/login"), 1500);
   };

@@ -11,7 +11,7 @@ import CreativeTeam from "./pages/CreativeTeam";
 import RoleSelection from "./pages/RoleSelection";
 import NotFound from "./pages/NotFound";
 import ContactUs from "./pages/ContactUs";
-
+import Notifications from "./pages/Notifications";
 
 function App() {
   return (
@@ -28,6 +28,7 @@ function App() {
         <Route path="/peer-partner" element={<PeerPartner />} />
         <Route path="/creative-team" element={<CreativeTeam />} />
         <Route path="/contact" element={<ContactUs />} />
+        <Route path="/notifications" element={<Notifications />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>
