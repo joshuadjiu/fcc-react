@@ -11,7 +11,7 @@ FCC (web) :
 5. SASC Staff (docs) :
 
 - Tambahkan fungsi hasil upload (creative team)
-- Perbaiki tabel (Tarik data report)
+- Hilangkan data setelah user isi di halaman creative team (checklist pengambilan souvenir)
 
 6. Semuanya (docs)
 

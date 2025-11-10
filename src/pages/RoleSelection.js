@@ -27,7 +27,7 @@ export default function RoleSelection() {
 
     setErrors(newErrors);
 
-    // Jika tidak ada error, simpan data dan navigasi
+    // Menyimpan data dan navigasi
     if (Object.keys(newErrors).length === 0) {
       const dataPeran = {
         role,
@@ -51,7 +51,7 @@ export default function RoleSelection() {
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Pilih Peran */}
+          {/* Pilih peran */}
           <div>
             <label className="block text-gray-900 font-medium mb-1">Peran</label>
             <select
@@ -72,7 +72,7 @@ export default function RoleSelection() {
             {errors.role && <p className="text-red-500 text-sm mt-1">{errors.role}</p>}
           </div>
 
-          {/* Peer Counselor dan Peer Partner memilih region kampus */}
+          {/* Peer Counselor dan Peer Partner -> region kampus */}
           {(role === "peer-counselor" || role === "peer-partner") && (
             <div>
               <label className="block text-gray-900 font-medium mb-1">Kampus</label>
@@ -101,7 +101,7 @@ export default function RoleSelection() {
             </div>
           )}
 
-          {/* Creative Team memilih pembina */}
+          {/* Creative Team -> pembina */}
           {role === "creative-team" && (
             <div>
               <label className="block text-gray-900 font-medium mb-1">Pembina</label>
@@ -126,7 +126,7 @@ export default function RoleSelection() {
             </div>
           )}
 
-          {/* Periode Peran */}
+          {/* Periode */}
           <div>
             <label className="block text-gray-900 font-medium mb-1">
               Periode Peran

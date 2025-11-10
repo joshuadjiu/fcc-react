@@ -8,12 +8,13 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState({ text: "", type: "" });
 
-  {/* Akun Staff */}
+  {/* Akun staff */}
   const staffAccounts = [
     { username: "admin", password: "123456" },
     { username: "staff1", password: "654321" },
   ];
 
+  // NIM -> Student dan Username -> SASC Staff
   const handleLogin = (e) => {
     e.preventDefault();
     setMessage({ text: "", type: "" });
@@ -54,7 +55,7 @@ export default function Login() {
   };
 
   return (
-    // Card/Kotak Login
+    // Card atau kotak login
     <div
       className="min-h-screen flex items-center justify-center relative bg-cover bg-center"
       style={{

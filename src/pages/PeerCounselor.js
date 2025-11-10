@@ -18,38 +18,36 @@ export default function PeerCounselor() {
 
   const [riwayat, setRiwayat] = useState([]);
   const [roleData, setRoleData] = useState({});
-  const [notifications, setNotifications] = useState([]); // 🔹 pindahkan ke sini
-  const [showDropdown, setShowDropdown] = useState(false); // 🔹 pindahkan juga
+  const [notifications, setNotifications] = useState([]);
+  const [showDropdown, setShowDropdown] = useState(false);
 
-  // 🔹 Ambil data role (periode & kampus) dan filter riwayat sesuai
+  // Mengambil data role diantara periode dan kampus dan filter riwayat sesuai
   useEffect(() => {
     const savedRole = JSON.parse(localStorage.getItem("roleData"));
     const savedCounselor = JSON.parse(localStorage.getItem("counselorData")) || [];
     const saved = JSON.parse(localStorage.getItem("notifications")) || [];
 
-    // Ambil role sebelumnya
+    // Mengambil role sebelumnya
     const lastRole = JSON.parse(localStorage.getItem("lastRoleData"));
 
-    // Cek apakah periode/kampus berubah
+    // Mengecek perubahan periode atau kampus
     if (
       lastRole &&
       (lastRole.periode !== savedRole?.periode ||
         lastRole.kampus !== (savedRole?.kampus || savedRole?.campus))
     ) {
-      // Jika berubah, kosongkan notifikasi
       localStorage.setItem("notifications", JSON.stringify([]));
       setNotifications([]);
     } else {
       setNotifications(saved);
     }
 
-    // Simpan role sekarang sebagai role terakhir
     if (savedRole) {
       localStorage.setItem("lastRoleData", JSON.stringify(savedRole));
       setRoleData(savedRole);
     }
 
-    // 🔹 Filter hanya data yang sesuai periode & kampus
+    // Filter data yang sesuai dengan periode dan kampus
     if (savedRole) {
       const filtered = savedCounselor.filter(
         (item) =>
@@ -62,7 +60,7 @@ export default function PeerCounselor() {
     }
   }, []);
 
-  // 🔹 Hitung durasi otomatis
+  // Durasi otomatis
   const hitungDurasi = () => {
     if (formData.jamMulai && formData.jamSelesai) {
       const mulai = new Date(`2025-01-01T${formData.jamMulai}`);
@@ -73,21 +71,21 @@ export default function PeerCounselor() {
     return 0;
   };
 
-  // 🔹 Handle input
+  // Handle perubahan input
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // 🔹 Submit form
+  // Handle submit form
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // simpan data form ke localStorage
+    // Menyimpan data form ke localStorage
     const existing = JSON.parse(localStorage.getItem("peerCounselorData")) || [];
     existing.push(formData);
     localStorage.setItem("peerCounselorData", JSON.stringify(existing));
 
-    // tambahkan notifikasi otomatis
+    // Notifikasi otomatis
     const newNotif = {
       message: "Form Peer Counselor berhasil dikirim!",
       date: new Date().toLocaleString(),
@@ -118,9 +116,10 @@ export default function PeerCounselor() {
       return;
     }
 
-    // 🔹 Ambil semua data counselor di localStorage
+    // Mengambil semua data counselor di localStorage
     const allData = JSON.parse(localStorage.getItem("counselorData")) || [];
 
+    // Validasi data baru dan sinkronisasi ke SASC Staff
     const newEntry = {
       nim: formData.nimBuddy,
       nama: formData.namaBuddy,
@@ -139,11 +138,11 @@ export default function PeerCounselor() {
       kampus: roleData.kampus || roleData.campus || "-",
     };
 
-    // 🔹 Simpan ke localStorage (tanpa filter, agar SASC Staff bisa lihat semua)
+    // 🔹 Melakukan update data ke localstorage
     const updatedAll = [...allData, newEntry];
     localStorage.setItem("counselorData", JSON.stringify(updatedAll));
 
-    // 🔹 Perbarui tampilan hanya dengan data sesuai periode & kampus aktif
+    // Memperbarui tampilan  data (periode & kampus)
     const filtered = updatedAll.filter(
       (item) =>
         item.periode === roleData.periode &&
@@ -170,7 +169,7 @@ export default function PeerCounselor() {
   const navigate = useNavigate();
 
   const handleViewAll = () => {
-   navigate("/notifications"); // arahkan ke halaman baru
+   navigate("/notifications");
   };
 
   const toggleDropdown = () => {
@@ -197,6 +196,7 @@ export default function PeerCounselor() {
               onClick={toggleDropdown}
             />
             
+            {/* Informasi notifikasi dan profil (nama dan NIM) */}
             {showDropdown && (
               <div className="absolute right-0 mt-2 w-64 bg-white border rounded-lg shadow-lg z-20">
                 <div className="px-4 py-2 border-b font-semibold text-gray-700">
@@ -240,7 +240,7 @@ export default function PeerCounselor() {
           </div>
         </div>
 
-        {/* Info Kampus & Periode */}
+        {/* Informasi kampus dan periode */}
         {roleData && (
           <div className="mb-6 p-3 rounded-lg bg-blue-100 border border-blue-300 max-w-lg">
             <p className="font-semibold text-gray-800">
@@ -260,7 +260,7 @@ export default function PeerCounselor() {
           Isi Form Data Peer Counselor
         </h1>
 
-        {/* Form Input */}
+        {/* Form input */}
         <form
           onSubmit={handleSubmit}
           className="bg-white p-6 rounded-2xl shadow space-y-5 max-w-3xl"
@@ -391,7 +391,7 @@ export default function PeerCounselor() {
           </button>
         </form>
 
-        {/* Riwayat */}
+        {/* Riwayat data form */}
         <div className="mt-10">
           <h2 className="text-xl font-semibold mb-3">Riwayat Form Peer Counselor</h2>
           <div className="bg-white p-5 rounded-xl shadow overflow-x-auto">

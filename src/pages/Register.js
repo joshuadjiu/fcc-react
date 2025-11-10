@@ -22,7 +22,7 @@ export default function Register() {
     e.preventDefault();
     setMessage({ text: "", type: "" });
 
-    {/* Validasi input */}
+    {/* Validasi input kosong */}
     if (!formData.nim) return setMessage({ text: "NIM harus diisi!", type: "error" });
     if (!formData.nama) return setMessage({ text: "Nama harus diisi!", type: "error" });
     if (!formData.faculty) return setMessage({ text: "Fakultas harus dipilih!", type: "error" });
@@ -52,7 +52,8 @@ export default function Register() {
   };
 
   return (
-    // Card/Kotak Register
+
+    // Card atau kotak register
     <div
       className="min-h-screen flex items-center justify-center relative bg-cover bg-center"
       style={{
@@ -99,6 +100,7 @@ export default function Register() {
             className="border p-3 w-full rounded-lg focus:ring-2 focus:ring-blue-400"
           />
 
+          {/* Dropdown fakultas */}
           <select
             name="faculty"
             value={formData.faculty}

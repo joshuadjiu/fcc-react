@@ -12,11 +12,14 @@ export default function CreativeTeam() {
     uploadFile: null,
   });
 
+  // Mengambil data, periode, dan pembina
   const [dataCreative, setDataCreative] = useState([]);
   const [roleData, setRoleData] = useState({});
+
+  // Mengambil data hasil upload
   const [showUpload, setShowUpload] = useState(false);
 
-  // === Ambil data dari localStorage ===
+  // Mengambil data dari localstorage
   useEffect(() => {
     const savedCreative = JSON.parse(localStorage.getItem("creativeData")) || [];
     const savedRole = JSON.parse(localStorage.getItem("roleData")) || {};
@@ -35,7 +38,7 @@ export default function CreativeTeam() {
     }
   }, []);
 
-  // === Sinkronisasi otomatis jika ada perubahan localStorage (mis. dari Staff) ===
+  // Sinkronisasi otomatis jika ada perubahan localstorage misalnya dari SASC Staff)
   useEffect(() => {
     const syncData = () => {
       const updatedCreative = JSON.parse(localStorage.getItem("creativeData")) || [];
@@ -52,20 +55,20 @@ export default function CreativeTeam() {
     return () => window.removeEventListener("storage", syncData);
   }, []);
 
-  // === Handle perubahan input ===
+  // Handle perubahan input
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
     if (name === "status") setShowUpload(value === "Final");
   };
 
-  // === Handle file upload ===
+  // Handle perubahan file upload
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     setFormData((prev) => ({ ...prev, uploadFile: file }));
   };
 
-  // === Submit form ===
+  // Submit form
   const handleSubmit = (e) => {
     e.preventDefault();
 
@@ -102,6 +105,7 @@ export default function CreativeTeam() {
     const updated = [...existing, newEntry];
     localStorage.setItem("creativeData", JSON.stringify(updated));
 
+    // Filter proses update atau perubahan periode dan pembina
     setDataCreative(
       updated.filter(
         (item) =>
@@ -152,7 +156,7 @@ export default function CreativeTeam() {
           </div>
         </div>
 
-        {/* Info Periode & Pembina */}
+        {/* Info periode dan pembina */}
         {roleData && (
           <div className="mb-6 p-3 rounded-lg bg-blue-100 border border-blue-300 max-w-lg">
             <p className="font-semibold text-gray-800">
@@ -164,7 +168,7 @@ export default function CreativeTeam() {
           </div>
         )}
 
-        {/* Form Input */}
+        {/* Form input */}
         <h1 className="text-2xl font-bold mb-6 text-gray-800">
           Isi Form Data Creative Team
         </h1>
@@ -273,7 +277,7 @@ export default function CreativeTeam() {
           </div>
         </form>
 
-        {/* Riwayat Creative */}
+        {/* Riwayat data form */}
         <div className="bg-white p-6 rounded-2xl shadow">
           <h2 className="text-lg font-bold mb-4 text-gray-800">Riwayat Form Creative Team</h2>
           {dataCreative.length === 0 ? (

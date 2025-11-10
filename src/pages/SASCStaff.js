@@ -12,23 +12,76 @@ export default function SASCStaff() {
   const [pembinaList, setPembinaList] = useState([]);
   const [formPembina, setFormPembina] = useState("");
 
-  // Data peran (peer counselor, peer partner, dan creatuve team) yang akan diverifikasi oleh SASC
+  // Data peran (peer counselor, peer partner, dan creatuve team) diverifikasi oleh SASC
   const [dataCounselor, setDataCounselor] = useState([]);
   const [dataPartner, setDataPartner] = useState([]);
   const [dataCreative, setDataCreative] = useState([]);
 
-  // Buddy (tetap utuh, tampilan tidak diubah)
   const [dataBuddy, setDataBuddy] = useState([]);
   const [formBuddy, setFormBuddy] = useState({ nim: "", nama: "", jurusan: "" });
 
-  // Notifikasi pusat (animasi di tengah)
   const [notif, setNotif] = useState({ show: false, message: "", type: "" });
 
   const [isChanged, setIsChanged] = useState(false);
 
-  // ======== LOAD DATA DARI LOCALSTORAGE ========
+  // Struktur kolom pada tabel untuk tiap role
+  const columnsByRole = {
+    "Peer Counselor": [
+      "periode",
+      "kampus",
+      "nim",
+      "nama",
+      "jurusan",
+      "tanggalKonseling",
+      "jamMulai",
+      "jamSelesai",
+      "durasi",
+      "metode",
+      "deskripsi",
+      "kendala",
+      "supportNeeded",
+      "verifikasi",
+      "komentarStaff",
+      "souvenir"
+    ],
+
+    "Peer Partner": [
+      "periode",
+      "kampus",
+      "nimBuddy",
+      "namaBuddy",
+      "jurusan",
+      "tanggal",
+      "jamMulai",
+      "jamSelesai",
+      "durasi",
+      "metode",
+      "deskripsi",
+      "kendala",
+      "support",
+      "verifikasi",
+      "komentarStaff",
+      "souvenir"
+    ],
+
+    "Creative Team": [
+      "periode",
+      "pembina",
+      "topik",
+      "statusTopik",
+      "tanggalDiskusi",
+      "mediaDiskusi",
+      "hasilDiskusi",
+      "status",
+      "uploadName",
+      "verifikasi",
+      "komentarStaff"
+    ]
+  };
+
+
+  // Melakukan proses load data dari localstorage
   useEffect(() => {
-    // pastikan nama key konsisten: gunakan peerCounselingData (format yang kamu pakai di page lain)
     const savedCounselor = JSON.parse(localStorage.getItem("counselorData")) || [];
     const savedPartner = JSON.parse(localStorage.getItem("partnerData")) || [];
     const savedBuddy = JSON.parse(localStorage.getItem("buddyData")) || [];
@@ -57,14 +110,13 @@ export default function SASCStaff() {
     setPembinaList(savedPembina);
   }, []);
 
-  // ======== NOTIFIKASI ========
+  // Notifikasi
   const showNotif = (message, type = "info") => {
     setNotif({ show: true, message, type });
-    // otomatis hilang setelah 2s
     setTimeout(() => setNotif({ show: false, message: "", type: "" }), 2000);
   };
 
-  // ======== FUNGSI UPDATE VERIFIKASI DAN KOMENTAR STAFF ========
+  // Fungsi update verifikasi dan komentar pada halaman peran
   const updateVerifikasiCounselor = (index, statusType) => {
     const updated = [...dataCounselor];
     if (!updated[index]) return;
@@ -107,23 +159,21 @@ export default function SASCStaff() {
     const updated = [...dataCreative];
     if (!updated[index]) return;
 
-    // 🔧 Perbaikan penting
     updated[index].statusVerifikasi = statusType === "setuju" ? "Disetujui" : "Tidak Disetujui";
     updated[index].verifikasi = statusType === "setuju";
     updated[index].komentarStaff = updated[index].komentarStaff || "";
 
-    // Simpan ke localStorage
     localStorage.setItem("creativeData", JSON.stringify(updated));
     setDataCreative(updated);
     setIsChanged(true);
 
-    // 🔔 Tampilkan notifikasi
+    // Menampilkan notifikasi
     showNotif(
       `Creative Team ${statusType === "setuju" ? "Disetujui ✅" : "Tidak Disetujui ❌"}`,
       "info"
     );
 
-    // 🚀 Trigger event agar halaman CreativeTeam ikut update (untuk listener "storage")
+    // Trigger event untuk halaman CreativeTeam dalam update (listener "storage")
     window.dispatchEvent(new Event("storage"));
   };
 
@@ -135,7 +185,7 @@ export default function SASCStaff() {
     setIsChanged(true);
   };
 
-  // Fungsi Input & Hapus Pembina
+  // Fungsi menambah dan menghapus pembina
   const handleAddPembina = (e) => {
     e.preventDefault();
     if (!formPembina.trim()) {
@@ -157,7 +207,7 @@ export default function SASCStaff() {
   };
 
 
-  // ======== FUNGSI INPUT BUDDY (tetap) ========
+  // fungsi input buddy
   const handleBuddyChange = (e) => {
     const { name, value } = e.target;
     setFormBuddy({ ...formBuddy, [name]: value });
@@ -188,15 +238,65 @@ export default function SASCStaff() {
   const [filteredData, setFilteredData] = useState([]);
   const [riwayat, setRiwayat] = useState([]);
 
+  // Sinkronisasi keseluruhan data untuk tabel (tarik data report)
   const handleTarikData = () => {
     const counselorData = JSON.parse(localStorage.getItem("counselorData")) || [];
     const partnerData = JSON.parse(localStorage.getItem("partnerData")) || [];
     const creativeData = JSON.parse(localStorage.getItem("creativeData")) || [];
 
     const allData = [
-      ...counselorData.map((d) => ({ ...d, role: "Peer Counselor" })),
-      ...partnerData.map((d) => ({ ...d, role: "Peer Partner" })),
-      ...creativeData.map((d) => ({ ...d, role: "Creative Team" })),
+      ...counselorData.map((d) => ({
+        role: "Peer Counselor",
+        periode: d.periode || "-",
+        kampus: d.kampus || "-",
+        nim: d.nim || "-",
+        nama: d.nama || "-",
+        jurusan: d.jurusan || "-",
+        tanggalKonseling: d.tanggalKonseling || "-",
+        jamMulai: d.jamMulai || "-",
+        jamSelesai: d.jamSelesai || "-",
+        durasi: d.durasi || "-",
+        metode: d.metode || "-",
+        deskripsi: d.deskripsi || "-",
+        kendala: d.kendala || "-",
+        supportNeeded: d.supportNeeded || "-",
+        verifikasi: d.verifikasi ? "✅" : "❌",
+        komentarStaff: d.komentarStaff || "-",
+        souvenir: d.souvenir || "-",
+      })),
+      ...partnerData.map((d) => ({
+        role: "Peer Partner",
+        periode: d.periode || "-",
+        kampus: d.kampus || "-",
+        nimBuddy: d.nimBuddy || "-",
+        namaBuddy: d.namaBuddy || "-",
+        jurusan: d.jurusan || "-",
+        tanggal: d.tanggal || d.tanggalKonseling || "-",
+        jamMulai: d.jamMulai || "-",
+        jamSelesai: d.jamSelesai || "-",
+        durasi: d.durasi || "-",
+        metode: d.metode || "-",
+        deskripsi: d.deskripsi || "-",
+        kendala: d.kendala || "-",
+        support: d.support || d.supportNeeded || "-",
+        verifikasi: d.verifikasi ? "✅" : "❌",
+        komentarStaff: d.komentarStaff || "-",
+        souvenir: d.souvenir ? "✅" : "-",
+      })),
+      ...creativeData.map((d) => ({
+        role: "Creative Team",
+        periode: d.periode || "-",
+        pembina: d.pembina || "-",
+        topik: d.topik || "-",
+        statusTopik: d.statusTopik || "-",
+        tanggalDiskusi: d.tanggalDiskusi || "-",
+        mediaDiskusi: d.mediaDiskusi || "-",
+        hasilDiskusi: d.hasilDiskusi || "-",
+        status: d.status || d.statusTopik || "-",
+        uploadName: d.uploadName || "-",
+        verifikasi: d.verifikasi ? "✅" : "❌",
+        komentarStaff: d.komentarStaff || "-",
+      })),
     ];
 
     const filtered = allData.filter((d) => {
@@ -216,7 +316,7 @@ export default function SASCStaff() {
     });
   };
 
-  // Export PDF per baris
+  // Export atau download PDF
   const handleExportSinglePDF = (item) => {
     const doc = new jsPDF();
       doc.setFontSize(14);
@@ -294,7 +394,7 @@ export default function SASCStaff() {
     );
   };
 
-  // ======== FORM TAMBAH USER SOUVENIR ========
+  // Form tambahan souvenir (manual)
   const [formSouvenir, setFormSouvenir] = useState({
     nama: "",
     role: "",
@@ -309,12 +409,13 @@ export default function SASCStaff() {
 
   const handleAddSouvenirUser = (e) => {
     e.preventDefault();
+    
     if (!formSouvenir.nama || !formSouvenir.role || !formSouvenir.periode) {
       showNotif("Harap isi semua kolom user souvenir!", "error");
       return;
     }
 
-    // simpan ke data sesuai role
+    // Menyimpan data sesuai role
     const dataMap = {
       "Peer Counselor": { data: dataCounselor, key: "counselorData", set: setDataCounselor },
       "Peer Partner": { data: dataPartner, key: "partnerData", set: setDataPartner },
@@ -344,7 +445,7 @@ export default function SASCStaff() {
 
   return (
     <div className="min-h-screen flex bg-gray-50">
-      {/* Notifikasi tengah (animasi scale + fade) */}
+      {/* Notifikasi */}
       {notif.show && (
         <div
           className={`fixed inset-0 z-50 flex items-center justify-center pointer-events-none`}
@@ -412,7 +513,7 @@ export default function SASCStaff() {
         </ul>
       </aside>
 
-      {/* Main Content */}
+      {/* Main */}
       <main className="flex-1 p-10">
         {/* Topbar */}
         <div className="flex justify-end items-center mb-8 space-x-6">
@@ -515,7 +616,7 @@ export default function SASCStaff() {
                       <th className="py-2 px-3">NIM</th>
                       <th className="py-2 px-3">Nama</th>
                       <th className="py-2 px-3">Jurusan</th>
-                      <th className="py-2 px-3 text-center">Aksi</th> {/* 🔹 Tambah kolom aksi */}
+                      <th className="py-2 px-3 text-center">Aksi</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -815,12 +916,15 @@ export default function SASCStaff() {
               {riwayat.length === 0 ? (
                 <p className="text-gray-500">Belum ada data yang sesuai.</p>
               ) : (
-                <table className="min-w-full text-left text-sm">
+                <table className="min-w-full text-sm text-left border-collapse table-fixed w-full">
                   <thead>
                     <tr className="border-b bg-gray-100">
-                      {Object.keys(riwayat[0] || {}).map((key) => (
-                        <th key={key} className="py-2 px-3 capitalize">
-                          {key}
+                      {columnsByRole[selectedRole]?.map((key) => (
+                        <th key={key} className="py-3 px-4 text-center font-semibold text-gray-700 border-b border-gray-200">
+                          {key
+                            .replace(/([A-Z])/g, " $1")
+                            .replace(/_/g, " ")
+                            .replace(/\b\w/g, (c) => c.toUpperCase())}
                         </th>
                       ))}
                       <th className="py-2 px-3 text-center">Aksi</th>
@@ -828,10 +932,16 @@ export default function SASCStaff() {
                   </thead>
                   <tbody>
                     {riwayat.map((item, i) => (
-                      <tr key={i} className="border-b hover:bg-gray-50">
-                        {Object.values(item || {}).map((val, j) => (
-                          <td key={j} className="py-2 px-3">
-                            {typeof val === "boolean" ? (val ? "✅" : "❌") : val?.toString()}
+                      <tr key={i} className={`border-b ${i % 2 === 0 ? "bg-gray-50" : "bg-white"} hover:bg-gray-100`}>
+                        {columnsByRole[selectedRole]?.map((key, j) => (
+                          <td key={j} className="py-2 px-4 text-center border-b border-gray-100">
+                            {typeof item[key] === "boolean"
+                              ? item[key]
+                                ? "✅"
+                                : "❌"
+                              : item[key] && item[key].toString().trim() !== ""
+                              ? item[key].toString()
+                              : "-"}
                           </td>
                         ))}
                         <td className="py-2 px-3 text-center">
@@ -880,6 +990,7 @@ export default function SASCStaff() {
                     <option value="">Pilih role</option>
                     <option value="Peer Counselor">Peer Counselor</option>
                     <option value="Peer Partner">Peer Partner</option>
+                    <option value="Creative Team">Creative Team</option>
                   </select>
                 </div>
                 <div>
@@ -920,7 +1031,7 @@ export default function SASCStaff() {
                     </tr>
                   </thead>
                   <tbody>
-                    {/* Peer Counselor */}
+                    {/* Bagian Peer Counselor */}
                     {dataCounselor.map((item, i) => (
                       <tr key={`counselor-${i}`} className="border-b hover:bg-gray-50">
                         <td className="py-2 px-3">{item.nama || "-"}</td>
@@ -936,7 +1047,7 @@ export default function SASCStaff() {
                       </tr>
                     ))}
 
-                    {/* Peer Partner */}
+                    {/* Bagian Peer Partner */}
                     {dataPartner.map((item, i) => (
                       <tr key={`partner-${i}`} className="border-b hover:bg-gray-50">
                         <td className="py-2 px-3">
@@ -954,7 +1065,7 @@ export default function SASCStaff() {
                       </tr>
                     ))}
 
-                    {/* Creative Team */}
+                    {/* Bagian Creative Team */}
                     {dataCreative.map((item, i) => (
                       <tr key={`creative-${i}`} className="border-b hover:bg-gray-50">
                         <td className="py-2 px-3">{item.nama || "-"}</td>
@@ -964,7 +1075,9 @@ export default function SASCStaff() {
                           <input
                             type="checkbox"
                             checked={item.souvenir === true}
-                            onChange={(e) => handleSouvenirChange({ ...item, role: "Creative Team" }, e.target.checked, i)}
+                            onChange={(e) =>
+                              handleSouvenirChange({ ...item, role: "Creative Team" }, e.target.checked, i)
+                            }
                           />
                         </td>
                       </tr>

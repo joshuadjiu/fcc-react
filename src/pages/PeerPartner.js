@@ -16,9 +16,11 @@ export default function PeerPartner() {
 
   const [riwayat, setRiwayat] = useState([]);
   const [buddyList, setBuddyList] = useState([]);
-  const [roleData, setRoleData] = useState({}); // 🔹 untuk ambil periode & kampus
 
-  // === Ambil data dari localStorage ===
+  // Mengambil periode dan kampus
+  const [roleData, setRoleData] = useState({});
+
+  // Mengambil data dari localstorage
   useEffect(() => {
     const savedBuddy = JSON.parse(localStorage.getItem("buddyData")) || [];
     const savedPartner = JSON.parse(localStorage.getItem("partnerData")) || [];
@@ -26,7 +28,7 @@ export default function PeerPartner() {
 
     if (savedRole) setRoleData(savedRole);
 
-    // 🔹 Filter riwayat sesuai periode & kampus
+    // Filter riwayat atau sebelumnya (periode dan kampus)
     if (savedRole) {
       const filtered = savedPartner.filter(
         (item) =>
@@ -40,7 +42,7 @@ export default function PeerPartner() {
     setBuddyList(savedBuddy);
   }, []);
 
-  // === Hitung durasi otomatis ===
+  // Durasi otomatis
   useEffect(() => {
     if (formData.jamMulai && formData.jamSelesai) {
       const [startH, startM] = formData.jamMulai.split(":").map(Number);
@@ -50,7 +52,7 @@ export default function PeerPartner() {
     }
   }, [formData.jamMulai, formData.jamSelesai]);
 
-  // === Submit form ===
+  // Submit form
   const handleSubmit = (e) => {
     e.preventDefault();
     const requiredFields = [
@@ -71,17 +73,18 @@ export default function PeerPartner() {
 
     const selectedBuddy = buddyList.find((b) => b.nama === formData.namaBuddy);
 
+    // Validasi data baru dan sinkronisasi ke SASC Staff
     const newEntry = {
       ...formData,
       nimBuddy: selectedBuddy?.nim || "-",
       jurusan: selectedBuddy?.jurusan || "-",
       verifikasi: false,
       komentarStaff: "",
-      periode: roleData.periode || "-", // 🔹 simpan periode
-      kampus: roleData.kampus || roleData.campus || "-", // 🔹 simpan kampus
+      periode: roleData.periode || "-",
+      kampus: roleData.kampus || roleData.campus || "-",
     };
 
-    // Tambahkan ke data lama
+    // Menambahkan ke data lama
     const existing = JSON.parse(localStorage.getItem("partnerData")) || [];
     const updated = [...existing, newEntry];
 
@@ -94,6 +97,7 @@ export default function PeerPartner() {
 
     alert("Form data peer partner berhasil disimpan");
     
+    // Beberapa bagian yang akan diisi
     setFormData({
       namaBuddy: "",
       tanggal: "",
@@ -107,7 +111,7 @@ export default function PeerPartner() {
     });
   };
 
-  // === Handle input ===
+  // Handle perubahan input
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -141,7 +145,7 @@ export default function PeerPartner() {
           </div>
         </div>
 
-        {/* 🔹 Info Kampus & Periode */}
+        {/* Informasi kampus dan periode */}
         {roleData && (
           <div className="mb-6 p-3 rounded-lg bg-blue-100 border border-blue-300 max-w-lg">
             <p className="font-semibold text-gray-800">
@@ -157,7 +161,7 @@ export default function PeerPartner() {
           </div>
         )}
 
-        {/* Input Form */}
+        {/* Input form */}
         <h1 className="text-2xl font-bold mb-6 text-gray-800">
           Isi Form Data Peer Partner
         </h1>
@@ -299,7 +303,7 @@ export default function PeerPartner() {
           </div>
         </form>
 
-        {/* Riwayat Konseling */}
+        {/* Riwayat data form */}
         <div className="bg-white p-6 rounded-2xl shadow">
           <h2 className="text-lg font-bold mb-4 text-gray-800">
             Riwayat Form Peer Partner
