@@ -1,12 +1,12 @@
 // 📁 src/pages/SASCStaff.js
 import React, { useEffect, useState } from "react";
 import Swal from "sweetalert2";
-import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
+import * as XLSX from "xlsx";
 import { Bell, User, CheckCircle, PlusCircle } from "lucide-react";
 
 export default function SASCStaff() {
   const [activePage, setActivePage] = useState("verifikasi");
+  const [searchPeriode, setSearchPeriode] = useState("");
 
   // Data pembina
   const [pembinaList, setPembinaList] = useState([]);
@@ -120,12 +120,30 @@ export default function SASCStaff() {
   const updateVerifikasiCounselor = (index, statusType) => {
     const updated = [...dataCounselor];
     if (!updated[index]) return;
-    updated[index].status = statusType === "setuju" ? "Disetujui" : "Tidak Disetujui";
-    updated[index].verifikasi = statusType === "setuju";
+
+    if (statusType === "setuju") {
+      updated[index].status = "Disetujui";
+      updated[index].verifikasi = true;
+    } else if (statusType === "tidak") {
+      updated[index].status = "Tidak Disetujui";
+      updated[index].verifikasi = false;
+    } else if (statusType === "decline") {
+      updated[index].status = "Decline";
+      updated[index].verifikasi = false;
+    }
+
     setDataCounselor(updated);
     localStorage.setItem("counselorData", JSON.stringify(updated));
     setIsChanged(true);
-    showNotif(`Data counselor ${statusType === "setuju" ? "Disetujui ✅" : "Tidak Disetujui ❌"}`, "info");
+
+    const notifText =
+      statusType === "setuju"
+        ? "Data counselor Disetujui ✅"
+        : statusType === "tidak"
+        ? "Data counselor Tidak Disetujui ❌"
+        : "Data counselor diminta revisi (Decline) 🔁";
+
+    showNotif(notifText, "info");
   };
 
   const handleKomentarCounselor = (index, value) => {
@@ -136,15 +154,49 @@ export default function SASCStaff() {
     setIsChanged(true);
   };
 
+  const handleEditUlangCounselor = (index) => {
+    const updated = [...dataCounselor];
+    if (!updated[index]) return;
+
+    // Reset beberapa kolom agar bisa diedit ulang
+    updated[index].verifikasi = false;
+    updated[index].status = "Menunggu";
+    updated[index].komentarStaff = "";
+
+    setDataCounselor(updated);
+    localStorage.setItem("counselorData", JSON.stringify(updated));
+
+    showNotif("Data dikembalikan untuk diperbaiki", "info");
+  };
+
+  // Fungsi update verifikasi dan komentar pada halaman peran
   const updateVerifikasiPartner = (index, statusType) => {
     const updated = [...dataPartner];
     if (!updated[index]) return;
-    updated[index].status = statusType === "setuju" ? "Disetujui" : "Tidak Disetujui";
-    updated[index].verifikasi = statusType === "setuju";
+
+    if (statusType === "setuju") {
+      updated[index].status = "Disetujui";
+      updated[index].verifikasi = true;
+    } else if (statusType === "tidak") {
+      updated[index].status = "Tidak Disetujui";
+      updated[index].verifikasi = false;
+    } else if (statusType === "decline") {
+      updated[index].status = "Decline";
+      updated[index].verifikasi = false;
+    }
+
     setDataPartner(updated);
     localStorage.setItem("partnerData", JSON.stringify(updated));
     setIsChanged(true);
-    showNotif(`Data partner ${statusType === "setuju" ? "Disetujui ✅" : "Tidak Disetujui ❌"}`, "info");
+
+    const notifText =
+      statusType === "setuju"
+        ? "Data counselor Disetujui ✅"
+        : statusType === "tidak"
+        ? "Data counselor Tidak Disetujui ❌"
+        : "Data counselor diminta revisi (Decline) 🔁";
+
+    showNotif(notifText, "info");
   };
 
   const handleKomentarPartner = (index, value) => {
@@ -153,6 +205,21 @@ export default function SASCStaff() {
     setDataPartner(updated);
     localStorage.setItem("partnerData", JSON.stringify(updated));
     setIsChanged(true);
+  };
+
+  const handleEditUlangPartner = (index) => {
+    const updated = [...dataPartner];
+    if (!updated[index]) return;
+
+    // Reset beberapa kolom agar bisa diedit ulang
+    updated[index].verifikasi = false;
+    updated[index].status = "Menunggu";
+    updated[index].komentarStaff = "";
+
+    setDataPartner(updated);
+    localStorage.setItem("partnerData", JSON.stringify(updated));
+
+    showNotif("Data dikembalikan untuk diperbaiki", "info");
   };
 
   const updateVerifikasiCreative = (index, statusType) => {
@@ -316,60 +383,55 @@ export default function SASCStaff() {
     });
   };
 
-  // Export atau download PDF
-  const handleExportSinglePDF = (item) => {
-    const doc = new jsPDF();
-      doc.setFontSize(14);
-      doc.text("Laporan Data", 14, 15);
+  const handleExportSingleExcel = (item) => {
+    // 1️⃣ Ubah data sebelum di-export
+    const formattedItem = Object.entries(item).reduce((acc, [key, value]) => {
+      // Jika kolom durasi, tambahkan satuan "menit"
+      if (key.toLowerCase().includes("durasi") && value) {
+        acc[key] = `${value} menit`;
+      }
+      // Jika kolom checklist (boolean), ubah ke simbol ✅ / ❌
+      else if (typeof value === "boolean") {
+        acc[key] = value ? "✅" : "❌";
+      }
+      // Kalau kosong, tampilkan "-"
+      else if (value === null || value === undefined || value === "") {
+        acc[key] = "-";
+      } else {
+        acc[key] = value;
+      }
+      return acc;
+    }, {});
 
-      const entries = Object.entries(item);
-      const tableData = entries.map(([key, value]) => [
-        key,
-        typeof value === "boolean" ? (value ? "✅" : "❌") : value || "-",
-      ]);
+    // 2️⃣ Buat worksheet dan workbook
+    const worksheet = XLSX.utils.json_to_sheet([formattedItem]);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Data");
 
-      autoTable(doc, {
-        startY: 30,
-        head: [["Field", "Value"]],
-        body: tableData,
-        styles: { fontSize: 9, cellPadding: 3 },
+    // 3️⃣ Simpan file
+    XLSX.writeFile(workbook, `${item.nama || "report"}_Data Report.xlsx`);
+  };
+
+  const handleExportExcel = () => {
+    if (riwayat.length === 0) {
+      Swal.fire({
+        icon: "warning",
+        title: "Tidak ada data",
+        text: "Tarik data terlebih dahulu sebelum ekspor Excel.",
       });
+      return;
+    }
 
-      doc.save(`${item.nama || "Data"}_${item.role || "Role"}.pdf`);
-    };
+    // Buat worksheet dari semua data riwayat
+    const worksheet = XLSX.utils.json_to_sheet(riwayat);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Report");
 
-  const handleExportPDF = () => {
-  if (riwayat.length === 0) {
-    Swal.fire({
-      icon: "warning",
-      title: "Tidak ada data",
-      text: "Tarik data terlebih dahulu sebelum ekspor PDF.",
-    });
-    return;
-  }
-
-  const doc = new jsPDF();
-    doc.setFontSize(14);
-    doc.text("Laporan Data Peer", 14, 15);
-    doc.setFontSize(10);
-    doc.text(`Periode: ${selectedPeriod || "-"}`, 14, 22);
-    doc.text(`Peran: ${selectedRole || "-"}`, 14, 28);
-
-    const tableColumn = Object.keys(riwayat[0]);
-    const tableRows = riwayat.map((item) =>
-      tableColumn.map((key) =>
-        typeof item[key] === "boolean" ? (item[key] ? "✅" : "❌") : item[key] || "-"
-      )
+    // Simpan file Excel
+    XLSX.writeFile(
+      workbook,
+      `Report_${selectedRole || "Semua"}_${selectedPeriod || "All"}.xlsx`
     );
-
-    autoTable(doc, {
-      startY: 40,
-      head: [tableColumn],
-      body: tableRows,
-      styles: { fontSize: 8, cellPadding: 3 },
-    });
-
-    doc.save(`Report_${selectedRole || "Semua"}_${selectedPeriod || "All"}.pdf`);
   };
 
   const handleSouvenirChange = (item, checked, index) => {
@@ -647,6 +709,17 @@ export default function SASCStaff() {
           <>
             <h1 className="text-2xl font-bold mb-6 text-gray-800">Verifikasi Peer Counselor</h1>
             <div className="bg-white p-6 rounded-2xl shadow overflow-x-auto">
+              
+              {/* 🔍 FITUR SEARCH PERIODE */}
+              <div className="mb-4">
+                <input
+                  type="text"
+                  placeholder="Cari berdasarkan periode (contoh: 2022 - 2026)"
+                  className="border rounded-lg p-2 w-full md:w-1/3"
+                  value={searchPeriode}
+                  onChange={(e) => setSearchPeriode(e.target.value)}
+                />
+              </div>
               {dataCounselor.length === 0 ? (
                 <p className="text-gray-500">Belum ada data peer counselor.</p>
               ) : (
@@ -671,7 +744,11 @@ export default function SASCStaff() {
                     </tr>
                   </thead>
                   <tbody>
-                    {dataCounselor.map((item, i) => (
+                    {dataCounselor
+                      .filter((item) =>
+                        item.periode?.toLowerCase().includes(searchPeriode.toLowerCase())
+                      )
+                      .map((item, i) => (
                       <tr key={i} className="border-b hover:bg-gray-50">
                         <td className="py-2 px-3">{item.periode || "-"}</td>
                         <td className="py-2 px-3">{item.kampus || "-"}</td>
@@ -691,25 +768,52 @@ export default function SASCStaff() {
                             <button
                               onClick={() => updateVerifikasiCounselor(i, "setuju")}
                               className="text-green-600 text-xl transition-transform transform hover:scale-125 hover:rotate-12 cursor-pointer"
+                              title="Setujui"
                             >
                               ✔️
                             </button>
                             <button
                               onClick={() => updateVerifikasiCounselor(i, "tidak")}
                               className="text-red-600 text-xl transition-transform transform hover:scale-125 hover:-rotate-12 cursor-pointer"
+                              title="Tidak Disetujui"
                             >
                               ❌
+                            </button>
+                            <button
+                              onClick={() => updateVerifikasiCounselor(i, "decline")}
+                              className="text-orange-500 text-xl transition-transform transform hover:scale-125 hover:rotate-12 cursor-pointer"
+                              title="Decline (Edit Ulang)"
+                            >
+                              🔁
                             </button>
                           </div>
                         </td>
                         <td className="py-2 px-3">
-                          <input
-                            type="text"
-                            value={item.komentarStaff || ""}
-                            onChange={(e) => handleKomentarCounselor(i, e.target.value)}
-                            className="border rounded-lg p-2 w-full"
-                            placeholder="Tulis komentar..."
-                          />
+                          {item.status === "Decline (Edit Ulang)" ? (
+                            <div className="flex items-center space-x-2">
+                              <input
+                                type="text"
+                                value={item.komentarStaff || ""}
+                                onChange={(e) => handleKomentarCounselor(i, e.target.value)}
+                                className="border rounded-lg p-2 w-full"
+                                placeholder="Komentar revisi..."
+                              />
+                              <button
+                                onClick={() => handleEditUlangCounselor(i)}
+                                className="bg-yellow-500 text-white px-3 py-1 rounded-lg hover:bg-yellow-600 transition text-sm"
+                              >
+                                Kirim Ulang
+                              </button>
+                            </div>
+                          ) : (
+                            <input
+                              type="text"
+                              value={item.komentarStaff || ""}
+                              onChange={(e) => handleKomentarCounselor(i, e.target.value)}
+                              className="border rounded-lg p-2 w-full"
+                              placeholder="Tulis komentar..."
+                            />
+                          )}
                         </td>
                       </tr>
                     ))}
@@ -725,6 +829,17 @@ export default function SASCStaff() {
           <>
             <h1 className="text-2xl font-bold mb-6 text-gray-800">Verifikasi Peer Partner</h1>
             <div className="bg-white p-6 rounded-2xl shadow overflow-x-auto">
+              
+              {/* 🔍 FITUR SEARCH PERIODE */}
+              <div className="mb-4">
+                <input
+                  type="text"
+                  placeholder="Cari berdasarkan periode (contoh: 2022 - 2026)"
+                  className="border rounded-lg p-2 w-full md:w-1/3"
+                  value={searchPeriode}
+                  onChange={(e) => setSearchPeriode(e.target.value)}
+                />
+              </div>
               {dataPartner.length === 0 ? (
                 <p className="text-gray-500">Belum ada data peer partner.</p>
               ) : (
@@ -747,7 +862,11 @@ export default function SASCStaff() {
                     </tr>
                   </thead>
                   <tbody>
-                    {dataPartner.map((item, i) => (
+                    {dataPartner
+                      .filter((item) =>
+                        item.periode?.toLowerCase().includes(searchPeriode.toLowerCase())
+                      )
+                      .map((item, i) => (
                       <tr key={i} className="border-b hover:bg-gray-50">
                         <td className="py-2 px-3">{item.periode || "-"}</td>
                         <td className="py-2 px-3">{item.kampus || "-"}</td>
@@ -766,28 +885,58 @@ export default function SASCStaff() {
                     </td>
                         <td className="py-2 px-3 text-center">
                           <div className="flex justify-center space-x-2">
+                            {/* Tombol Setuju */}
                             <button
                               onClick={() => updateVerifikasiPartner(i, "setuju")}
                               className="text-green-600 text-xl transition-transform transform hover:scale-125 hover:rotate-12 cursor-pointer"
                             >
                               ✔️
                             </button>
+
+                            {/* Tombol Tidak Setuju */}
                             <button
                               onClick={() => updateVerifikasiPartner(i, "tidak")}
                               className="text-red-600 text-xl transition-transform transform hover:scale-125 hover:-rotate-12 cursor-pointer"
                             >
                               ❌
                             </button>
+
+                            {/* Tombol Decline */}
+                            <button
+                              onClick={() => updateVerifikasiPartner(i, "decline")}
+                              className="text-yellow-500 text-xl transition-transform transform hover:scale-125 cursor-pointer"
+                              title="Minta revisi (Decline)"
+                            >
+                              🔁
+                            </button>
                           </div>
                         </td>
                         <td className="py-2 px-3">
-                          <input
-                            type="text"
-                            value={item.komentarStaff || ""}
-                            onChange={(e) => handleKomentarPartner(i, e.target.value)}
-                            className="border rounded-lg p-2 w-full"
-                            placeholder="Tulis komentar..."
-                          />
+                          {item.status === "Decline (Edit Ulang)" ? (
+                            <div className="flex items-center space-x-2">
+                              <input
+                                type="text"
+                                value={item.komentarStaff || ""}
+                                onChange={(e) => handleKomentarPartner(i, e.target.value)}
+                                className="border rounded-lg p-2 w-full"
+                                placeholder="Komentar revisi..."
+                              />
+                              <button
+                                onClick={() => handleEditUlangPartner(i)}
+                                className="bg-yellow-500 text-white px-3 py-1 rounded-lg hover:bg-yellow-600 transition text-sm"
+                              >
+                                Kirim Ulang
+                              </button>
+                            </div>
+                          ) : (
+                            <input
+                              type="text"
+                              value={item.komentarStaff || ""}
+                              onChange={(e) => handleKomentarPartner(i, e.target.value)}
+                              className="border rounded-lg p-2 w-full"
+                              placeholder="Tulis komentar..."
+                            />
+                          )}
                         </td>
                       </tr>
                     ))}
@@ -803,6 +952,17 @@ export default function SASCStaff() {
           <>
             <h1 className="text-2xl font-bold mb-6 text-gray-800">Verifikasi Creative team</h1>
             <div className="bg-white p-6 rounded-2xl shadow overflow-x-auto">
+              
+              {/* 🔍 FITUR SEARCH PERIODE */}
+              <div className="mb-4">
+                <input
+                  type="text"
+                  placeholder="Cari berdasarkan periode (contoh: 2022 - 2026)"
+                  className="border rounded-lg p-2 w-full md:w-1/3"
+                  value={searchPeriode}
+                  onChange={(e) => setSearchPeriode(e.target.value)}
+                />
+              </div>
               {dataCreative.length === 0 ? (
                 <p className="text-gray-500">Belum ada data Creative Team.</p>
               ) : (
@@ -823,7 +983,11 @@ export default function SASCStaff() {
                     </tr>
                   </thead>
                   <tbody>
-                    {dataCreative.map((item, i) => (
+                    {dataCreative
+                      .filter((item) =>
+                        item.periode?.toLowerCase().includes(searchPeriode.toLowerCase())
+                      )
+                      .map((item, i) => (
                       <tr key={i} className="border-b hover:bg-gray-50">
                         <td className="py-2 px-3">{item.periode || "-"}</td>
                         <td className="py-2 px-3">{item.pembina || "-"}</td>
@@ -939,6 +1103,8 @@ export default function SASCStaff() {
                               ? item[key]
                                 ? "✅"
                                 : "❌"
+                              : key.toLowerCase().includes("durasi") && item[key] // jika field adalah durasi
+                              ? `${item[key]} menit`
                               : item[key] && item[key].toString().trim() !== ""
                               ? item[key].toString()
                               : "-"}
@@ -946,10 +1112,10 @@ export default function SASCStaff() {
                         ))}
                         <td className="py-2 px-3 text-center">
                           <button
-                            onClick={() => handleExportSinglePDF(item)}
+                            onClick={() => handleExportSingleExcel(item)}
                             className="bg-green-500 text-white px-3 py-1 rounded-lg hover:bg-green-600 transition text-sm"
                           >
-                            Export PDF
+                            Export Excel
                           </button>
                         </td>
                       </tr>
@@ -1017,7 +1183,19 @@ export default function SASCStaff() {
               </div>
             </form>
             <div className="bg-white p-6 rounded-2xl shadow">
-            <h1 className="text-2xl font-bold mb-6 text-gray-800">Data Checklist Souvenir Diterima</h1> 
+            <h1 className="text-2xl font-bold mb-6 text-gray-800">Data Checklist Souvenir Diterima</h1>
+
+            {/* 🔍 FITUR SEARCH PERIODE */}
+            <div className="mb-4">
+              <input
+                type="text"
+                placeholder="Cari berdasarkan periode (contoh: 2022 - 2026)"
+                className="border rounded-lg p-2 w-full md:w-1/3"
+                value={searchPeriode}
+                onChange={(e) => setSearchPeriode(e.target.value)}
+              />
+            </div>
+
               {dataCounselor.length === 0 && dataPartner.length === 0 && dataCreative.length === 0 ? (
                 <p className="text-gray-500">Belum ada data mahasiswa untuk pendataan souvenir.</p>
               ) : (
@@ -1032,24 +1210,40 @@ export default function SASCStaff() {
                   </thead>
                   <tbody>
                     {/* Bagian Peer Counselor */}
-                    {dataCounselor.map((item, i) => (
-                      <tr key={`counselor-${i}`} className="border-b hover:bg-gray-50">
-                        <td className="py-2 px-3">{item.nama || "-"}</td>
-                        <td className="py-2 px-3">Peer Counselor</td>
-                        <td className="py-2 px-3">{item.periode || "-"}</td>
-                        <td className="py-2 px-3 text-center">
-                          <input
-                            type="checkbox"
-                            checked={item.souvenir === true}
-                            onChange={(e) => handleSouvenirChange({ ...item, role: "Peer Counselor" }, e.target.checked, i)}
-                          />
-                        </td>
-                      </tr>
-                    ))}
+                    {dataCounselor
+                      .map((item, i) => ({ ...item, originalIndex: i }))
+                      .filter((item) =>
+                        item.periode?.toLowerCase().includes(searchPeriode.toLowerCase())
+                      )
+                      .map((item) => (
+                        <tr key={`counselor-${item.originalIndex}`} className="border-b hover:bg-gray-50">
+                          <td className="py-2 px-3">{item.nama || "-"}</td>
+                          <td className="py-2 px-3">Peer Counselor</td>
+                          <td className="py-2 px-3">{item.periode || "-"}</td>
+                          <td className="py-2 px-3 text-center">
+                            <input
+                              type="checkbox"
+                              checked={item.souvenir === true}
+                              onChange={(e) =>
+                                handleSouvenirChange(
+                                  { ...item, role: "Peer Counselor" },
+                                  e.target.checked,
+                                  item.originalIndex
+                                )
+                              }
+                            />
+                          </td>
+                        </tr>
+                      ))}
 
                     {/* Bagian Peer Partner */}
-                    {dataPartner.map((item, i) => (
-                      <tr key={`partner-${i}`} className="border-b hover:bg-gray-50">
+                    {dataPartner
+                      .map((item, i) => ({ ...item, originalIndex: i }))
+                      .filter((item) =>
+                        item.periode?.toLowerCase().includes(searchPeriode.toLowerCase())
+                      )
+                      .map((item) => (
+                      <tr key={`partner-${item.originalIndex}`} className="border-b hover:bg-gray-50">
                         <td className="py-2 px-3">
                           {dataBuddy.find((b) => b.nim === item.nim)?.nama || item.namaBuddy || "-"}
                         </td>
@@ -1057,28 +1251,43 @@ export default function SASCStaff() {
                         <td className="py-2 px-3">{item.periode || "-"}</td>
                         <td className="py-2 px-3 text-center">
                           <input
-                            type="checkbox"
-                            checked={item.souvenir === true}
-                            onChange={(e) => handleSouvenirChange({ ...item, role: "Peer Partner" }, e.target.checked, i)}
-                          />
+                              type="checkbox"
+                              checked={item.souvenir === true}
+                              onChange={(e) =>
+                                handleSouvenirChange(
+                                  { ...item, role: "Peer Partner" },
+                                  e.target.checked,
+                                  item.originalIndex
+                                )
+                              }
+                            />
                         </td>
                       </tr>
                     ))}
 
                     {/* Bagian Creative Team */}
-                    {dataCreative.map((item, i) => (
-                      <tr key={`creative-${i}`} className="border-b hover:bg-gray-50">
+                    {dataCreative
+                      .map((item, i) => ({ ...item, originalIndex: i }))
+                      .filter((item) =>
+                        item.periode?.toLowerCase().includes(searchPeriode.toLowerCase())
+                      )
+                      .map((item) => (
+                      <tr key={`creative-${item.originalIndex}`} className="border-b hover:bg-gray-50">
                         <td className="py-2 px-3">{item.nama || "-"}</td>
                         <td className="py-2 px-3">Creative Team</td>
                         <td className="py-2 px-3">{item.periode || "-"}</td>
                         <td className="py-2 px-3 text-center">
                           <input
-                            type="checkbox"
-                            checked={item.souvenir === true}
-                            onChange={(e) =>
-                              handleSouvenirChange({ ...item, role: "Creative Team" }, e.target.checked, i)
-                            }
-                          />
+                              type="checkbox"
+                              checked={item.souvenir === true}
+                              onChange={(e) =>
+                                handleSouvenirChange(
+                                  { ...item, role: "Creative Team" },
+                                  e.target.checked,
+                                  item.originalIndex
+                                )
+                              }
+                            />
                         </td>
                       </tr>
                     ))}

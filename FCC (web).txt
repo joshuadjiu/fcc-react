@@ -1,20 +1,22 @@
 FCC (web) :
 
-1. Warna background binus (referensi : https://support.binus.ac.id/)
+1. Peer Counselor (docs) :
 
 2. Peer Counselor (docs) :
 
-3. Peer Counselor (docs) :
+3. Creative Team (docs) :
+- Tambah fitur edit dan status decline (Riwayat form creative team)
 
-4. Creative Team (docs) :
-
-5. SASC Staff (docs) :
+4. SASC Staff (docs) :
 
 - Tambahkan fungsi hasil upload (creative team)
-- Hilangkan data setelah user isi di halaman creative team (checklist pengambilan souvenir)
+- Hilangkan data creative team, setelah user isi di halaman creative team (checklist pengambilan souvenir)
+- Tambahkan tombol decline (verifikasi peran) - Note: tombol decline ini untuk memberitahu user masih dapat mengubah atau mengedit form
+- Tambahkan konfirmasi setelah menekan silang, checklist, atau decline (verifikasi peran)
+- Ketika menekan salah satu dan memberi komentar, maka tambahkan proses data menghilang (verifikasi peran) - (opsional)
 
-6. Semuanya (docs)
+5. Semuanya (docs)
 
 - data form reset jika register dan login baru
 - Notifikasi (Peer Partner, Creative Team, dan SASC Staff)
-- Tampilan halaman (docx)
+- Jika data banyak, maka harus pagination

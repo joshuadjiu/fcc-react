@@ -20,6 +20,7 @@ export default function PeerCounselor() {
   const [roleData, setRoleData] = useState({});
   const [notifications, setNotifications] = useState([]);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [editIndex, setEditIndex] = useState(null);
 
   // Mengambil data role diantara periode dan kampus dan filter riwayat sesuai
   useEffect(() => {
@@ -80,23 +81,11 @@ export default function PeerCounselor() {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // Menyimpan data form ke localStorage
-    const existing = JSON.parse(localStorage.getItem("peerCounselorData")) || [];
-    existing.push(formData);
-    localStorage.setItem("peerCounselorData", JSON.stringify(existing));
+    formData.status = "Menunggu";
+    formData.verifikasi = false;
+    formData.komentarStaff = "";
 
-    // Notifikasi otomatis
-    const newNotif = {
-      message: "Form Peer Counselor berhasil dikirim!",
-      date: new Date().toLocaleString(),
-    };
-
-    const saved = JSON.parse(localStorage.getItem("notifications")) || [];
-    saved.push(newNotif);
-    localStorage.setItem("notifications", JSON.stringify(saved));
-    setNotifications(saved);
-
-    const durasi = hitungDurasi();
+    // --- Validasi field wajib ---
     const requiredFields = [
       "nimBuddy",
       "namaBuddy",
@@ -116,10 +105,22 @@ export default function PeerCounselor() {
       return;
     }
 
-    // Mengambil semua data counselor di localStorage
-    const allData = JSON.parse(localStorage.getItem("counselorData")) || [];
+    const durasi = hitungDurasi();
 
-    // Validasi data baru dan sinkronisasi ke SASC Staff
+    // --- Ambil semua data counselor & user ---
+    const allData = JSON.parse(localStorage.getItem("counselorData")) || [];
+    const existing = JSON.parse(localStorage.getItem("peerCounselorData")) || [];
+
+    // --- Jika edit, hapus data lama dengan nim & tanggal sama ---
+    const filteredExisting = existing.filter(
+      (item) =>
+        !(
+          item.nimBuddy === formData.nimBuddy &&
+          item.tanggal === formData.tanggal
+        )
+    );
+
+    // --- Entry baru untuk counselorData (dipakai oleh SASC Staff) ---
     const newEntry = {
       nim: formData.nimBuddy,
       nama: formData.namaBuddy,
@@ -136,22 +137,39 @@ export default function PeerCounselor() {
       komentarStaff: "",
       periode: roleData.periode || "-",
       kampus: roleData.kampus || roleData.campus || "-",
+      status: "Menunggu", // default setiap submit / edit ulang
     };
 
-    // 🔹 Melakukan update data ke localstorage
-    const updatedAll = [...allData, newEntry];
-    localStorage.setItem("counselorData", JSON.stringify(updatedAll));
+    // --- Jika data dengan NIM & tanggal sudah ada di counselorData (edit ulang) ---
+    const existingIndex = allData.findIndex(
+      (item) =>
+        item.nim === newEntry.nim && item.tanggalKonseling === newEntry.tanggalKonseling
+    );
 
-    // Memperbarui tampilan  data (periode & kampus)
-    const filtered = updatedAll.filter(
+    if (existingIndex !== -1) {
+      // Jika data sudah ada, artinya user sedang edit
+      allData[existingIndex] = newEntry;
+    } else {
+      // Jika belum ada, tambahkan baru
+      allData.push(newEntry);
+    }
+
+    // --- Simpan ke localStorage ---
+    filteredExisting.push(formData);
+    localStorage.setItem("peerCounselorData", JSON.stringify(filteredExisting));
+    localStorage.setItem("counselorData", JSON.stringify(allData));
+
+    // --- Update tampilan (riwayat) ---
+    const filtered = allData.filter(
       (item) =>
         item.periode === roleData.periode &&
         item.kampus === (roleData.kampus || roleData.campus)
     );
     setRiwayat(filtered);
 
-    alert("Form data peer counselor berhasil disimpan");
+    alert("Data logbook berhasil disimpan!");
 
+    // --- Reset form ---
     setFormData({
       nimBuddy: "",
       namaBuddy: "",
@@ -170,6 +188,33 @@ export default function PeerCounselor() {
 
   const handleViewAll = () => {
    navigate("/notifications");
+  };
+
+  const handleEdit = (index) => {
+    const selected = riwayat[index];
+    if (!selected) return;
+
+    // isi kembali form dengan data lama
+    setFormData({
+      nimBuddy: selected.nim,
+      namaBuddy: selected.nama,
+      jurusan: selected.jurusan,
+      tanggal: selected.tanggalKonseling,
+      jamMulai: selected.jamMulai,
+      jamSelesai: selected.jamSelesai,
+      metode: selected.metode,
+      deskripsi: selected.deskripsi,
+      kendala: selected.kendala,
+      support: selected.supportNeeded,
+    });
+
+    // hapus sementara dari localStorage agar tidak dobel saat disubmit lagi
+    const allData = JSON.parse(localStorage.getItem("counselorData")) || [];
+    allData.splice(index, 1);
+    localStorage.setItem("counselorData", JSON.stringify(allData));
+
+    // tampilkan notifikasi kecil
+    alert("Silakan ubah data dan klik Simpan untuk memperbarui logbook.");
   };
 
   const toggleDropdown = () => {
@@ -257,7 +302,7 @@ export default function PeerCounselor() {
         )}
 
         <h1 className="text-2xl font-bold mb-6 text-gray-800">
-          Isi Form Data Peer Counselor
+          Logbook Kegiatan
         </h1>
 
         {/* Form input */}
@@ -393,7 +438,7 @@ export default function PeerCounselor() {
 
         {/* Riwayat data form */}
         <div className="mt-10">
-          <h2 className="text-xl font-semibold mb-3">Riwayat Form Peer Counselor</h2>
+          <h2 className="text-xl font-semibold mb-3">Data Logbook</h2>
           <div className="bg-white p-5 rounded-xl shadow overflow-x-auto">
             <table className="min-w-full text-left text-sm">
               <thead>
@@ -411,8 +456,10 @@ export default function PeerCounselor() {
                   <th className="py-2 px-3">Support Needed</th>
                   <th className="py-2 px-3">Status Verifikasi</th>
                   <th className="py-2 px-3">Komentar</th>
+                  <th className="py-2 px-3 text-center">Aksi</th>
                 </tr>
               </thead>
+
               <tbody>
                 {riwayat.map((item, i) => (
                   <tr key={i} className="border-b hover:bg-gray-50">
@@ -434,6 +481,8 @@ export default function PeerCounselor() {
                             ? "bg-green-100 text-green-700"
                             : item.status === "Tidak Disetujui"
                             ? "bg-red-100 text-red-700"
+                            : item.status === "Decline"
+                            ? "bg-orange-100 text-orange-700"
                             : "bg-yellow-100 text-yellow-700"
                         }`}
                       >
@@ -441,6 +490,16 @@ export default function PeerCounselor() {
                       </span>
                     </td>
                     <td className="py-2 px-3">{item.komentarStaff || "-"}</td>
+                    <td className="py-2 px-3 text-center">
+                      {(item.status === "Menunggu" || item.status === "Decline") && (
+                        <button
+                          onClick={() => handleEdit(i)}
+                          className="bg-blue-500 text-white px-3 py-1 rounded-lg hover:bg-blue-600 transition"
+                        >
+                          Edit
+                        </button>
+                      )}
+                    </td>
                   </tr>
                 ))}
               </tbody>

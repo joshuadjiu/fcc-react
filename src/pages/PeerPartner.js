@@ -53,63 +53,137 @@ export default function PeerPartner() {
   }, [formData.jamMulai, formData.jamSelesai]);
 
   // Submit form
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const requiredFields = [
-      "namaBuddy",
-      "tanggal",
-      "jamMulai",
-      "jamSelesai",
-      "metode",
-      "deskripsi",
-      "kendala",
-      "support",
-    ];
-    const emptyFields = requiredFields.filter((f) => !formData[f]);
-    if (emptyFields.length > 0) {
-      alert("Harap isi semua kolom!");
-      return;
-    }
+const handleSubmit = (e) => {
+  e.preventDefault();
 
-    const selectedBuddy = buddyList.find((b) => b.nama === formData.namaBuddy);
+  const requiredFields = [
+    "namaBuddy",
+    "tanggal",
+    "jamMulai",
+    "jamSelesai",
+    "metode",
+    "deskripsi",
+    "kendala",
+    "support",
+  ];
+  const emptyFields = requiredFields.filter((f) => !formData[f]);
+  if (emptyFields.length > 0) {
+    alert("Harap isi semua kolom!");
+    return;
+  }
 
-    // Validasi data baru dan sinkronisasi ke SASC Staff
-    const newEntry = {
-      ...formData,
-      nimBuddy: selectedBuddy?.nim || "-",
-      jurusan: selectedBuddy?.jurusan || "-",
-      verifikasi: false,
-      komentarStaff: "",
-      periode: roleData.periode || "-",
-      kampus: roleData.kampus || roleData.campus || "-",
-    };
+  const existing = JSON.parse(localStorage.getItem("partnerData")) || [];
 
-    // Menambahkan ke data lama
-    const existing = JSON.parse(localStorage.getItem("partnerData")) || [];
-    const updated = [...existing, newEntry];
+  // Jika formData belum punya id (data baru), buat id unik
+  let id = formData.id || Date.now();
 
-    localStorage.setItem("partnerData", JSON.stringify(updated));
-    setRiwayat(updated.filter(
+  const selectedBuddy = buddyList.find((b) => b.nama === formData.namaBuddy);
+
+  // Data baru atau hasil edit
+  const newEntry = {
+    ...formData,
+    id,
+    nimBuddy: selectedBuddy?.nim || "-",
+    jurusan: selectedBuddy?.jurusan || "-",
+    verifikasi: false,
+    status: "Menunggu",
+    komentarStaff: "",
+    periode: roleData.periode || "-",
+    kampus: roleData.kampus || roleData.campus || "-",
+  };
+
+  // Cek apakah data ini sudah ada
+  const existingIndex = existing.findIndex((item) => item.id === id);
+
+  if (existingIndex !== -1) {
+    // Jika sudah ada → update
+    existing[existingIndex] = newEntry;
+  } else {
+    // Jika belum ada → tambahkan
+    existing.push(newEntry);
+  }
+
+  // Simpan ke localStorage
+  localStorage.setItem("partnerData", JSON.stringify(existing));
+
+  // Sinkronisasi otomatis ke halaman SASC Staff
+  const sascData = JSON.parse(localStorage.getItem("sascPartnerData")) || [];
+  const sascIndex = sascData.findIndex((item) => item.id === id);
+
+  const sascEntry = {
+    id,
+    nama: selectedBuddy?.nama || "-",
+    nim: selectedBuddy?.nim || "-",
+    jurusan: selectedBuddy?.jurusan || "-",
+    tanggalKonseling: formData.tanggal,
+    jamMulai: formData.jamMulai,
+    jamSelesai: formData.jamSelesai,
+    durasi: formData.durasi,
+    metode: formData.metode,
+    deskripsi: formData.deskripsi,
+    kendala: formData.kendala,
+    supportNeeded: formData.support,
+    status: "Menunggu",
+    komentarStaff: "",
+    verifikasi: false,
+    periode: roleData.periode || "-",
+    kampus: roleData.kampus || roleData.campus || "-",
+  };
+
+  if (sascIndex !== -1) {
+    sascData[sascIndex] = sascEntry;
+  } else {
+    sascData.push(sascEntry);
+  }
+
+  localStorage.setItem("sascPartnerData", JSON.stringify(sascData));
+
+  // Update tampilan tabel sesuai periode dan kampus
+  setRiwayat(
+    existing.filter(
       (item) =>
         item.periode === roleData.periode &&
         item.kampus === (roleData.kampus || roleData.campus)
-    ));
+    )
+  );
 
-    alert("Form data peer partner berhasil disimpan");
-    
-    // Beberapa bagian yang akan diisi
-    setFormData({
-      namaBuddy: "",
-      tanggal: "",
-      jamMulai: "",
-      jamSelesai: "",
-      durasi: 0,
-      metode: "",
-      deskripsi: "",
-      kendala: "",
-      support: "",
-    });
-  };
+  alert("Data logbook berhasil disimpan!");
+
+  // Reset form
+  setFormData({
+    namaBuddy: "",
+    tanggal: "",
+    jamMulai: "",
+    jamSelesai: "",
+    durasi: 0,
+    metode: "",
+    deskripsi: "",
+    kendala: "",
+    support: "",
+  });
+};
+
+// Edit data lama
+const handleEdit = (index) => {
+  const selected = riwayat[index];
+  if (!selected) return;
+
+  // isi kembali form dengan data lama (beserta id-nya agar tidak membuat data baru)
+  setFormData({
+    id: selected.id,
+    namaBuddy: selected.namaBuddy,
+    tanggal: selected.tanggal,
+    jamMulai: selected.jamMulai,
+    jamSelesai: selected.jamSelesai,
+    durasi: selected.durasi,
+    metode: selected.metode,
+    deskripsi: selected.deskripsi,
+    kendala: selected.kendala,
+    support: selected.support,
+  });
+
+  alert("Silakan ubah data dan klik Simpan untuk memperbarui logbook.");
+};
 
   // Handle perubahan input
   const handleChange = (e) => {
@@ -163,7 +237,7 @@ export default function PeerPartner() {
 
         {/* Input form */}
         <h1 className="text-2xl font-bold mb-6 text-gray-800">
-          Isi Form Data Peer Partner
+          Logbook Kegiatan
         </h1>
 
         <form
@@ -306,7 +380,7 @@ export default function PeerPartner() {
         {/* Riwayat data form */}
         <div className="bg-white p-6 rounded-2xl shadow">
           <h2 className="text-lg font-bold mb-4 text-gray-800">
-            Riwayat Form Peer Partner
+            Data Logbook
           </h2>
           {riwayat.length === 0 ? (
             <p className="text-gray-500">Belum ada data konseling.</p>
@@ -325,6 +399,7 @@ export default function PeerPartner() {
                   <th className="py-2 px-3">Support Needed</th>
                   <th className="py-2 px-3">Status Verifikasi</th>
                   <th className="py-2 px-3">Komentar</th>
+                  <th className="py-2 px-3 text-center">Aksi</th>
                 </tr>
               </thead>
               <tbody>
@@ -350,6 +425,8 @@ export default function PeerPartner() {
                             ? "bg-green-100 text-green-700"
                             : item.status === "Tidak Disetujui"
                             ? "bg-red-100 text-red-700"
+                            : item.status === "Decline"
+                            ? "bg-orange-100 text-orange-700"
                             : "bg-yellow-100 text-yellow-700"
                         }`}
                       >
@@ -357,6 +434,16 @@ export default function PeerPartner() {
                       </span>
                     </td>
                     <td className="py-2 px-3">{item.komentarStaff || "-"}</td>
+                    <td className="py-2 px-3 text-center">
+                      {(item.status === "Menunggu" || item.status === "Decline") && (
+                        <button
+                          onClick={() => handleEdit(i)}
+                          className="bg-blue-500 text-white px-3 py-1 rounded-lg hover:bg-blue-600 transition"
+                        >
+                          Edit
+                        </button>
+                      )}
+                    </td>
                   </tr>
                 ))}
               </tbody>

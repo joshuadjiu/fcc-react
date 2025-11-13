@@ -170,7 +170,7 @@ export default function CreativeTeam() {
 
         {/* Form input */}
         <h1 className="text-2xl font-bold mb-6 text-gray-800">
-          Isi Form Data Creative Team
+          Logbook Kegiatan
         </h1>
 
         <form onSubmit={handleSubmit} className="bg-white p-6 rounded-2xl shadow mb-8">
@@ -279,7 +279,7 @@ export default function CreativeTeam() {
 
         {/* Riwayat data form */}
         <div className="bg-white p-6 rounded-2xl shadow">
-          <h2 className="text-lg font-bold mb-4 text-gray-800">Riwayat Form Creative Team</h2>
+          <h2 className="text-lg font-bold mb-4 text-gray-800">Data Logbook</h2>
           {dataCreative.length === 0 ? (
             <p className="text-gray-500">Belum ada data.</p>
           ) : (
