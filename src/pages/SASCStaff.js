@@ -138,10 +138,10 @@ export default function SASCStaff() {
 
     const notifText =
       statusType === "setuju"
-        ? "Data counselor Disetujui ✅"
+        ? "Data logbook Disetujui ✅"
         : statusType === "tidak"
-        ? "Data counselor Tidak Disetujui ❌"
-        : "Data counselor diminta revisi (Decline) 🔁";
+        ? "Data logbook Tidak Disetujui ❌"
+        : "Data logbook diminta revisi (Decline) 🔁";
 
     showNotif(notifText, "info");
   };
@@ -191,10 +191,10 @@ export default function SASCStaff() {
 
     const notifText =
       statusType === "setuju"
-        ? "Data counselor Disetujui ✅"
+        ? "Data logbook Disetujui ✅"
         : statusType === "tidak"
-        ? "Data counselor Tidak Disetujui ❌"
-        : "Data counselor diminta revisi (Decline) 🔁";
+        ? "Data logbook Tidak Disetujui ❌"
+        : "Data logbook diminta revisi (Decline) 🔁";
 
     showNotif(notifText, "info");
   };
@@ -226,21 +226,36 @@ export default function SASCStaff() {
     const updated = [...dataCreative];
     if (!updated[index]) return;
 
-    updated[index].statusVerifikasi = statusType === "setuju" ? "Disetujui" : "Tidak Disetujui";
-    updated[index].verifikasi = statusType === "setuju";
+    if (statusType === "setuju") {
+      updated[index].statusVerifikasi = "Disetujui";
+      updated[index].verifikasi = true;
+
+    } else if (statusType === "tidak") {
+      updated[index].statusVerifikasi = "Tidak Disetujui";
+      updated[index].verifikasi = false;
+
+    } else if (statusType === "decline") {
+      updated[index].statusVerifikasi = "Decline (Edit Ulang)";
+      updated[index].verifikasi = false;
+    }
+
     updated[index].komentarStaff = updated[index].komentarStaff || "";
 
     localStorage.setItem("creativeData", JSON.stringify(updated));
     setDataCreative(updated);
     setIsChanged(true);
 
-    // Menampilkan notifikasi
-    showNotif(
-      `Creative Team ${statusType === "setuju" ? "Disetujui ✅" : "Tidak Disetujui ❌"}`,
-      "info"
-    );
+    const notifText =
+      statusType === "setuju"
+        ? "Data logbook Disetujui ✅"
+        : statusType === "tidak"
+        ? "Data logbook Tidak Disetujui ❌"
+        : "Data logbook diminta revisi (Decline) 🔁";
 
-    // Trigger event untuk halaman CreativeTeam dalam update (listener "storage")
+    // Notifikasi
+    showNotif(notifText, "info");
+
+    // Trigger update ke halaman CreativeTeam
     window.dispatchEvent(new Event("storage"));
   };
 
@@ -250,6 +265,21 @@ export default function SASCStaff() {
     setDataCreative(updated);
     localStorage.setItem("creativeData", JSON.stringify(updated));
     setIsChanged(true);
+  };
+
+  const handleEditUlangCreative = (index) => {
+    const updated = [...dataCreative];
+    if (!updated[index]) return;
+
+    // Reset beberapa kolom agar bisa diedit ulang
+    updated[index].verifikasi = false;
+    updated[index].status = "Menunggu";
+    updated[index].komentarStaff = "";
+
+    setDataCreative(updated);
+    localStorage.setItem("creativeData", JSON.stringify(updated));
+
+    showNotif("Data dikembalikan untuk diperbaiki", "info");
   };
 
   // Fungsi menambah dan menghapus pembina
@@ -1014,16 +1044,40 @@ export default function SASCStaff() {
                             >
                               ❌
                             </button>
+                            <button
+                              onClick={() => updateVerifikasiCreative(i, "decline")}
+                              className="text-orange-600 text-xl transition-transform transform hover:scale-125 cursor-pointer"
+                            >
+                              🔁
+                            </button>
                           </div>
                         </td>
                         <td className="py-2 px-3">
-                          <input
-                            type="text"
-                            value={item.komentarStaff || ""}
-                            onChange={(e) => handleKomentarCreative(i, e.target.value)}
-                            className="border rounded-lg p-2 w-full"
-                            placeholder="Tulis komentar..."
-                          />
+                          {item.status === "Decline (Edit Ulang)" ? (
+                            <div className="flex items-center space-x-2">
+                              <input
+                                type="text"
+                                value={item.komentarStaff || ""}
+                                onChange={(e) => handleKomentarCreative(i, e.target.value)}
+                                className="border rounded-lg p-2 w-full"
+                                placeholder="Komentar revisi..."
+                              />
+                              <button
+                                onClick={() => handleEditUlangCreative(i)}
+                                className="bg-yellow-500 text-white px-3 py-1 rounded-lg hover:bg-yellow-600 transition text-sm"
+                              >
+                                Kirim Ulang
+                              </button>
+                            </div>
+                          ) : (
+                            <input
+                              type="text"
+                              value={item.komentarStaff || ""}
+                              onChange={(e) => handleKomentarCreative(i, e.target.value)}
+                              className="border rounded-lg p-2 w-full"
+                              placeholder="Tulis komentar..."
+                            />
+                          )}
                         </td>
                       </tr>
                     ))}

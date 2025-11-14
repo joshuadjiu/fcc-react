@@ -5,13 +5,11 @@ FCC (web) :
 2. Peer Counselor (docs) :
 
 3. Creative Team (docs) :
-- Tambah fitur edit dan status decline (Riwayat form creative team)
 
 4. SASC Staff (docs) :
 
 - Tambahkan fungsi hasil upload (creative team)
 - Hilangkan data creative team, setelah user isi di halaman creative team (checklist pengambilan souvenir)
-- Tambahkan tombol decline (verifikasi peran) - Note: tombol decline ini untuk memberitahu user masih dapat mengubah atau mengedit form
 - Tambahkan konfirmasi setelah menekan silang, checklist, atau decline (verifikasi peran)
 - Ketika menekan salah satu dan memberi komentar, maka tambahkan proses data menghilang (verifikasi peran) - (opsional)
 

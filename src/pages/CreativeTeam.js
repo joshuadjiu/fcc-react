@@ -21,7 +21,12 @@ export default function CreativeTeam() {
 
   // Mengambil data dari localstorage
   useEffect(() => {
-    const savedCreative = JSON.parse(localStorage.getItem("creativeData")) || [];
+    let savedCreative = JSON.parse(localStorage.getItem("creativeData"));
+
+    if (!Array.isArray(savedCreative)) {
+      savedCreative = [];
+    }
+
     const savedRole = JSON.parse(localStorage.getItem("roleData")) || {};
 
     setRoleData(savedRole);
@@ -41,7 +46,12 @@ export default function CreativeTeam() {
   // Sinkronisasi otomatis jika ada perubahan localstorage misalnya dari SASC Staff)
   useEffect(() => {
     const syncData = () => {
-      const updatedCreative = JSON.parse(localStorage.getItem("creativeData")) || [];
+      let updatedCreative = JSON.parse(localStorage.getItem("creativeData"));
+
+      if (!Array.isArray(updatedCreative)) {
+        updatedCreative = [];
+      }
+      
       const savedRole = JSON.parse(localStorage.getItem("roleData")) || {};
       const filtered = updatedCreative.filter(
         (item) =>
@@ -90,31 +100,46 @@ export default function CreativeTeam() {
       return;
     }
 
+    const id = formData.id || Date.now();
+
     const newEntry = {
       ...formData,
-      id: Date.now(),
+      id,
       uploadName: formData.uploadFile ? formData.uploadFile.name : null,
       periode: roleData.periode || "-",
       pembina: roleData.pembina || "-",
-      statusVerifikasi: "Menunggu",
-      komentarStaff: "",
-      
+
+      // Tambahan ↓↓↓ (agar sinkron seperti peer counselor & partner)
+      statusVerifikasi: formData.statusVerifikasi || "Menunggu",
+      komentarStaff: formData.komentarStaff || "",
     };
 
-    const existing = JSON.parse(localStorage.getItem("creativeData")) || [];
-    const updated = [...existing, newEntry];
-    localStorage.setItem("creativeData", JSON.stringify(updated));
+    let existing = JSON.parse(localStorage.getItem("creativeData"));
+
+    if (!Array.isArray(existing)) {
+      existing = [];
+    }
+
+    const index = existing.findIndex(item => item.id === id);
+
+    if (index !== -1) {
+      existing[index] = newEntry // Update data
+    } else {
+      existing.push(newEntry); // Tambah baru
+    }
+
+    localStorage.setItem("creativeData", JSON.stringify(existing));
 
     // Filter proses update atau perubahan periode dan pembina
     setDataCreative(
-      updated.filter(
+      existing.filter(
         (item) =>
           item.periode === roleData.periode &&
           item.pembina === roleData.pembina
       )
     );
 
-    alert("Form data creative team berhasil disimpan");
+    alert("Data logbook berhasil disimpan");
 
     setFormData({
       topik: "",
@@ -126,6 +151,25 @@ export default function CreativeTeam() {
       uploadFile: null,
     });
     setShowUpload(false);
+  };
+
+  const handleEdit = (item) => {
+    setFormData({
+      id: item.id,
+      topik: item.topik,
+      statusTopik: item.statusTopik,
+      tanggalDiskusi: item.tanggalDiskusi,
+      mediaDiskusi: item.mediaDiskusi,
+      hasilDiskusi: item.hasilDiskusi,
+      status: item.status,
+      uploadFile: null, // user boleh upload lagi kalau Final
+      statusVerifikasi: "Menunggu",
+      komentarStaff: "",
+    });
+
+    setShowUpload(item.status === "Final");
+
+    alert("Silakan ubah data dan klik Simpan untuk memperbarui logbook.");
   };
 
   return (
@@ -295,10 +339,11 @@ export default function CreativeTeam() {
                   <th className="py-2 px-3">Upload</th>
                   <th className="py-2 px-3">Status Verifikasi</th>
                   <th className="py-2 px-3">Komentar</th>
+                  <th className="py-2 px-3 text-center">Aksi</th>
                 </tr>
               </thead>
               <tbody>
-                {dataCreative.map((item) => (
+                {dataCreative.map((item, i) => (
                   <tr key={item.id} className="border-b hover:bg-gray-50">
                     <td className="py-2 px-3">{item.topik}</td>
                     <td className="py-2 px-3">{item.statusTopik}</td>
@@ -314,6 +359,8 @@ export default function CreativeTeam() {
                             ? "bg-green-100 text-green-700"
                             : item.statusVerifikasi === "Tidak Disetujui"
                             ? "bg-red-100 text-red-700"
+                            : item.statusVerifikasi === "Decline (Edit Ulang)"
+                            ? "bg-orange-100 text-orange-700"
                             : "bg-yellow-100 text-yellow-700"
                         }`}
                       >
@@ -321,6 +368,16 @@ export default function CreativeTeam() {
                       </span>
                     </td>
                     <td className="py-2 px-3">{item.komentarStaff || "-"}</td>
+                    <td className="py-2 px-3 text-center">
+                      {(item.statusVerifikasi === "Menunggu" || item.statusVerifikasi === "Decline (Edit Ulang)") && (
+                        <button
+                          onClick={() => handleEdit(item)}
+                          className="bg-blue-500 text-white px-3 py-1 rounded-lg hover:bg-blue-600"
+                        >
+                          Edit
+                        </button>
+                      )}
+                    </td>
                   </tr>
                 ))}
               </tbody>
