@@ -102,14 +102,13 @@ export default function CreativeTeam() {
 
     const id = formData.id || Date.now();
 
+    // Data baru dari hasil submit
     const newEntry = {
       ...formData,
       id,
       uploadName: formData.uploadFile ? formData.uploadFile.name : null,
       periode: roleData.periode || "-",
       pembina: roleData.pembina || "-",
-
-      // Tambahan ↓↓↓ (agar sinkron seperti peer counselor & partner)
       statusVerifikasi: formData.statusVerifikasi || "Menunggu",
       komentarStaff: formData.komentarStaff || "",
     };
@@ -120,12 +119,14 @@ export default function CreativeTeam() {
       existing = [];
     }
 
+    // Berfungsi untuk mencari data lama sebelumnya atau data baru (berdasarkan id)
     const index = existing.findIndex(item => item.id === id);
 
+    // Data sudah ada -> melakukan update data, sedangkan data belum ada -> menambahkan data baru (berdasarkan id)
     if (index !== -1) {
-      existing[index] = newEntry // Update data
+      existing[index] = newEntry
     } else {
-      existing.push(newEntry); // Tambah baru
+      existing.push(newEntry);
     }
 
     localStorage.setItem("creativeData", JSON.stringify(existing));
@@ -141,6 +142,7 @@ export default function CreativeTeam() {
 
     alert("Data logbook berhasil disimpan");
 
+    // Reset form
     setFormData({
       topik: "",
       statusTopik: "New",
@@ -153,6 +155,7 @@ export default function CreativeTeam() {
     setShowUpload(false);
   };
 
+  // Handle edit pada data lama
   const handleEdit = (item) => {
     setFormData({
       id: item.id,
@@ -162,7 +165,7 @@ export default function CreativeTeam() {
       mediaDiskusi: item.mediaDiskusi,
       hasilDiskusi: item.hasilDiskusi,
       status: item.status,
-      uploadFile: null, // user boleh upload lagi kalau Final
+      uploadFile: null,
       statusVerifikasi: "Menunggu",
       komentarStaff: "",
     });
@@ -212,7 +215,7 @@ export default function CreativeTeam() {
           </div>
         )}
 
-        {/* Form input */}
+        {/* Input logbook */}
         <h1 className="text-2xl font-bold mb-6 text-gray-800">
           Logbook Kegiatan
         </h1>
@@ -321,7 +324,7 @@ export default function CreativeTeam() {
           </div>
         </form>
 
-        {/* Riwayat data form */}
+        {/* Riwayat data logbook */}
         <div className="bg-white p-6 rounded-2xl shadow">
           <h2 className="text-lg font-bold mb-4 text-gray-800">Data Logbook</h2>
           {dataCreative.length === 0 ? (

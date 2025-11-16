@@ -1,4 +1,3 @@
-// 📁 src/pages/SASCStaff.js
 import React, { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 import * as XLSX from "xlsx";
@@ -12,7 +11,7 @@ export default function SASCStaff() {
   const [pembinaList, setPembinaList] = useState([]);
   const [formPembina, setFormPembina] = useState("");
 
-  // Data peran (peer counselor, peer partner, dan creatuve team) diverifikasi oleh SASC
+  // Data peran (peer counselor, peer partner, dan creatuve team) diverifikasi oleh SASC Staff
   const [dataCounselor, setDataCounselor] = useState([]);
   const [dataPartner, setDataPartner] = useState([]);
   const [dataCreative, setDataCreative] = useState([]);
@@ -80,7 +79,7 @@ export default function SASCStaff() {
   };
 
 
-  // Melakukan proses load data dari localstorage
+  // Melakukan proses atau load data dari localstorage
   useEffect(() => {
     const savedCounselor = JSON.parse(localStorage.getItem("counselorData")) || [];
     const savedPartner = JSON.parse(localStorage.getItem("partnerData")) || [];
@@ -116,7 +115,7 @@ export default function SASCStaff() {
     setTimeout(() => setNotif({ show: false, message: "", type: "" }), 2000);
   };
 
-  // Fungsi update verifikasi dan komentar pada halaman peran
+  // Fungsi update verifikasi, komentar, dan edit pada halaman peer counselor
   const updateVerifikasiCounselor = (index, statusType) => {
     const updated = [...dataCounselor];
     if (!updated[index]) return;
@@ -169,7 +168,7 @@ export default function SASCStaff() {
     showNotif("Data dikembalikan untuk diperbaiki", "info");
   };
 
-  // Fungsi update verifikasi dan komentar pada halaman peran
+  // Fungsi update verifikasi,komentar, dan edit pada halaman peer partner
   const updateVerifikasiPartner = (index, statusType) => {
     const updated = [...dataPartner];
     if (!updated[index]) return;
@@ -222,6 +221,7 @@ export default function SASCStaff() {
     showNotif("Data dikembalikan untuk diperbaiki", "info");
   };
 
+  // Fungsi update verifikasi, komentar dan edit pada halaman creative team
   const updateVerifikasiCreative = (index, statusType) => {
     const updated = [...dataCreative];
     if (!updated[index]) return;
@@ -255,7 +255,7 @@ export default function SASCStaff() {
     // Notifikasi
     showNotif(notifText, "info");
 
-    // Trigger update ke halaman CreativeTeam
+    // Melakukan Trigger update ke halaman CreativeTeam
     window.dispatchEvent(new Event("storage"));
   };
 
@@ -303,8 +303,7 @@ export default function SASCStaff() {
     showNotif("Pembina dihapus!", "info");
   };
 
-
-  // fungsi input buddy
+  // Fungsi input buddy
   const handleBuddyChange = (e) => {
     const { name, value } = e.target;
     setFormBuddy({ ...formBuddy, [name]: value });
@@ -341,6 +340,7 @@ export default function SASCStaff() {
     const partnerData = JSON.parse(localStorage.getItem("partnerData")) || [];
     const creativeData = JSON.parse(localStorage.getItem("creativeData")) || [];
 
+    // Sinkronisasi data ke halaman SASC Staff
     const allData = [
       ...counselorData.map((d) => ({
         role: "Peer Counselor",
@@ -396,6 +396,7 @@ export default function SASCStaff() {
       })),
     ];
 
+    // Filter riwayat atau sebelumnya (periode dan role)
     const filtered = allData.filter((d) => {
       const matchPeriode = !selectedPeriod || d.periode === selectedPeriod;
       const matchRole = !selectedRole || d.role === selectedRole;
@@ -413,18 +414,17 @@ export default function SASCStaff() {
     });
   };
 
+  // Fungsi export atau download file data dengan excel
   const handleExportSingleExcel = (item) => {
-    // 1️⃣ Ubah data sebelum di-export
+    
+    // Mengubah data sebelum di-export
     const formattedItem = Object.entries(item).reduce((acc, [key, value]) => {
-      // Jika kolom durasi, tambahkan satuan "menit"
       if (key.toLowerCase().includes("durasi") && value) {
         acc[key] = `${value} menit`;
       }
-      // Jika kolom checklist (boolean), ubah ke simbol ✅ / ❌
       else if (typeof value === "boolean") {
         acc[key] = value ? "✅" : "❌";
       }
-      // Kalau kosong, tampilkan "-"
       else if (value === null || value === undefined || value === "") {
         acc[key] = "-";
       } else {
@@ -433,15 +433,14 @@ export default function SASCStaff() {
       return acc;
     }, {});
 
-    // 2️⃣ Buat worksheet dan workbook
+    // Memuat worksheet atau workbook
     const worksheet = XLSX.utils.json_to_sheet([formattedItem]);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Data");
-
-    // 3️⃣ Simpan file
     XLSX.writeFile(workbook, `${item.nama || "report"}_Data Report.xlsx`);
   };
 
+  // Fungsi export atau download file dari keseluruhan data dengan excel
   const handleExportExcel = () => {
     if (riwayat.length === 0) {
       Swal.fire({
@@ -452,18 +451,17 @@ export default function SASCStaff() {
       return;
     }
 
-    // Buat worksheet dari semua data riwayat
+    // Membuat worksheet dari semua data riwayat
     const worksheet = XLSX.utils.json_to_sheet(riwayat);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Report");
-
-    // Simpan file Excel
     XLSX.writeFile(
       workbook,
       `Report_${selectedRole || "Semua"}_${selectedPeriod || "All"}.xlsx`
     );
   };
 
+  // Fungsi perubahan proses pada bagian checklist pengambilan souvenir
   const handleSouvenirChange = (item, checked, index) => {
     const updateData = (data, key) => {
       const updated = [...data];
@@ -472,6 +470,7 @@ export default function SASCStaff() {
       return updated;
     };
 
+    // Melakukan update data dari hasil logbook yang telah diisi sebelumnya berdasarkan peran
     if (item.role === "Peer Counselor") {
       setDataCounselor((prev) => updateData(prev, "counselorData"));
     } else if (item.role === "Peer Partner") {
@@ -514,6 +513,7 @@ export default function SASCStaff() {
       "Creative Team": { data: dataCreative, key: "creativeData", set: setDataCreative },
     };
 
+    // Berfungsi untuk menandai bagian peran yang tertuju 
     const target = dataMap[formSouvenir.role];
     if (!target) {
       showNotif("Role tidak valid!", "error");
@@ -740,7 +740,7 @@ export default function SASCStaff() {
             <h1 className="text-2xl font-bold mb-6 text-gray-800">Verifikasi Peer Counselor</h1>
             <div className="bg-white p-6 rounded-2xl shadow overflow-x-auto">
               
-              {/* 🔍 FITUR SEARCH PERIODE */}
+              {/* Fitur search periode */}
               <div className="mb-4">
                 <input
                   type="text"
@@ -860,7 +860,7 @@ export default function SASCStaff() {
             <h1 className="text-2xl font-bold mb-6 text-gray-800">Verifikasi Peer Partner</h1>
             <div className="bg-white p-6 rounded-2xl shadow overflow-x-auto">
               
-              {/* 🔍 FITUR SEARCH PERIODE */}
+              {/* Fitur search periode */}
               <div className="mb-4">
                 <input
                   type="text"
@@ -915,23 +915,18 @@ export default function SASCStaff() {
                     </td>
                         <td className="py-2 px-3 text-center">
                           <div className="flex justify-center space-x-2">
-                            {/* Tombol Setuju */}
                             <button
                               onClick={() => updateVerifikasiPartner(i, "setuju")}
                               className="text-green-600 text-xl transition-transform transform hover:scale-125 hover:rotate-12 cursor-pointer"
                             >
                               ✔️
                             </button>
-
-                            {/* Tombol Tidak Setuju */}
                             <button
                               onClick={() => updateVerifikasiPartner(i, "tidak")}
                               className="text-red-600 text-xl transition-transform transform hover:scale-125 hover:-rotate-12 cursor-pointer"
                             >
                               ❌
                             </button>
-
-                            {/* Tombol Decline */}
                             <button
                               onClick={() => updateVerifikasiPartner(i, "decline")}
                               className="text-yellow-500 text-xl transition-transform transform hover:scale-125 cursor-pointer"
@@ -983,7 +978,7 @@ export default function SASCStaff() {
             <h1 className="text-2xl font-bold mb-6 text-gray-800">Verifikasi Creative team</h1>
             <div className="bg-white p-6 rounded-2xl shadow overflow-x-auto">
               
-              {/* 🔍 FITUR SEARCH PERIODE */}
+              {/* Fitur search periode */}
               <div className="mb-4">
                 <input
                   type="text"
@@ -1157,7 +1152,7 @@ export default function SASCStaff() {
                               ? item[key]
                                 ? "✅"
                                 : "❌"
-                              : key.toLowerCase().includes("durasi") && item[key] // jika field adalah durasi
+                              : key.toLowerCase().includes("durasi") && item[key]
                               ? `${item[key]} menit`
                               : item[key] && item[key].toString().trim() !== ""
                               ? item[key].toString()
@@ -1239,7 +1234,7 @@ export default function SASCStaff() {
             <div className="bg-white p-6 rounded-2xl shadow">
             <h1 className="text-2xl font-bold mb-6 text-gray-800">Data Checklist Souvenir Diterima</h1>
 
-            {/* 🔍 FITUR SEARCH PERIODE */}
+            {/* Fitur search periode */}
             <div className="mb-4">
               <input
                 type="text"
@@ -1263,7 +1258,7 @@ export default function SASCStaff() {
                     </tr>
                   </thead>
                   <tbody>
-                    {/* Bagian Peer Counselor */}
+                    {/* Bagian peer counselor */}
                     {dataCounselor
                       .map((item, i) => ({ ...item, originalIndex: i }))
                       .filter((item) =>
@@ -1290,7 +1285,7 @@ export default function SASCStaff() {
                         </tr>
                       ))}
 
-                    {/* Bagian Peer Partner */}
+                    {/* Bagian peer partner */}
                     {dataPartner
                       .map((item, i) => ({ ...item, originalIndex: i }))
                       .filter((item) =>
@@ -1319,7 +1314,7 @@ export default function SASCStaff() {
                       </tr>
                     ))}
 
-                    {/* Bagian Creative Team */}
+                    {/* Bagian creative team */}
                     {dataCreative
                       .map((item, i) => ({ ...item, originalIndex: i }))
                       .filter((item) =>

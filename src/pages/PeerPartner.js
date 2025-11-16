@@ -17,7 +17,7 @@ export default function PeerPartner() {
   const [riwayat, setRiwayat] = useState([]);
   const [buddyList, setBuddyList] = useState([]);
 
-  // Mengambil periode dan kampus
+  // Mengambil periode dan kampus dalam role
   const [roleData, setRoleData] = useState({});
 
   // Mengambil data dari localstorage
@@ -74,12 +74,12 @@ const handleSubmit = (e) => {
 
   const existing = JSON.parse(localStorage.getItem("partnerData")) || [];
 
-  // Jika formData belum punya id (data baru), buat id unik
+  // Jika form atau input data logbook belum punya id (data baru), maka akan menambahkan id unik atau baru
   let id = formData.id || Date.now();
 
   const selectedBuddy = buddyList.find((b) => b.nama === formData.namaBuddy);
 
-  // Data baru atau hasil edit
+  // Data baru dari hasil submit
   const newEntry = {
     ...formData,
     id,
@@ -92,21 +92,20 @@ const handleSubmit = (e) => {
     kampus: roleData.kampus || roleData.campus || "-",
   };
 
-  // Cek apakah data ini sudah ada
+  // Mengecek apakah data ini sudah tersedia atau ada di sebelumnya
   const existingIndex = existing.findIndex((item) => item.id === id);
 
+  // Data sudah ada -> melakukan update data, sedangkan data belum ada -> menambahkan data baru
   if (existingIndex !== -1) {
-    // Jika sudah ada → update
     existing[existingIndex] = newEntry;
   } else {
-    // Jika belum ada → tambahkan
     existing.push(newEntry);
   }
 
-  // Simpan ke localStorage
+  // Menyimpan ke localStorage
   localStorage.setItem("partnerData", JSON.stringify(existing));
 
-  // Sinkronisasi otomatis ke halaman SASC Staff
+  // Sinkronisasi otomatis untuk SASC Staff
   const sascData = JSON.parse(localStorage.getItem("sascPartnerData")) || [];
   const sascIndex = sascData.findIndex((item) => item.id === id);
 
@@ -168,7 +167,7 @@ const handleEdit = (index) => {
   const selected = riwayat[index];
   if (!selected) return;
 
-  // isi kembali form dengan data lama (beserta id-nya agar tidak membuat data baru)
+  // Mengisi kembali form dengan data lama (beserta id-nya agar tidak membuat data baru)
   setFormData({
     id: selected.id,
     namaBuddy: selected.namaBuddy,
@@ -235,7 +234,7 @@ const handleEdit = (index) => {
           </div>
         )}
 
-        {/* Input form */}
+        {/* Input logbook */}
         <h1 className="text-2xl font-bold mb-6 text-gray-800">
           Logbook Kegiatan
         </h1>
@@ -377,7 +376,7 @@ const handleEdit = (index) => {
           </div>
         </form>
 
-        {/* Riwayat data form */}
+        {/* Riwayat data logbook */}
         <div className="bg-white p-6 rounded-2xl shadow">
           <h2 className="text-lg font-bold mb-4 text-gray-800">
             Data Logbook

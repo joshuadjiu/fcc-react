@@ -22,7 +22,7 @@ export default function PeerCounselor() {
   const [showDropdown, setShowDropdown] = useState(false);
   const [editIndex, setEditIndex] = useState(null);
 
-  // Mengambil data role diantara periode dan kampus dan filter riwayat sesuai
+  // Mengambil data role diantara periode dan kampus, serta filter riwayat data logbook yang sesuai
   useEffect(() => {
     const savedRole = JSON.parse(localStorage.getItem("roleData"));
     const savedCounselor = JSON.parse(localStorage.getItem("counselorData")) || [];
@@ -85,7 +85,7 @@ export default function PeerCounselor() {
     formData.verifikasi = false;
     formData.komentarStaff = "";
 
-    // --- Validasi field wajib ---
+    // Validasi field
     const requiredFields = [
       "nimBuddy",
       "namaBuddy",
@@ -107,11 +107,11 @@ export default function PeerCounselor() {
 
     const durasi = hitungDurasi();
 
-    // --- Ambil semua data counselor & user ---
+    // Mengambil semua data user dalam peer counselor
     const allData = JSON.parse(localStorage.getItem("counselorData")) || [];
     const existing = JSON.parse(localStorage.getItem("peerCounselorData")) || [];
 
-    // --- Jika edit, hapus data lama dengan nim & tanggal sama ---
+    // Melakukan filter edit dalam memperbarui/menghapus data lama berdasarkan NIM dan tanggal yang sama
     const filteredExisting = existing.filter(
       (item) =>
         !(
@@ -120,7 +120,7 @@ export default function PeerCounselor() {
         )
     );
 
-    // --- Entry baru untuk counselorData (dipakai oleh SASC Staff) ---
+    // Entry baru untuk data counselor (dipakai oleh SASC Staff)
     const newEntry = {
       nim: formData.nimBuddy,
       nama: formData.namaBuddy,
@@ -137,29 +137,28 @@ export default function PeerCounselor() {
       komentarStaff: "",
       periode: roleData.periode || "-",
       kampus: roleData.kampus || roleData.campus || "-",
-      status: "Menunggu", // default setiap submit / edit ulang
+      status: "Menunggu",
     };
 
-    // --- Jika data dengan NIM & tanggal sudah ada di counselorData (edit ulang) ---
+    // Mengedit ulang, jika data dalam NIM dan tanggal sudah ada di data counselor
     const existingIndex = allData.findIndex(
       (item) =>
         item.nim === newEntry.nim && item.tanggalKonseling === newEntry.tanggalKonseling
     );
 
+    // Data sudah ada -> user melakukan edit, sedangkan Data belum ada -> menambahkan data baru
     if (existingIndex !== -1) {
-      // Jika data sudah ada, artinya user sedang edit
       allData[existingIndex] = newEntry;
     } else {
-      // Jika belum ada, tambahkan baru
       allData.push(newEntry);
     }
 
-    // --- Simpan ke localStorage ---
+    // Menyimpan ke localStorage
     filteredExisting.push(formData);
     localStorage.setItem("peerCounselorData", JSON.stringify(filteredExisting));
     localStorage.setItem("counselorData", JSON.stringify(allData));
 
-    // --- Update tampilan (riwayat) ---
+    // Filter Update tampilan pada riwayat data
     const filtered = allData.filter(
       (item) =>
         item.periode === roleData.periode &&
@@ -169,7 +168,7 @@ export default function PeerCounselor() {
 
     alert("Data logbook berhasil disimpan!");
 
-    // --- Reset form ---
+    // Reset form
     setFormData({
       nimBuddy: "",
       namaBuddy: "",
@@ -194,7 +193,7 @@ export default function PeerCounselor() {
     const selected = riwayat[index];
     if (!selected) return;
 
-    // isi kembali form dengan data lama
+    // Mengisi kembali form dengan data lama
     setFormData({
       nimBuddy: selected.nim,
       namaBuddy: selected.nama,
@@ -208,15 +207,14 @@ export default function PeerCounselor() {
       support: selected.supportNeeded,
     });
 
-    // hapus sementara dari localStorage agar tidak dobel saat disubmit lagi
+    // Menghapus sementara dari localStorage agar tidak double atau menambah data baru saat disubmit lagi
     const allData = JSON.parse(localStorage.getItem("counselorData")) || [];
     allData.splice(index, 1);
     localStorage.setItem("counselorData", JSON.stringify(allData));
 
-    // tampilkan notifikasi kecil
     alert("Silakan ubah data dan klik Simpan untuk memperbarui logbook.");
   };
-
+  
   const toggleDropdown = () => {
     setShowDropdown(!showDropdown);
   };
@@ -305,7 +303,7 @@ export default function PeerCounselor() {
           Logbook Kegiatan
         </h1>
 
-        {/* Form input */}
+        {/* Input logbook */}
         <form
           onSubmit={handleSubmit}
           className="bg-white p-6 rounded-2xl shadow space-y-5 max-w-3xl"
@@ -436,7 +434,7 @@ export default function PeerCounselor() {
           </button>
         </form>
 
-        {/* Riwayat data form */}
+        {/* Riwayat data logbook */}
         <div className="mt-10">
           <h2 className="text-xl font-semibold mb-3">Data Logbook</h2>
           <div className="bg-white p-5 rounded-xl shadow overflow-x-auto">
