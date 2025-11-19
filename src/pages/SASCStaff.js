@@ -117,6 +117,17 @@ export default function SASCStaff() {
 
   // Fungsi update verifikasi, komentar, dan edit pada halaman peer counselor
   const updateVerifikasiCounselor = (index, statusType) => {
+   
+   Swal.fire({
+    title: "Konfirmasi Terlebih Dahulu",
+    text: `Anda akan memberi status: ${statusType.toUpperCase()}`,
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: "Ya, lanjutkan",
+    cancelButtonText: "Batal",
+   }).then((result) => {
+    if(!result.isConfirmed) return;
+   
     const updated = [...dataCounselor];
     if (!updated[index]) return;
 
@@ -142,7 +153,8 @@ export default function SASCStaff() {
         ? "Data logbook Tidak Disetujui ❌"
         : "Data logbook diminta revisi (Decline) 🔁";
 
-    showNotif(notifText, "info");
+      showNotif(notifText, "info");
+    });
   };
 
   const handleKomentarCounselor = (index, value) => {
@@ -170,6 +182,17 @@ export default function SASCStaff() {
 
   // Fungsi update verifikasi,komentar, dan edit pada halaman peer partner
   const updateVerifikasiPartner = (index, statusType) => {
+    
+    Swal.fire({
+      title: "Konfirmasi Terlebih Dahulu",
+      text: `Anda akan memberi status: ${statusType.toUpperCase()}`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Ya, lanjutkan",
+      cancelButtonText: "Batal",
+    }).then((result) => {
+      if(!result.isConfirmed) return;
+    
     const updated = [...dataPartner];
     if (!updated[index]) return;
 
@@ -195,7 +218,8 @@ export default function SASCStaff() {
         ? "Data logbook Tidak Disetujui ❌"
         : "Data logbook diminta revisi (Decline) 🔁";
 
-    showNotif(notifText, "info");
+      showNotif(notifText, "info");
+    });
   };
 
   const handleKomentarPartner = (index, value) => {
@@ -223,6 +247,17 @@ export default function SASCStaff() {
 
   // Fungsi update verifikasi, komentar dan edit pada halaman creative team
   const updateVerifikasiCreative = (index, statusType) => {
+    
+    Swal.fire({
+      title: "Konfirmasi Terlebih Dahulu",
+      text: `Anda akan memberi status: ${statusType.toUpperCase()}`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Ya, lanjutkan",
+      cancelButtonText: "Batal",
+    }).then((result) => {
+      if (!result.isConfirmed) return;
+    
     const updated = [...dataCreative];
     if (!updated[index]) return;
 
@@ -252,11 +287,12 @@ export default function SASCStaff() {
         ? "Data logbook Tidak Disetujui ❌"
         : "Data logbook diminta revisi (Decline) 🔁";
 
-    // Notifikasi
-    showNotif(notifText, "info");
+      // Notifikasi
+      showNotif(notifText, "info");
 
-    // Melakukan Trigger update ke halaman CreativeTeam
-    window.dispatchEvent(new Event("storage"));
+      // Melakukan Trigger update ke halaman CreativeTeam
+      window.dispatchEvent(new Event("storage"));
+    });
   };
 
   const handleKomentarCreative = (index, value) => {
@@ -1022,8 +1058,18 @@ export default function SASCStaff() {
                         <td className="py-2 px-3">{item.mediaDiskusi}</td>
                         <td className="py-2 px-3">{item.hasilDiskusi}</td>
                         <td className="py-2 px-3">{item.status}</td>
-                        <td className="py-2 px-3 text-blue-600">
-                        {item.uploadName || "-"}
+                        <td className="py-2 px-3">
+                          {item.uploadName ? (
+                            <a
+                              href={item.uploadData}
+                              download={item.uploadName}
+                              className="text-blue-600 underline"
+                            >
+                              {item.uploadName}
+                            </a>
+                          ) : (
+                            "-"
+                          )}
                         </td>
                         <td className="py-2 px-3 text-center">
                           <div className="flex justify-center space-x-2">

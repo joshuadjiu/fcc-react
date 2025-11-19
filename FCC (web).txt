@@ -8,9 +8,7 @@ FCC (web) :
 
 4. SASC Staff (docs) :
 
-- Tambahkan fungsi hasil upload (creative team)
 - Hilangkan data creative team, setelah user isi di halaman creative team (checklist pengambilan souvenir)
-- Tambahkan konfirmasi setelah menekan silang, checklist, atau decline (verifikasi peran)
 - Ketika menekan salah satu dan memberi komentar, maka tambahkan proses data menghilang (verifikasi peran) - (opsional)
 
 5. Semuanya (docs)

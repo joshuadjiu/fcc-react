@@ -72,10 +72,28 @@ export default function CreativeTeam() {
     if (name === "status") setShowUpload(value === "Final");
   };
 
+  // Fungsi converter dalam file upload
+  const fileToBase64 = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = (error) => reject(error);
+    });
+  };
+
   // Handle perubahan file upload
-  const handleFileChange = (e) => {
+  const handleFileChange = async (e) => {
     const file = e.target.files[0];
-    setFormData((prev) => ({ ...prev, uploadFile: file }));
+    if (!file) return;
+
+    const base64 = await fileToBase64(file);
+
+    setFormData((prev) => ({
+      ...prev,
+      uploadFile: file,
+      uploadBase64: base64,
+    }));
   };
 
   // Submit form
@@ -107,6 +125,7 @@ export default function CreativeTeam() {
       ...formData,
       id,
       uploadName: formData.uploadFile ? formData.uploadFile.name : null,
+      uploadData: formData.uploadBase64 || null,
       periode: roleData.periode || "-",
       pembina: roleData.pembina || "-",
       statusVerifikasi: formData.statusVerifikasi || "Menunggu",
@@ -354,7 +373,19 @@ export default function CreativeTeam() {
                     <td className="py-2 px-3">{item.mediaDiskusi}</td>
                     <td className="py-2 px-3">{item.hasilDiskusi}</td>
                     <td className="py-2 px-3">{item.status}</td>
-                    <td className="py-2 px-3 text-blue-600">{item.uploadName || "-"}</td>
+                    <td className="py-2 px-3">
+                      {item.uploadName ? (
+                        <a
+                          href={item.uploadData}
+                          download={item.uploadName}
+                          className="text-blue-600 underline"
+                        >
+                          {item.uploadName}
+                        </a>
+                      ) : (
+                        "-"
+                      )}
+                    </td>
                     <td className="py-2 px-3">
                       <span
                         className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${
