@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "./static/css/main.30276aa5.css",
-    "main.js": "./static/js/main.d6997bcd.js",
+    "main.css": "./static/css/main.48c6792f.css",
+    "main.js": "./static/js/main.d7cadb4d.js",
     "static/js/488.d4a0d7d0.chunk.js": "./static/js/488.d4a0d7d0.chunk.js",
     "static/media/Logo-FCC.png": "./static/media/Logo-FCC.0df9c08f8df8c2056fb4.png",
     "static/media/BinusSupport_Binusian.jpg": "./static/media/BinusSupport_Binusian.3a7f53d37f450d0fa266.jpg",
@@ -9,12 +9,12 @@
     "static/media/Logo-Binus.png": "./static/media/Logo-Binus.c5c6a81328a9f4fe9432.png",
     "static/media/Teman-Ngumpul.jpg": "./static/media/Teman-Ngumpul.d4e6432cbb49c15ed036.jpg",
     "index.html": "./index.html",
-    "main.30276aa5.css.map": "./static/css/main.30276aa5.css.map",
-    "main.d6997bcd.js.map": "./static/js/main.d6997bcd.js.map",
+    "main.48c6792f.css.map": "./static/css/main.48c6792f.css.map",
+    "main.d7cadb4d.js.map": "./static/js/main.d7cadb4d.js.map",
     "488.d4a0d7d0.chunk.js.map": "./static/js/488.d4a0d7d0.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.30276aa5.css",
-    "static/js/main.d6997bcd.js"
+    "static/css/main.48c6792f.css",
+    "static/js/main.d7cadb4d.js"
   ]
 }
