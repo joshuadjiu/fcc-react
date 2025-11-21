@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Bell, User, CheckCircle } from "lucide-react";
+import { useNavigate } from "react-router-dom"
 
 export default function PeerPartner() {
   const [formData, setFormData] = useState({
@@ -52,44 +53,50 @@ export default function PeerPartner() {
     }
   }, [formData.jamMulai, formData.jamSelesai]);
 
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    navigate("/login");
+  };
+
   // Submit form
-const handleSubmit = (e) => {
-  e.preventDefault();
+  const handleSubmit = (e) => {
+    e.preventDefault();
 
-  const requiredFields = [
-    "namaBuddy",
-    "tanggal",
-    "jamMulai",
-    "jamSelesai",
-    "metode",
-    "deskripsi",
-    "kendala",
-    "support",
-  ];
-  const emptyFields = requiredFields.filter((f) => !formData[f]);
-  if (emptyFields.length > 0) {
-    alert("Harap isi semua kolom!");
-    return;
-  }
+    const requiredFields = [
+      "namaBuddy",
+      "tanggal",
+      "jamMulai",
+      "jamSelesai",
+      "metode",
+      "deskripsi",
+      "kendala",
+      "support",
+    ];
+    const emptyFields = requiredFields.filter((f) => !formData[f]);
+    if (emptyFields.length > 0) {
+      alert("Harap isi semua kolom!");
+      return;
+    }
 
-  const existing = JSON.parse(localStorage.getItem("partnerData")) || [];
+    const existing = JSON.parse(localStorage.getItem("partnerData")) || [];
 
-  // Jika form atau input data logbook belum punya id (data baru), maka akan menambahkan id unik atau baru
-  let id = formData.id || Date.now();
+    // Jika form atau input data logbook belum punya id (data baru), maka akan menambahkan id unik atau baru
+    let id = formData.id || Date.now();
 
-  const selectedBuddy = buddyList.find((b) => b.nama === formData.namaBuddy);
+    const selectedBuddy = buddyList.find((b) => b.nama === formData.namaBuddy);
 
-  // Data baru dari hasil submit
-  const newEntry = {
-    ...formData,
-    id,
-    nimBuddy: selectedBuddy?.nim || "-",
-    jurusan: selectedBuddy?.jurusan || "-",
-    verifikasi: false,
-    status: "Menunggu",
-    komentarStaff: "",
-    periode: roleData.periode || "-",
-    kampus: roleData.kampus || roleData.campus || "-",
+    // Data baru dari hasil submit
+    const newEntry = {
+      ...formData,
+      id,
+      nimBuddy: selectedBuddy?.nim || "-",
+      jurusan: selectedBuddy?.jurusan || "-",
+      verifikasi: false,
+      status: "Menunggu",
+      komentarStaff: "",
+      periode: roleData.periode || "-",
+      kampus: roleData.kampus || roleData.campus || "-",
   };
 
   // Mengecek apakah data ini sudah tersedia atau ada di sebelumnya
@@ -215,6 +222,12 @@ const handleEdit = (index) => {
                 {localStorage.getItem("userNIM") || "NIM"}
               </p>
             </div>
+            <button
+              onClick={handleLogout}
+              className="ml-4 bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-900 transition text-sm"
+            >
+              Logout
+            </button>
           </div>
         </div>
 
@@ -318,10 +331,10 @@ const handleEdit = (index) => {
               className="border rounded-lg p-2 w-full"
             >
               <option value="">-- Pilih Metode --</option>
-              <option value="zoom">Zoom</option>
-              <option value="tatap muka">Tatap Muka</option>
-              <option value="chat">Chat WA/Line</option>
-              <option value="telpon">Telepon</option>
+              <option value="Zoom">Zoom</option>
+              <option value="Tatap Muka">Tatap Muka</option>
+              <option value="Chat WA/Line">Chat WA/Line</option>
+              <option value="Telepon">Telepon</option>
             </select>
           </div>
 

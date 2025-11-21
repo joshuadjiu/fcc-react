@@ -46,7 +46,7 @@ export default function Register() {
 
     localStorage.setItem("userName", formData.nama);
     localStorage.setItem("userNIM", formData.nim);
-    
+
     setMessage({ text: "Registrasi berhasil! Silakan login.", type: "success" });
     setTimeout(() => navigate("/login"), 1500);
   };
@@ -159,6 +159,11 @@ export default function Register() {
             className="text-blue-500 cursor-pointer hover:underline"
           >
             Login
+          </span>
+        </p>
+        <p className="text-center text-sm text-gray-600 mt-2">
+          <span onClick={() => navigate("/")} className="text-blue-500 cursor-pointer hover:underline">
+            Kembali ke Home
           </span>
         </p>
       </div>

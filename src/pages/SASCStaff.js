@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 import * as XLSX from "xlsx";
 import { Bell, User, CheckCircle, PlusCircle } from "lucide-react";
+import { useNavigate } from "react-router-dom"
 
 export default function SASCStaff() {
   const [activePage, setActivePage] = useState("verifikasi");
@@ -22,6 +23,16 @@ export default function SASCStaff() {
   const [notif, setNotif] = useState({ show: false, message: "", type: "" });
 
   const [isChanged, setIsChanged] = useState(false);
+
+  const [dataCreativeSouvenir, setDataCreativeSouvenir] = useState(
+    JSON.parse(localStorage.getItem("creativeSouvenirData")) || []
+  );
+
+  const navigate = useNavigate();
+    
+  const handleLogout = () => {
+    navigate("/login");
+  };
 
   // Struktur kolom pada tabel untuk tiap role
   const columnsByRole = {
@@ -512,7 +523,7 @@ export default function SASCStaff() {
     } else if (item.role === "Peer Partner") {
       setDataPartner((prev) => updateData(prev, "partnerData"));
     } else if (item.role === "Creative Team") {
-      setDataCreative((prev) => updateData(prev, "creativeData"));
+      setDataCreativeSouvenir((prev) => updateData(prev, "creativeSouvenirData"));
     }
 
     showNotif(
@@ -546,7 +557,7 @@ export default function SASCStaff() {
     const dataMap = {
       "Peer Counselor": { data: dataCounselor, key: "counselorData", set: setDataCounselor },
       "Peer Partner": { data: dataPartner, key: "partnerData", set: setDataPartner },
-      "Creative Team": { data: dataCreative, key: "creativeData", set: setDataCreative },
+      "Creative Team": { data: dataCreativeSouvenir, key: "creativeSouvenirData", set: setDataCreativeSouvenir },
     };
 
     // Berfungsi untuk menandai bagian peran yang tertuju 
@@ -561,6 +572,7 @@ export default function SASCStaff() {
       periode: formSouvenir.periode,
       role: formSouvenir.role,
       souvenir: false,
+      fromManual: true,
     };
 
     const updated = [...target.data, newEntry];
@@ -652,6 +664,12 @@ export default function SASCStaff() {
               <p className="font-semibold text-gray-800">Staff SASC</p>
               <p className="text-sm text-gray-600">Administrator</p>
             </div>
+            <button
+              onClick={handleLogout}
+              className="ml-4 bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-900 transition text-sm"
+            >
+              Logout
+            </button>
           </div>
         </div>
 
@@ -807,6 +825,7 @@ export default function SASCStaff() {
                       <th className="py-2 px-3">Support Needed</th>
                       <th className="py-2 px-3 text-center">Verifikasi</th>
                       <th className="py-2 px-3">Komentar Staff</th>
+                      <th className="py-2 px-3">Status Proses</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -881,6 +900,28 @@ export default function SASCStaff() {
                             />
                           )}
                         </td>
+                        <td className="py-2 px-3">
+                          {item.status === "Disetujui" && (
+                            <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-semibold">
+                              Disetujui
+                            </span>
+                          )}
+                          {item.status === "Tidak Disetujui" && (
+                            <span className="bg-red-100 text-red-700 px-3 py-1 rounded-full text-xs font-semibold">
+                              Tidak Disetujui
+                            </span>
+                          )}
+                          {item.status === "Decline" && (
+                            <span className="bg-orange-100 text-orange-700 px-3 py-1 rounded-full text-xs font-semibold">
+                              Revisi
+                            </span>
+                          )}
+                          {(item.status === undefined || item.status === "Menunggu") && (
+                            <span className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-xs font-semibold">
+                              Menunggu
+                            </span>
+                          )}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -925,6 +966,7 @@ export default function SASCStaff() {
                       <th className="py-2 px-3">Support Needed</th>
                       <th className="py-2 px-3">Verifikasi</th>
                       <th className="py-2 px-3">Komentar Staff</th>
+                      <th className="py-2 px-3">Status Proses</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -999,6 +1041,28 @@ export default function SASCStaff() {
                             />
                           )}
                         </td>
+                        <td className="py-2 px-3">
+                          {item.status === "Disetujui" && (
+                            <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-semibold">
+                              Disetujui
+                            </span>
+                          )}
+                          {item.status === "Tidak Disetujui" && (
+                            <span className="bg-red-100 text-red-700 px-3 py-1 rounded-full text-xs font-semibold">
+                              Tidak Disetujui
+                            </span>
+                          )}
+                          {item.status === "Decline" && (
+                            <span className="bg-orange-100 text-orange-700 px-3 py-1 rounded-full text-xs font-semibold">
+                              Revisi
+                            </span>
+                          )}
+                          {(item.status === undefined || item.status === "Menunggu") && (
+                            <span className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-xs font-semibold">
+                              Menunggu
+                            </span>
+                          )}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -1041,6 +1105,7 @@ export default function SASCStaff() {
                       <th className="py-2 px-3">Hasil Upload</th>
                       <th className="py-2 px-3">Verifikasi</th>
                       <th className="py-2 px-3">Komentar Staff</th>
+                      <th className="py-2 px-3">Status Proses</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1118,6 +1183,28 @@ export default function SASCStaff() {
                               className="border rounded-lg p-2 w-full"
                               placeholder="Tulis komentar..."
                             />
+                          )}
+                        </td>
+                        <td className="py-2 px-3">
+                          {item.statusVerifikasi === "Disetujui" && (
+                            <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-semibold">
+                              Disetujui
+                            </span>
+                          )}
+                          {item.statusVerifikasi === "Tidak Disetujui" && (
+                            <span className="bg-red-100 text-red-700 px-3 py-1 rounded-full text-xs font-semibold">
+                              Tidak Disetujui
+                            </span>
+                          )}
+                          {item.statusVerifikasi === "Decline" && (
+                            <span className="bg-orange-100 text-orange-700 px-3 py-1 rounded-full text-xs font-semibold">
+                              Revisi
+                            </span>
+                          )}
+                          {(item.statusVerifikasi === undefined || item.statusVerifikasi === "Menunggu") && (
+                            <span className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-xs font-semibold">
+                              Menunggu
+                            </span>
                           )}
                         </td>
                       </tr>
@@ -1361,10 +1448,11 @@ export default function SASCStaff() {
                     ))}
 
                     {/* Bagian creative team */}
-                    {dataCreative
+                    {dataCreativeSouvenir
                       .map((item, i) => ({ ...item, originalIndex: i }))
                       .filter((item) =>
-                        item.periode?.toLowerCase().includes(searchPeriode.toLowerCase())
+                        item.periode?.toLowerCase().includes(searchPeriode.toLowerCase()) &&
+                        item.fromManual === true
                       )
                       .map((item) => (
                       <tr key={`creative-${item.originalIndex}`} className="border-b hover:bg-gray-50">

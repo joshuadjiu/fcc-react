@@ -189,6 +189,10 @@ export default function PeerCounselor() {
    navigate("/notifications");
   };
 
+  const handleLogout = () => {
+    navigate("/login");
+  };
+
   const handleEdit = (index) => {
     const selected = riwayat[index];
     if (!selected) return;
@@ -233,7 +237,7 @@ export default function PeerCounselor() {
       <main className="flex-1 p-10">
         {/* Topbar */}
         <div className="flex justify-end items-center mb-8 space-x-6">
-          <div className="relative">
+          <div className="relative flex items-center justify-center p-2 rounded-full cursor-pointer hover:bg-gray-300 transition">
             <Bell
               className="text-gray-700 cursor-pointer"
               onClick={toggleDropdown}
@@ -241,7 +245,7 @@ export default function PeerCounselor() {
             
             {/* Informasi notifikasi dan profil (nama dan NIM) */}
             {showDropdown && (
-              <div className="absolute right-0 mt-2 w-64 bg-white border rounded-lg shadow-lg z-20">
+              <div className="absolute right-0 top-12 w-64 bg-white border rounded-lg shadow-lg z-20">
                 <div className="px-4 py-2 border-b font-semibold text-gray-700">
                   Notification
                 </div>
@@ -280,6 +284,12 @@ export default function PeerCounselor() {
                 {localStorage.getItem("userNIM") || "NIM"}
               </p>
             </div>
+            <button
+              onClick={handleLogout}
+              className="ml-4 bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-900 transition text-sm"
+            >
+              Logout
+            </button>
           </div>
         </div>
 
@@ -388,10 +398,10 @@ export default function PeerCounselor() {
               className="w-full border p-2 rounded-lg"
             >
               <option value="">-- Pilih Metode --</option>
-              <option value="zoom">Zoom</option>
-              <option value="tatap muka">Tatap Muka</option>
-              <option value="chat">Chat WA/Line</option>
-              <option value="telpon">Telepon</option>
+              <option value="Zoom">Zoom</option>
+              <option value="Tatap Muka">Tatap Muka</option>
+              <option value="chat WA/Line">Chat WA/Line</option>
+              <option value="Telepon">Telepon</option>
             </select>
           </div>
 

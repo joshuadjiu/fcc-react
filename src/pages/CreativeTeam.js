@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Bell, User, Upload } from "lucide-react";
+import { useNavigate } from "react-router-dom"
 
 export default function CreativeTeam() {
   const [formData, setFormData] = useState({
@@ -94,6 +95,12 @@ export default function CreativeTeam() {
       uploadFile: file,
       uploadBase64: base64,
     }));
+  };
+
+  const navigate = useNavigate();
+  
+  const handleLogout = () => {
+    navigate("/login");
   };
 
   // Submit form
@@ -219,6 +226,12 @@ export default function CreativeTeam() {
                 {localStorage.getItem("userNIM") || "NIM"}
               </p>
             </div>
+            <button
+              onClick={handleLogout}
+              className="ml-4 bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-900 transition text-sm"
+            >
+              Logout
+            </button>
           </div>
         </div>
 
@@ -287,9 +300,9 @@ export default function CreativeTeam() {
               >
                 <option value="">Pilih media</option>
                 <option value="Zoom">Zoom</option>
-                <option value="Chat WA/LINE">Chat WA/LINE</option>
+                <option value="Chat WA/Line">Chat WA/Line</option>
                 <option value="Email">Email</option>
-                <option value="Tatap muka">Tatap muka</option>
+                <option value="Tatap Muka">Tatap muka</option>
               </select>
             </div>
 

@@ -117,6 +117,11 @@ export default function Login() {
             Register
           </span>
         </p>
+        <p className="text-center text-sm text-gray-600 mt-2">
+          <span onClick={() => navigate("/")} className="text-blue-500 cursor-pointer hover:underline">
+            Kembali ke Home
+          </span>
+        </p>
       </div>
     </div>
   );
