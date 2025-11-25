@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom"
 export default function SASCStaff() {
   const [activePage, setActivePage] = useState("verifikasi");
   const [searchPeriode, setSearchPeriode] = useState("");
+  const [searchNama, setSearchNama] = useState("");
 
   // Data pembina
   const [pembinaList, setPembinaList] = useState([]);
@@ -23,6 +24,14 @@ export default function SASCStaff() {
   const [notif, setNotif] = useState({ show: false, message: "", type: "" });
 
   const [isChanged, setIsChanged] = useState(false);
+
+  const [dataCounselorSouvenir, setDataCounselorSouvenir] = useState(
+    JSON.parse(localStorage.getItem("counselorSouvenirData")) || []
+  );
+
+  const [dataPartnerSouvenir, setDataPartnerSouvenir] = useState(
+    JSON.parse(localStorage.getItem("partnerSouvenirData")) || []
+  );
 
   const [dataCreativeSouvenir, setDataCreativeSouvenir] = useState(
     JSON.parse(localStorage.getItem("creativeSouvenirData")) || []
@@ -52,7 +61,6 @@ export default function SASCStaff() {
       "supportNeeded",
       "verifikasi",
       "komentarStaff",
-      "souvenir"
     ],
 
     "Peer Partner": [
@@ -71,7 +79,6 @@ export default function SASCStaff() {
       "support",
       "verifikasi",
       "komentarStaff",
-      "souvenir"
     ],
 
     "Creative Team": [
@@ -275,11 +282,9 @@ export default function SASCStaff() {
     if (statusType === "setuju") {
       updated[index].statusVerifikasi = "Disetujui";
       updated[index].verifikasi = true;
-
     } else if (statusType === "tidak") {
       updated[index].statusVerifikasi = "Tidak Disetujui";
       updated[index].verifikasi = false;
-
     } else if (statusType === "decline") {
       updated[index].statusVerifikasi = "Decline (Edit Ulang)";
       updated[index].verifikasi = false;
@@ -406,7 +411,6 @@ export default function SASCStaff() {
         supportNeeded: d.supportNeeded || "-",
         verifikasi: d.verifikasi ? "✅" : "❌",
         komentarStaff: d.komentarStaff || "-",
-        souvenir: d.souvenir || "-",
       })),
       ...partnerData.map((d) => ({
         role: "Peer Partner",
@@ -425,7 +429,6 @@ export default function SASCStaff() {
         support: d.support || d.supportNeeded || "-",
         verifikasi: d.verifikasi ? "✅" : "❌",
         komentarStaff: d.komentarStaff || "-",
-        souvenir: d.souvenir ? "✅" : "-",
       })),
       ...creativeData.map((d) => ({
         role: "Creative Team",
@@ -484,7 +487,7 @@ export default function SASCStaff() {
     const worksheet = XLSX.utils.json_to_sheet([formattedItem]);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Data");
-    XLSX.writeFile(workbook, `${item.nama || "report"}_Data Report.xlsx`);
+    XLSX.writeFile(workbook, `${item.nama || item.namaBuddy || item.pembina}_Data Report.xlsx`);
   };
 
   // Fungsi export atau download file dari keseluruhan data dengan excel
@@ -519,9 +522,9 @@ export default function SASCStaff() {
 
     // Melakukan update data dari hasil logbook yang telah diisi sebelumnya berdasarkan peran
     if (item.role === "Peer Counselor") {
-      setDataCounselor((prev) => updateData(prev, "counselorData"));
+      setDataCounselorSouvenir((prev) => updateData(prev, "counselorSouvenirData"));
     } else if (item.role === "Peer Partner") {
-      setDataPartner((prev) => updateData(prev, "partnerData"));
+      setDataPartnerSouvenir((prev) => updateData(prev, "partnerSouvenirData"));
     } else if (item.role === "Creative Team") {
       setDataCreativeSouvenir((prev) => updateData(prev, "creativeSouvenirData"));
     }
@@ -555,8 +558,8 @@ export default function SASCStaff() {
 
     // Menyimpan data sesuai role
     const dataMap = {
-      "Peer Counselor": { data: dataCounselor, key: "counselorData", set: setDataCounselor },
-      "Peer Partner": { data: dataPartner, key: "partnerData", set: setDataPartner },
+      "Peer Counselor": { data: dataCounselorSouvenir, key: "counselorSouvenirData", set: setDataCounselorSouvenir },
+      "Peer Partner": { data: dataPartnerSouvenir, key: "partnerSouvenirData", set: setDataPartnerSouvenir },
       "Creative Team": { data: dataCreativeSouvenir, key: "creativeSouvenirData", set: setDataCreativeSouvenir },
     };
 
@@ -580,7 +583,7 @@ export default function SASCStaff() {
     localStorage.setItem(target.key, JSON.stringify(updated));
 
     setFormSouvenir({ nama: "", role: "", periode: "", souvenir: false });
-    showNotif(`User baru (${formSouvenir.nama}) berhasil ditambahkan ke ${formSouvenir.role}! ✅`, "success");
+    showNotif(`User (${formSouvenir.nama}) berhasil ditambahkan ke ${formSouvenir.role}! ✅`, "success");
   };
 
   return (
@@ -1314,7 +1317,7 @@ export default function SASCStaff() {
           <>
             <h1 className="text-2xl font-bold mb-6 text-gray-800">Checklist Pengambilan Souvenir</h1>
             <form onSubmit={handleAddSouvenirUser} className="bg-white p-6 rounded-2xl shadow mb-8">
-              <h2 className="text-lg font-semibold mb-4">Data Baru untuk Pengambilan Souvenir (manual)</h2>
+              <h2 className="text-lg font-semibold mb-4">Input Data Pengambilan Souvenir</h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Nama</label>
@@ -1367,12 +1370,23 @@ export default function SASCStaff() {
             <div className="bg-white p-6 rounded-2xl shadow">
             <h1 className="text-2xl font-bold mb-6 text-gray-800">Data Checklist Souvenir Diterima</h1>
 
+            {/* Search Filters */}
+            <div className="mb-4 flex flex-col md:flex-row md:items-center md:space-x-4">
+
+            {/* Fitur search nama */}
+              <input
+                type="text"
+                placeholder="Cari berdasarkan nama"
+                className="border rounded-lg p-2 w-full md:w-1/3"
+                value={searchNama}
+                onChange={(e) => setSearchNama(e.target.value)}
+              />
+
             {/* Fitur search periode */}
-            <div className="mb-4">
               <input
                 type="text"
                 placeholder="Cari berdasarkan periode (contoh: 2022 - 2026)"
-                className="border rounded-lg p-2 w-full md:w-1/3"
+                className="border rounded-lg p-2 w-full md:w-1/3 mt-3 md:mt-0"
                 value={searchPeriode}
                 onChange={(e) => setSearchPeriode(e.target.value)}
               />
@@ -1391,12 +1405,21 @@ export default function SASCStaff() {
                     </tr>
                   </thead>
                   <tbody>
+
                     {/* Bagian peer counselor */}
-                    {dataCounselor
+                    {dataCounselorSouvenir
                       .map((item, i) => ({ ...item, originalIndex: i }))
-                      .filter((item) =>
-                        item.periode?.toLowerCase().includes(searchPeriode.toLowerCase())
-                      )
+                      .filter((item) => {
+                        const nameSearch =
+                          searchNama === "" ||
+                          item.nama?.toLowerCase().includes(searchNama.toLowerCase());
+
+                        const periodeSearch =
+                          searchPeriode === "" ||
+                          item.periode?.toLowerCase().includes(searchPeriode.toLowerCase());
+
+                        return nameSearch && periodeSearch && item.fromManual === true;
+                      })
                       .map((item) => (
                         <tr key={`counselor-${item.originalIndex}`} className="border-b hover:bg-gray-50">
                           <td className="py-2 px-3">{item.nama || "-"}</td>
@@ -1419,15 +1442,29 @@ export default function SASCStaff() {
                       ))}
 
                     {/* Bagian peer partner */}
-                    {dataPartner
+                    {dataPartnerSouvenir
                       .map((item, i) => ({ ...item, originalIndex: i }))
-                      .filter((item) =>
-                        item.periode?.toLowerCase().includes(searchPeriode.toLowerCase())
-                      )
+                      .filter((item) => {
+                        const buddyView =
+                          dataBuddy.find((b) => b.nim === item.nim)?.nama ||
+                          item.namaBuddy ||
+                          item.nama ||
+                          "-";
+
+                        const nameSearch =
+                          searchNama === "" ||
+                          buddyView.toLowerCase().includes(searchNama.toLowerCase());
+
+                        const periodeSearch =
+                          searchPeriode === "" ||
+                          item.periode?.toLowerCase().includes(searchPeriode.toLowerCase());
+
+                        return nameSearch && periodeSearch && item.fromManual === true;
+                      })
                       .map((item) => (
                       <tr key={`partner-${item.originalIndex}`} className="border-b hover:bg-gray-50">
                         <td className="py-2 px-3">
-                          {dataBuddy.find((b) => b.nim === item.nim)?.nama || item.namaBuddy || "-"}
+                          {dataBuddy.find((b) => b.nim === item.nim)?.nama || item.nama || item.namaBuddy || "-"}
                         </td>
                         <td className="py-2 px-3">Peer Partner</td>
                         <td className="py-2 px-3">{item.periode || "-"}</td>
@@ -1450,10 +1487,17 @@ export default function SASCStaff() {
                     {/* Bagian creative team */}
                     {dataCreativeSouvenir
                       .map((item, i) => ({ ...item, originalIndex: i }))
-                      .filter((item) =>
-                        item.periode?.toLowerCase().includes(searchPeriode.toLowerCase()) &&
-                        item.fromManual === true
-                      )
+                      .filter((item) => {
+                        const nameSearch =
+                          searchNama === "" ||
+                          item.nama?.toLowerCase().includes(searchNama.toLowerCase());
+
+                        const periodeSearch =
+                          searchPeriode === "" ||
+                          item.periode?.toLowerCase().includes(searchPeriode.toLowerCase());
+
+                        return nameSearch && periodeSearch && item.fromManual === true;
+                      })
                       .map((item) => (
                       <tr key={`creative-${item.originalIndex}`} className="border-b hover:bg-gray-50">
                         <td className="py-2 px-3">{item.nama || "-"}</td>

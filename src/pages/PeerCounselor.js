@@ -235,61 +235,78 @@ export default function PeerCounselor() {
 
       {/* Main */}
       <main className="flex-1 p-10">
+
         {/* Topbar */}
-        <div className="flex justify-end items-center mb-8 space-x-6">
-          <div className="relative flex items-center justify-center p-2 rounded-full cursor-pointer hover:bg-gray-300 transition">
-            <Bell
-              className="text-gray-700 cursor-pointer"
-              onClick={toggleDropdown}
-            />
+        <div className="flex justify-between items-center mb-8 w-full">
+          
+          {/* Tombol Kembali (kiri) */}
+          <button
+            onClick={() => navigate("/role-selection")}
+            className="bg-gray-200 text-gray-700 px-5 py-2 rounded-lg hover:bg-gray-300 transition"
+          >
+            ← Kembali
+          </button>
+
+          {/* Bagian kanan: Bell + Profile */}
+          <div className="flex items-center space-x-6">
             
-            {/* Informasi notifikasi dan profil (nama dan NIM) */}
-            {showDropdown && (
-              <div className="absolute right-0 top-12 w-64 bg-white border rounded-lg shadow-lg z-20">
-                <div className="px-4 py-2 border-b font-semibold text-gray-700">
-                  Notification
-                </div>
-
-                {notifications.length === 0 ? (
-                  <div className="px-4 py-6 text-center text-gray-500 text-sm">
-                    No New Notification
-                  </div>
-                ) : (
-                  notifications.map((notif, i) => (
-                    <div
-                      key={i}
-                      className="px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer"
-                    >
-                      {notif.message}
-                    </div>
-                  ))
-                )}
-
-                <button
-                  onClick={handleViewAll}
-                  className="w-full text-center text-blue-600 py-2 border-t hover:bg-gray-50 text-sm font-medium"
-                >
-                  VIEW ALL
-                </button>
-              </div>
-            )}
-          </div>
-          <div className="flex items-center space-x-2">
-            <User className="text-gray-700" />
-            <div>
-              <p className="font-semibold text-gray-800">
-                {localStorage.getItem("userName") || "Nama"}
-              </p>
-              <p className="text-sm text-gray-600">
-                {localStorage.getItem("userNIM") || "NIM"}
-              </p>
-            </div>
-            <button
-              onClick={handleLogout}
-              className="ml-4 bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-900 transition text-sm"
+            {/* Bell */}
+            <div
+              className="relative flex items-center justify-center p-2 rounded-full cursor-pointer hover:bg-gray-300 transition"
+              onClick={toggleDropdown}
             >
-              Logout
-            </button>
+              <Bell className="text-gray-700 cursor-pointer" />
+
+              {showDropdown && (
+                <div className="absolute right-0 top-12 w-64 bg-white border rounded-lg shadow-lg z-20">
+                  <div className="px-4 py-2 border-b font-semibold text-gray-700">
+                    Notification
+                  </div>
+
+                  {notifications.length === 0 ? (
+                    <div className="px-4 py-6 text-center text-gray-500 text-sm">
+                      No New Notification
+                    </div>
+                  ) : (
+                    notifications.map((notif, i) => (
+                      <div
+                        key={i}
+                        className="px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer"
+                      >
+                        {notif.message}
+                      </div>
+                    ))
+                  )}
+
+                  <button
+                    onClick={handleViewAll}
+                    className="w-full text-center text-blue-600 py-2 border-t hover:bg-gray-50 text-sm font-medium"
+                  >
+                    VIEW ALL
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Profile */}
+            <div className="flex items-center space-x-2">
+              <User className="text-gray-700" />
+              <div>
+                <p className="font-semibold text-gray-800">
+                  {localStorage.getItem("userName") || "Nama"}
+                </p>
+                <p className="text-sm text-gray-600">
+                  {localStorage.getItem("userNIM") || "NIM"}
+                </p>
+              </div>
+
+              <button
+                onClick={handleLogout}
+                className="ml-4 bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-900 transition text-sm"
+              >
+                Logout
+              </button>
+            </div>
           </div>
         </div>
 

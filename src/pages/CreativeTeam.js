@@ -214,24 +214,39 @@ export default function CreativeTeam() {
       {/* Main */}
       <main className="flex-1 p-10">
         {/* Topbar */}
-        <div className="flex justify-end items-center mb-8 space-x-6">
-          <Bell className="text-gray-700 cursor-pointer" />
-          <div className="flex items-center space-x-2">
-            <User className="text-gray-700" />
-            <div>
-              <p className="font-semibold text-gray-800">
-                {localStorage.getItem("userName") || "Nama"}
-              </p>
-              <p className="text-sm text-gray-600">
-                {localStorage.getItem("userNIM") || "NIM"}
-              </p>
+
+        <div className="flex justify-between items-center mb-8 w-full">
+          
+          {/* Tombol kembali */}
+          <button
+            onClick={() => navigate("/role-selection")}
+            className="bg-gray-200 text-gray-700 px-5 py-2 rounded-lg hover:bg-gray-300 transition"
+          >
+            ← Kembali
+          </button>
+
+          {/* Profil + Notifikasi */}
+          <div className="flex items-center space-x-6">
+            <Bell className="text-gray-700 cursor-pointer" />
+            
+            <div className="flex items-center space-x-2">
+              <User className="text-gray-700" />
+              <div>
+                <p className="font-semibold text-gray-800">
+                  {localStorage.getItem("userName") || "Nama"}
+                </p>
+                <p className="text-sm text-gray-600">
+                  {localStorage.getItem("userNIM") || "NIM"}
+                </p>
+              </div>
+
+              <button
+                onClick={handleLogout}
+                className="ml-4 bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-900 transition text-sm"
+              >
+                Logout
+              </button>
             </div>
-            <button
-              onClick={handleLogout}
-              className="ml-4 bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-900 transition text-sm"
-            >
-              Logout
-            </button>
           </div>
         </div>
 
