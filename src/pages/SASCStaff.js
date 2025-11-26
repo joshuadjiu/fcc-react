@@ -25,6 +25,7 @@ export default function SASCStaff() {
 
   const [isChanged, setIsChanged] = useState(false);
 
+  // Data user dengan proses penambahan secara manual pada bagian checklist pengambilan souvenir
   const [dataCounselorSouvenir, setDataCounselorSouvenir] = useState(
     JSON.parse(localStorage.getItem("counselorSouvenirData")) || []
   );
@@ -198,7 +199,7 @@ export default function SASCStaff() {
     showNotif("Data dikembalikan untuk diperbaiki", "info");
   };
 
-  // Fungsi update verifikasi,komentar, dan edit pada halaman peer partner
+  // Fungsi update verifikasi, komentar, dan edit pada halaman peer partner
   const updateVerifikasiPartner = (index, statusType) => {
     
     Swal.fire({
@@ -236,6 +237,7 @@ export default function SASCStaff() {
         ? "Data logbook Tidak Disetujui ❌"
         : "Data logbook diminta revisi (Decline) 🔁";
 
+        // Notifikasi
       showNotif(notifText, "info");
     });
   };
@@ -306,7 +308,7 @@ export default function SASCStaff() {
       // Notifikasi
       showNotif(notifText, "info");
 
-      // Melakukan Trigger update ke halaman CreativeTeam
+      // Melakukan trigger update ke halaman Creative Team
       window.dispatchEvent(new Event("storage"));
     });
   };
@@ -334,7 +336,7 @@ export default function SASCStaff() {
     showNotif("Data dikembalikan untuk diperbaiki", "info");
   };
 
-  // Fungsi menambah dan menghapus pembina
+  // Fungsi menambah pembina
   const handleAddPembina = (e) => {
     e.preventDefault();
     if (!formPembina.trim()) {
@@ -348,6 +350,7 @@ export default function SASCStaff() {
     showNotif("Pembina berhasil ditambahkan!", "success");
   };
 
+  // Fungsi menghapus pembina
   const handleDeletePembina = (index) => {
     const updated = pembinaList.filter((_, i) => i !== index);
     setPembinaList(updated);
@@ -355,12 +358,13 @@ export default function SASCStaff() {
     showNotif("Pembina dihapus!", "info");
   };
 
-  // Fungsi input buddy
+  // Fungsi input atau perubahan pada data buddy
   const handleBuddyChange = (e) => {
     const { name, value } = e.target;
     setFormBuddy({ ...formBuddy, [name]: value });
   };
 
+  // Fungsi menambah data buddy
   const handleAddBuddy = (e) => {
     e.preventDefault();
     if (!formBuddy.nim || !formBuddy.nama || !formBuddy.jurusan) {
@@ -374,6 +378,7 @@ export default function SASCStaff() {
     showNotif("Data buddy berhasil ditambahkan!", "success");
   };
 
+  // Fungsi menghapus data buddy
   const handleDeleteBuddy = (index) => {
     const updated = dataBuddy.filter((_, i) => i !== index);
     setDataBuddy(updated);
@@ -529,13 +534,14 @@ export default function SASCStaff() {
       setDataCreativeSouvenir((prev) => updateData(prev, "creativeSouvenirData"));
     }
 
+    // Notifikasi
     showNotif(
       `Souvenir ${item.nama || item.namaBuddy || "-"} ${checked ? "✅ Sudah diambil" : "❌ Belum diambil"}`,
       "info"
     );
   };
 
-  // Form tambahan souvenir (manual)
+  // Form dengan fungsi menambahkan data user dalam pengambilan souvenir (manual)
   const [formSouvenir, setFormSouvenir] = useState({
     nama: "",
     role: "",
@@ -588,6 +594,7 @@ export default function SASCStaff() {
 
   return (
     <div className="min-h-screen flex bg-gray-50">
+
       {/* Notifikasi */}
       {notif.show && (
         <div
@@ -658,6 +665,7 @@ export default function SASCStaff() {
 
       {/* Main */}
       <main className="flex-1 p-10">
+
         {/* Topbar */}
         <div className="flex justify-end items-center mb-8 space-x-6">
           <Bell className="text-gray-700 cursor-pointer" />
@@ -667,6 +675,8 @@ export default function SASCStaff() {
               <p className="font-semibold text-gray-800">Staff SASC</p>
               <p className="text-sm text-gray-600">Administrator</p>
             </div>
+
+            {/* Tombol logout */}
             <button
               onClick={handleLogout}
               className="ml-4 bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-900 transition text-sm"
@@ -1370,10 +1380,10 @@ export default function SASCStaff() {
             <div className="bg-white p-6 rounded-2xl shadow">
             <h1 className="text-2xl font-bold mb-6 text-gray-800">Data Checklist Souvenir Diterima</h1>
 
-            {/* Search Filters */}
+            {/* Search filter */}
             <div className="mb-4 flex flex-col md:flex-row md:items-center md:space-x-4">
 
-            {/* Fitur search nama */}
+            {/* Fitur search name */}
               <input
                 type="text"
                 placeholder="Cari berdasarkan nama"

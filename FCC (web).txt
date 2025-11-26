@@ -2,14 +2,21 @@ FCC (web) :
 
 1. Peer Counselor (docs) :
 
+- Tambahkan pagination (scroll)
+
 2. Peer Partner (docs) :
+
+- Tambahkan pagination (scroll)
 
 3. Creative Team (docs) :
 
+- Tambahkan pagination (scroll)
+
 4. SASC Staff (docs) :
+
+- Tambahkan pagination (kotak angka dan pastikan search periode tetap berfungsi baik) - (Verifikasi peer counselor, verifikasi peer partner, verifikasi creative team, Tarik data report, dan checklist pengambilan souvenir)
 
 5. Semuanya (docs)
 
 - data form reset jika register dan login baru
 - Notifikasi (Peer Counselor, Peer Partner, Creative Team, dan SASC Staff)
-- Jika data banyak, maka harus pagination

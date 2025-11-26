@@ -158,7 +158,7 @@ export default function PeerCounselor() {
     localStorage.setItem("peerCounselorData", JSON.stringify(filteredExisting));
     localStorage.setItem("counselorData", JSON.stringify(allData));
 
-    // Filter Update tampilan pada riwayat data
+    // Filter update otomatis pada tampilan melalui riwayat data
     const filtered = allData.filter(
       (item) =>
         item.periode === roleData.periode &&
@@ -225,6 +225,7 @@ export default function PeerCounselor() {
 
   return (
     <div className="min-h-screen flex bg-gray-50">
+
       {/* Sidebar */}
       <aside className="w-64 bg-white shadow-lg p-6">
         <h2 className="text-lg font-bold text-gray-800 mb-6">Peer Counselor</h2>
@@ -239,7 +240,7 @@ export default function PeerCounselor() {
         {/* Topbar */}
         <div className="flex justify-between items-center mb-8 w-full">
           
-          {/* Tombol Kembali (kiri) */}
+          {/* Tombol kembali */}
           <button
             onClick={() => navigate("/role-selection")}
             className="bg-gray-200 text-gray-700 px-5 py-2 rounded-lg hover:bg-gray-300 transition"
@@ -247,10 +248,9 @@ export default function PeerCounselor() {
             ← Kembali
           </button>
 
-          {/* Bagian kanan: Bell + Profile */}
           <div className="flex items-center space-x-6">
             
-            {/* Bell */}
+            {/* Notifikasi */}
             <div
               className="relative flex items-center justify-center p-2 rounded-full cursor-pointer hover:bg-gray-300 transition"
               onClick={toggleDropdown}
@@ -300,6 +300,7 @@ export default function PeerCounselor() {
                 </p>
               </div>
 
+              {/* Tombol logout */}
               <button
                 onClick={handleLogout}
                 className="ml-4 bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-900 transition text-sm"
@@ -330,12 +331,12 @@ export default function PeerCounselor() {
           Logbook Kegiatan
         </h1>
 
-        {/* Input logbook */}
+        {/* Input logbook kegiatan */}
         <form
           onSubmit={handleSubmit}
-          className="bg-white p-6 rounded-2xl shadow space-y-5 max-w-3xl"
+          className="bg-white p-6 rounded-2xl shadow mb-8"
         >
-          <div>
+          <div className="mb-4">
             <label className="font-medium">NIM</label>
             <input
               type="text"
@@ -346,7 +347,7 @@ export default function PeerCounselor() {
             />
           </div>
 
-          <div>
+          <div className="mb-4">
             <label className="font-medium">Nama</label>
             <input
               type="text"
@@ -357,7 +358,7 @@ export default function PeerCounselor() {
             />
           </div>
 
-          <div>
+          <div className="mb-4">
             <label className="font-medium">Jurusan</label>
             <input
               type="text"
@@ -368,7 +369,7 @@ export default function PeerCounselor() {
             />
           </div>
 
-          <div>
+          <div className="mb-4">
             <label className="font-medium">Tanggal Konseling</label>
             <input
               type="date"
@@ -406,7 +407,7 @@ export default function PeerCounselor() {
             Durasi: <span className="font-semibold">{hitungDurasi()} menit</span>
           </p>
 
-          <div>
+          <div className="mb-4">
             <label className="font-medium">Metode Konseling</label>
             <select
               name="metode"
@@ -422,7 +423,7 @@ export default function PeerCounselor() {
             </select>
           </div>
 
-          <div>
+          <div className="mb-4">
             <label className="font-medium">Deskripsi Kegiatan</label>
             <textarea
               name="deskripsi"
@@ -433,7 +434,7 @@ export default function PeerCounselor() {
             />
           </div>
 
-          <div>
+          <div className="mb-4">
             <label className="font-medium">Kendala Saat Konseling</label>
             <textarea
               name="kendala"
@@ -443,7 +444,7 @@ export default function PeerCounselor() {
             />
           </div>
 
-          <div>
+          <div className="mb-4">
             <label className="font-medium">Support Needed</label>
             <textarea
               name="support"

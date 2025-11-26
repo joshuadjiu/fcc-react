@@ -199,6 +199,7 @@ const handleEdit = (index) => {
 
   return (
     <div className="min-h-screen flex bg-gray-50">
+
       {/* Sidebar */}
       <aside className="w-64 bg-white shadow-lg p-6">
         <h2 className="text-lg font-bold text-gray-800 mb-6">Peer Partner</h2>
@@ -221,7 +222,7 @@ const handleEdit = (index) => {
             ← Kembali
           </button>
 
-          {/* Profil + Notifikasi */}
+          {/* Notifikasi dan profile */}
           <div className="flex items-center space-x-6">
             <Bell className="text-gray-700 cursor-pointer" />
             
@@ -236,6 +237,7 @@ const handleEdit = (index) => {
                 </p>
               </div>
 
+              {/* Tombol logout */}
               <button
                 onClick={handleLogout}
                 className="ml-4 bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-900 transition text-sm"
@@ -262,7 +264,7 @@ const handleEdit = (index) => {
           </div>
         )}
 
-        {/* Input logbook */}
+        {/* Input logbook kegiatan */}
         <h1 className="text-2xl font-bold mb-6 text-gray-800">
           Logbook Kegiatan
         </h1>
