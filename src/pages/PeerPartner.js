@@ -407,15 +407,16 @@ const handleEdit = (index) => {
         </form>
 
         {/* Riwayat data logbook */}
-        <div className="bg-white p-6 rounded-2xl shadow">
-          <h2 className="text-lg font-bold mb-4 text-gray-800">
-            Data Logbook
-          </h2>
+        <h2 className="text-lg font-bold mb-4 text-gray-800">Data Logbook</h2>
+        <div
+            className="bg-white rounded-xl shadow overflow-auto"
+            style={{ maxHeight: "255px", position: "relative" }}
+        >
           {riwayat.length === 0 ? (
-            <p className="text-gray-500">Belum ada data konseling.</p>
+            <p className="text-gray-500">Belum ada data.</p>
           ) : (
-            <table className="min-w-full text-left text-sm">
-              <thead>
+            <table className="min-w-full text-left text-sm border-collapse">
+              <thead className="sticky top-0 bg-gray-200 z-10 shadow">
                 <tr className="border-b">
                   <th className="py-2 px-3">Nama</th>
                   <th className="py-2 px-3">Tanggal Konseling</th>

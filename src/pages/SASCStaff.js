@@ -8,6 +8,8 @@ export default function SASCStaff() {
   const [activePage, setActivePage] = useState("verifikasi");
   const [searchPeriode, setSearchPeriode] = useState("");
   const [searchNama, setSearchNama] = useState("");
+  const [searchPembina, setSearchPembina] = useState("");
+  const [searchBuddy, setSearchBuddy] = useState("");
 
   // Data pembina
   const [pembinaList, setPembinaList] = useState([]);
@@ -351,8 +353,8 @@ export default function SASCStaff() {
   };
 
   // Fungsi menghapus pembina
-  const handleDeletePembina = (index) => {
-    const updated = pembinaList.filter((_, i) => i !== index);
+  const handleDeletePembina = (nama) => {
+    const updated = pembinaList.filter((p) => p !== nama);
     setPembinaList(updated);
     localStorage.setItem("pembinaList", JSON.stringify(updated));
     showNotif("Pembina dihapus!", "info");
@@ -379,8 +381,8 @@ export default function SASCStaff() {
   };
 
   // Fungsi menghapus data buddy
-  const handleDeleteBuddy = (index) => {
-    const updated = dataBuddy.filter((_, i) => i !== index);
+  const handleDeleteBuddy = (nim) => {
+    const updated = dataBuddy.filter((b) => b.nim !== nim);
     setDataBuddy(updated);
     localStorage.setItem("buddyData", JSON.stringify(updated));
     showNotif("Data buddy berhasil dihapus!", "info");
@@ -716,15 +718,29 @@ export default function SASCStaff() {
 
             <div className="bg-white p-6 rounded-2xl shadow">
               <h2 className="text-lg font-bold mb-4 text-gray-800">Daftar Pembina</h2>
+              
+              {/* Fitur pencarian */}
+              <input
+                type="text"
+                value={searchPembina}
+                onChange={(e) => setSearchPembina(e.target.value)}
+                placeholder="Cari nama pembina..."
+                className="border rounded-lg p-2 w-64 mb-4"
+              />
+
               {pembinaList.length === 0 ? (
                 <p className="text-gray-500">Belum ada pembina yang ditambahkan.</p>
               ) : (
-                <ul className="space-y-2">
-                  {pembinaList.map((nama, i) => (
+                <ul className="space-y-2 max-h-96 overflow-y-auto pr-2">
+                  {pembinaList
+                    .filter((nama) =>
+                      nama.toLowerCase().includes(searchPembina.toLowerCase())
+                    )
+                    .map((nama, i) => (
                     <li key={i} className="flex justify-between items-center border-b pb-2">
                       <span>{nama}</span>
                       <button
-                        onClick={() => handleDeletePembina(i)}
+                        onClick={() => handleDeletePembina(nama)}
                         className="text-red-500 hover:text-red-700 text-sm"
                       >
                         Hapus
@@ -766,12 +782,24 @@ export default function SASCStaff() {
 
             <div className="bg-white p-6 rounded-2xl shadow">
               <h2 className="text-lg font-bold mb-4 text-gray-800">Daftar Buddy</h2>
+              
+              {/* Fitur pencarian */}
+              <input
+                type="text"
+                value={searchBuddy}
+                onChange={(e) => setSearchBuddy(e.target.value)}
+                placeholder="Cari nama buddy..."
+                className="border rounded-lg p-2 w-64 mb-4"
+              />
+              
               {dataBuddy.length === 0 ? (
                 <p className="text-gray-500">Belum ada data buddy.</p>
               ) : (
+
+              <div className="max-h-96 overflow-y-auto rounded-lg border">
                 <table className="min-w-full text-left text-sm">
-                  <thead>
-                    <tr className="border-b bg-gray-100">
+                  <thead className="bg-gray-200 sticky top-0">
+                    <tr className="border-b">
                       <th className="py-2 px-3">NIM</th>
                       <th className="py-2 px-3">Nama</th>
                       <th className="py-2 px-3">Jurusan</th>
@@ -779,14 +807,18 @@ export default function SASCStaff() {
                     </tr>
                   </thead>
                   <tbody>
-                    {dataBuddy.map((b, i) => (
+                    {dataBuddy
+                      .filter((b) =>
+                        b.nama.toLowerCase().includes(searchBuddy.toLowerCase())
+                      )
+                      .map((b, i) => (
                       <tr key={i} className="border-b hover:bg-gray-50">
                         <td className="py-2 px-3">{b.nim}</td>
                         <td className="py-2 px-3">{b.nama}</td>
                         <td className="py-2 px-3">{b.jurusan}</td>
                         <td className="py-2 px-3 text-center">
                           <button
-                            onClick={() => handleDeleteBuddy(i)}
+                            onClick={() => handleDeleteBuddy(b.nim)}
                             className="text-red-500 hover:text-red-700 text-sm font-medium"
                           >
                             Hapus
@@ -796,6 +828,7 @@ export default function SASCStaff() {
                     ))}
                   </tbody>
                 </table>
+              </div>
               )}
             </div>
           </>
@@ -820,9 +853,10 @@ export default function SASCStaff() {
               {dataCounselor.length === 0 ? (
                 <p className="text-gray-500">Belum ada data peer counselor.</p>
               ) : (
-                <table className="min-w-full text-left text-sm">
-                  <thead>
-                    <tr className="border-b bg-gray-100">
+                <div className="max-h-[750px] overflow-y-auto rounded-lg border">
+                <table className="min-w-full text-sm text-left border-collapse table-fixed w-full">
+                  <thead className="bg-gray-200 sticky top-0 z-10">
+                    <tr className="border-b">
                       <th className="py-2 px-3">Periode</th>
                       <th className="py-2 px-3">Kampus</th>
                       <th className="py-2 px-3">NIM</th>
@@ -939,6 +973,7 @@ export default function SASCStaff() {
                     ))}
                   </tbody>
                 </table>
+              </div>
               )}
             </div>
           </>
@@ -963,9 +998,10 @@ export default function SASCStaff() {
               {dataPartner.length === 0 ? (
                 <p className="text-gray-500">Belum ada data peer partner.</p>
               ) : (
-                <table className="min-w-full text-left text-sm">
-                  <thead>
-                    <tr className="border-b bg-gray-100">
+                <div className="max-h-[750px] overflow-y-auto rounded-lg border">
+                <table className="min-w-full text-sm text-left border-collapse table-fixed w-full">
+                  <thead className="bg-gray-200 sticky top-0 z-10">
+                    <tr className="border-b">
                       <th className="py-2 px-3">Periode</th>
                       <th className="py-2 px-3">Kampus</th>
                       <th className="py-2 px-3">Nama</th>
@@ -1080,6 +1116,7 @@ export default function SASCStaff() {
                     ))}
                   </tbody>
                 </table>
+              </div>
               )}
             </div>
           </>
@@ -1104,9 +1141,10 @@ export default function SASCStaff() {
               {dataCreative.length === 0 ? (
                 <p className="text-gray-500">Belum ada data Creative Team.</p>
               ) : (
-                <table className="min-w-full text-left text-sm">
-                  <thead>
-                    <tr className="border-b bg-gray-100">
+                <div className="max-h-[750px] overflow-y-auto rounded-lg border">
+                <table className="min-w-full text-sm text-left border-collapse table-fixed w-full">
+                  <thead className="bg-gray-200 sticky top-0 z-10">
+                    <tr className="border-b">
                       <th className="py-2 px-3">Periode</th>
                       <th className="py-2 px-3">Pembina</th>
                       <th className="py-2 px-3">Topik</th>
@@ -1209,7 +1247,7 @@ export default function SASCStaff() {
                               Tidak Disetujui
                             </span>
                           )}
-                          {item.statusVerifikasi === "Decline" && (
+                          {item.statusVerifikasi === "Decline (Edit Ulang)" && (
                             <span className="bg-orange-100 text-orange-700 px-3 py-1 rounded-full text-xs font-semibold">
                               Revisi
                             </span>
@@ -1224,6 +1262,7 @@ export default function SASCStaff() {
                     ))}
                   </tbody>
                 </table>
+              </div>
               )}
             </div>
           </>
@@ -1275,18 +1314,19 @@ export default function SASCStaff() {
               {riwayat.length === 0 ? (
                 <p className="text-gray-500">Belum ada data yang sesuai.</p>
               ) : (
+                <div className="max-h-[550px] overflow-y-auto rounded-lg border">
                 <table className="min-w-full text-sm text-left border-collapse table-fixed w-full">
-                  <thead>
-                    <tr className="border-b bg-gray-100">
+                  <thead className="bg-gray-200 sticky top-0 z-10">
+                    <tr className="border-b">
                       {columnsByRole[selectedRole]?.map((key) => (
-                        <th key={key} className="py-3 px-4 text-center font-semibold text-gray-700 border-b border-gray-200">
+                        <th key={key} className="py-3 px-4 text-center font-semibold text-gray-900 border-b border-gray-200">
                           {key
                             .replace(/([A-Z])/g, " $1")
                             .replace(/_/g, " ")
                             .replace(/\b\w/g, (c) => c.toUpperCase())}
                         </th>
                       ))}
-                      <th className="py-2 px-3 text-center">Aksi</th>
+                      <th className="py-2 px-3 text-gray-700 text-center">Aksi</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1317,6 +1357,7 @@ export default function SASCStaff() {
                     ))}
                   </tbody>
                 </table>
+              </div>
               )}
             </div>
           </>
@@ -1405,9 +1446,10 @@ export default function SASCStaff() {
               {dataCounselor.length === 0 && dataPartner.length === 0 && dataCreative.length === 0 ? (
                 <p className="text-gray-500">Belum ada data mahasiswa untuk pendataan souvenir.</p>
               ) : (
+                <div className="max-h-[450px] overflow-y-auto rounded-lg border">
                 <table className="min-w-full text-left text-sm">
-                  <thead>
-                    <tr className="border-b bg-gray-100">
+                  <thead className="bg-gray-200 sticky top-0">
+                    <tr className="border-b">
                       <th className="py-2 px-3">Nama</th>
                       <th className="py-2 px-3">Peran</th>
                       <th className="py-2 px-3">Periode</th>
@@ -1530,6 +1572,7 @@ export default function SASCStaff() {
                     ))}
                   </tbody>
                 </table>
+              </div>
               )}
             </div>
           </>

@@ -465,9 +465,12 @@ export default function PeerCounselor() {
         {/* Riwayat data logbook */}
         <div className="mt-10">
           <h2 className="text-xl font-semibold mb-3">Data Logbook</h2>
-          <div className="bg-white p-5 rounded-xl shadow overflow-x-auto">
-            <table className="min-w-full text-left text-sm">
-              <thead>
+          <div
+            className="bg-white rounded-xl shadow overflow-auto"
+            style={{ maxHeight: "250px", position: "relative" }}
+          >
+            <table className="min-w-full text-left text-sm border-collapse">
+              <thead className="sticky top-0 bg-gray-200 z-10 shadow">
                 <tr className="border-b">
                   <th className="py-2 px-3">NIM</th>
                   <th className="py-2 px-3">Nama</th>
