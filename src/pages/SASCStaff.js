@@ -1323,7 +1323,7 @@ export default function SASCStaff() {
                       {pembinaList
                         .filter((p) =>
                           searchPembina === "" ||
-                          p.nama.toLowerCase().includes(searchPembina.toLowerCase())
+                          p.nama?.toLowerCase().includes(searchPembina.toLowerCase())
                         )
                         .map((p, i) => (
                           <tr key={i} className="border-b">
@@ -1452,7 +1452,8 @@ export default function SASCStaff() {
                   <tbody>
                     {dataBuddy
                       .filter((b) =>
-                        b.nama.toLowerCase().includes(searchBuddy.toLowerCase())
+                        searchBuddy === "" ||
+                        b.nama?.toLowerCase().includes(searchBuddy.toLowerCase())
                       )
                       .map((b, i) => (
                       <tr key={i} className="border-b hover:bg-gray-50">
