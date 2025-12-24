@@ -48,8 +48,12 @@ export default function Login() {
         JSON.stringify({
           username: student.username,
           nama: student.nama,
+          nim: student.nim,
         })
       );
+
+      localStorage.setItem("userName", student.nama);
+    localStorage.setItem("userNIM", student.nim);
 
       setMessage({ text: "Login sebagai Student berhasil!", type: "success" });
       setTimeout(() => navigate("/role-selection"), 1500);
