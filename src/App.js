@@ -1,6 +1,6 @@
 import { HashRouter as Router, Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
-import LoginStudent from "./pages/Login";
+import Login from "./pages/Login";
 import Articles from "./pages/Articles";
 import Documents from "./pages/Documents";
 import SASCStaff from "./pages/SASCStaff";
@@ -16,7 +16,7 @@ function App() {
     <Router>
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/login" element={<LoginStudent />} />
+        <Route path="/login" element={<Login />} />
         <Route path="/articles" element={<Articles />} />
         <Route path="/documents" element={<Documents />} />
         <Route path="/role-selection" element={<RoleSelection />} />

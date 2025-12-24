@@ -1322,6 +1322,7 @@ export default function SASCStaff() {
                     <tbody>
                       {pembinaList
                         .filter((p) =>
+                          searchPembina === "" ||
                           p.nama.toLowerCase().includes(searchPembina.toLowerCase())
                         )
                         .map((p, i) => (
@@ -1640,7 +1641,7 @@ export default function SASCStaff() {
                       <td className="p-2 px-3 text-center">
                         <button
                           onClick={() => handleDeleteStudent(i)}
-                          className="bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-600 transition text-sm"
+                          className="text-red-500 hover:text-red-700 text-sm font-medium"
                         >
                           Hapus
                         </button>
