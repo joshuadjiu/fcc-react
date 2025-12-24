@@ -40,8 +40,12 @@ export default function PeerCounselor() {
     const savedEval = JSON.parse(localStorage.getItem("evaluationData")) || {};
 
     const filtered = {
-      evaluations: savedEval.evaluations.filter(item => item.role === "Peer Counselor"),
-      questionnaires: savedEval.questionnaires.filter(item => item.role === "Peer Counselor"),
+      evaluations: Array.isArray(savedEval.evaluations)
+        ? savedEval.evaluations.filter(item => item.role === "Peer Counselor")
+        : [],
+      questionnaires: Array.isArray(savedEval.questionnaires)
+        ? savedEval.questionnaires.filter(item => item.role === "Peer Counselor")
+        : [],
     };
 
     setEvaluation(filtered);

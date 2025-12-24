@@ -41,8 +41,12 @@ export default function CreativeTeam() {
     const savedEval = JSON.parse(localStorage.getItem("evaluationData")) || {};
 
     const filtered = {
-      evaluations: savedEval.evaluations.filter(item => item.role === "Creative Team"),
-      questionnaires: savedEval.questionnaires.filter(item => item.role === "Creative Team"),
+      evaluations: Array.isArray(savedEval.evaluations)
+        ? savedEval.evaluations.filter(item => item.role === "Creative Team")
+        : [],
+      questionnaires: Array.isArray(savedEval.questionnaires)
+        ? savedEval.questionnaires.filter(item => item.role === "Creative Team")
+        : [],
     };
 
     setEvaluation(filtered);

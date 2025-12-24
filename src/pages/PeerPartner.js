@@ -37,8 +37,12 @@ export default function PeerPartner() {
     const savedEval = JSON.parse(localStorage.getItem("evaluationData")) || {};
 
     const filtered = {
-      evaluations: savedEval.evaluations.filter(item => item.role === "Peer Partner"),
-      questionnaires: savedEval.questionnaires.filter(item => item.role === "Peer Partner"),
+      evaluations: Array.isArray(savedEval.evaluations)
+        ? savedEval.evaluations.filter(item => item.role === "Peer Partner")
+        : [],
+      questionnaires: Array.isArray(savedEval.questionnaires)
+        ? savedEval.questionnaires.filter(item => item.role === "Peer Partner")
+        : [],
     };
 
     setEvaluation(filtered);
