@@ -1,6 +1,5 @@
 import { HashRouter as Router, Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
-import Register from "./pages/Register";
 import LoginStudent from "./pages/Login";
 import Articles from "./pages/Articles";
 import Documents from "./pages/Documents";
@@ -11,14 +10,12 @@ import CreativeTeam from "./pages/CreativeTeam";
 import RoleSelection from "./pages/RoleSelection";
 import NotFound from "./pages/NotFound";
 import ContactUs from "./pages/ContactUs";
-import Notifications from "./pages/Notifications";
 
 function App() {
   return (
     <Router>
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/register" element={<Register />} />
         <Route path="/login" element={<LoginStudent />} />
         <Route path="/articles" element={<Articles />} />
         <Route path="/documents" element={<Documents />} />
@@ -28,7 +25,6 @@ function App() {
         <Route path="/peer-partner" element={<PeerPartner />} />
         <Route path="/creative-team" element={<CreativeTeam />} />
         <Route path="/contact" element={<ContactUs />} />
-        <Route path="/notifications" element={<Notifications />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>

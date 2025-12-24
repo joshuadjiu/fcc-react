@@ -4,7 +4,7 @@ import fccLogo from "../Assets/Logo-FCC.png";
 
 export default function Login() {
   const navigate = useNavigate();
-  const [emailOrNim, setEmailOrNim] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState({ text: "", type: "" });
 
@@ -14,13 +14,12 @@ export default function Login() {
     { username: "staff1", password: "654321" },
   ];
 
-  // NIM -> Student dan Username -> SASC Staff
   const handleLogin = (e) => {
     e.preventDefault();
     setMessage({ text: "", type: "" });
 
-    if (!emailOrNim) {
-      setMessage({ text: "NIM atau Username harus diisi!", type: "error" });
+    if (!username) {
+      setMessage({ text: "Username harus diisi!", type: "error" });
       return;
     }
 
@@ -30,7 +29,7 @@ export default function Login() {
     }
 
     const staff = staffAccounts.find(
-      (s) => s.username === emailOrNim && s.password === password
+      (s) => s.username === username && s.password === password
     );
     if (staff) {
       setMessage({ text: "Login sebagai Staff berhasil!", type: "success" });
@@ -38,19 +37,24 @@ export default function Login() {
       return;
     }
 
-    const users = JSON.parse(localStorage.getItem("users")) || [];
+    const users = JSON.parse(localStorage.getItem("studentAccounts")) || [];
     const student = users.find(
-      (u) => u.nim === emailOrNim && u.password === password
+      (u) => u.username === username && u.password === password
     );
 
     if (student) {
-      localStorage.setItem("userName", student.nama);
-      localStorage.setItem("userNIM", student.nim);
+      localStorage.setItem(
+        "currentUser",
+        JSON.stringify({
+          username: student.username,
+          nama: student.nama,
+        })
+      );
 
       setMessage({ text: "Login sebagai Student berhasil!", type: "success" });
       setTimeout(() => navigate("/role-selection"), 1500);
     } else {
-      setMessage({ text: "NIM atau password salah!", type: "error" });
+      setMessage({ text: "Username atau password salah!", type: "error" });
     }
   };
 
@@ -86,9 +90,9 @@ export default function Login() {
         <form onSubmit={handleLogin} className="space-y-4">
           <input
             type="text"
-            placeholder="NIM atau Username Staff"
-            value={emailOrNim}
-            onChange={(e) => setEmailOrNim(e.target.value)}
+            placeholder="Username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
             className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
           />
 
@@ -108,15 +112,6 @@ export default function Login() {
           </button>
         </form>
 
-        <p className="text-center text-sm text-gray-600 mt-4">
-          Belum punya akun?{" "}
-          <span
-            onClick={() => navigate("/register")}
-            className="text-blue-500 cursor-pointer hover:underline"
-          >
-            Register
-          </span>
-        </p>
         <p className="text-center text-sm text-gray-600 mt-2">
           <span onClick={() => navigate("/")} className="text-blue-500 cursor-pointer hover:underline">
             Kembali ke Home

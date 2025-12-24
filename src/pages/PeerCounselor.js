@@ -1,12 +1,18 @@
 import React, { useState, useEffect } from "react";
-import { Bell, User } from "lucide-react";
+import { User } from "lucide-react";
 import { useNavigate } from "react-router-dom"
+import Swal from "sweetalert2";
 
 export default function PeerCounselor() {
+
+  const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+    const loggedInUsername = currentUser?.username;
+
   const [formData, setFormData] = useState({
     nimBuddy: "",
     namaBuddy: "",
     jurusan: "",
+    kampusArea: "",
     tanggal: "",
     jamMulai: "",
     jamSelesai: "",
@@ -14,50 +20,45 @@ export default function PeerCounselor() {
     deskripsi: "",
     kendala: "",
     support: "",
+    statusCase: "",
   });
 
   const [riwayat, setRiwayat] = useState([]);
   const [roleData, setRoleData] = useState({});
-  const [notifications, setNotifications] = useState([]);
-  const [showDropdown, setShowDropdown] = useState(false);
   const [editIndex, setEditIndex] = useState(null);
+  const [activePage, setActivePage] = useState("dashboard");
+  const [evaluation, setEvaluation] = useState(null);
 
   // Mengambil data role diantara periode dan kampus, serta filter riwayat data logbook yang sesuai
   useEffect(() => {
     const savedRole = JSON.parse(localStorage.getItem("roleData"));
     const savedCounselor = JSON.parse(localStorage.getItem("counselorData")) || [];
-    const saved = JSON.parse(localStorage.getItem("notifications")) || [];
 
     // Mengambil role sebelumnya
     const lastRole = JSON.parse(localStorage.getItem("lastRoleData"));
 
-    // Mengecek perubahan periode atau kampus
-    if (
-      lastRole &&
-      (lastRole.periode !== savedRole?.periode ||
-        lastRole.kampus !== (savedRole?.kampus || savedRole?.campus))
-    ) {
-      localStorage.setItem("notifications", JSON.stringify([]));
-      setNotifications([]);
-    } else {
-      setNotifications(saved);
-    }
+    const savedEval = JSON.parse(localStorage.getItem("evaluationData")) || {};
+
+    const filtered = {
+      evaluations: savedEval.evaluations.filter(item => item.role === "Peer Counselor"),
+      questionnaires: savedEval.questionnaires.filter(item => item.role === "Peer Counselor"),
+    };
+
+    setEvaluation(filtered);
 
     if (savedRole) {
       localStorage.setItem("lastRoleData", JSON.stringify(savedRole));
       setRoleData(savedRole);
     }
 
-    // Filter data yang sesuai dengan periode dan kampus
-    if (savedRole) {
+    if (savedRole && loggedInUsername) {
       const filtered = savedCounselor.filter(
         (item) =>
+          item.username === loggedInUsername &&
           item.periode === savedRole.periode &&
-          item.kampus === (savedRole.campus || savedRole.kampus)
+          item.kampus === (savedRole.kampus || savedRole.campus)
       );
       setRiwayat(filtered);
-    } else {
-      setRiwayat(savedCounselor);
     }
   }, []);
 
@@ -78,7 +79,7 @@ export default function PeerCounselor() {
   };
 
   // Handle submit form
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     formData.status = "Menunggu";
@@ -90,6 +91,7 @@ export default function PeerCounselor() {
       "nimBuddy",
       "namaBuddy",
       "jurusan",
+      "kampusArea",
       "tanggal",
       "jamMulai",
       "jamSelesai",
@@ -97,13 +99,29 @@ export default function PeerCounselor() {
       "deskripsi",
       "kendala",
       "support",
+      "statusCase",
     ];
 
     const emptyFields = requiredFields.filter((field) => !formData[field]);
     if (emptyFields.length > 0) {
-      alert("Harap isi semua kolom!");
+        Swal.fire({
+        icon: "error",
+        title: "Gagal",
+        text: "Harap isi semua kolom!",
+      });
       return;
     }
+
+    const result = await Swal.fire({
+      title: "Konfirmasi",
+      text: "Apakah Anda yakin ingin menyimpan logbook ini?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Ya, Simpan",
+      cancelButtonText: "Batal",
+    });
+
+    if (!result.isConfirmed) return;
 
     const durasi = hitungDurasi();
 
@@ -122,9 +140,11 @@ export default function PeerCounselor() {
 
     // Entry baru untuk data counselor (dipakai oleh SASC Staff)
     const newEntry = {
+      username: loggedInUsername,
       nim: formData.nimBuddy,
       nama: formData.namaBuddy,
       jurusan: formData.jurusan,
+      kampusArea: formData.kampusArea,
       tanggalKonseling: formData.tanggal,
       jamMulai: formData.jamMulai,
       jamSelesai: formData.jamSelesai,
@@ -133,6 +153,7 @@ export default function PeerCounselor() {
       deskripsi: formData.deskripsi,
       kendala: formData.kendala,
       supportNeeded: formData.support,
+      statusCase: formData.statusCase,
       verifikasi: false,
       komentarStaff: "",
       periode: roleData.periode || "-",
@@ -158,21 +179,26 @@ export default function PeerCounselor() {
     localStorage.setItem("peerCounselorData", JSON.stringify(filteredExisting));
     localStorage.setItem("counselorData", JSON.stringify(allData));
 
-    // Filter update otomatis pada tampilan melalui riwayat data
     const filtered = allData.filter(
       (item) =>
+        item.username === loggedInUsername &&
         item.periode === roleData.periode &&
         item.kampus === (roleData.kampus || roleData.campus)
     );
     setRiwayat(filtered);
 
-    alert("Data logbook berhasil disimpan!");
+    Swal.fire({
+      icon: "success",
+      title: "Berhasil",
+      text: "Data logbook berhasil disimpan",
+    });
 
     // Reset form
     setFormData({
       nimBuddy: "",
       namaBuddy: "",
       jurusan: "",
+      kampusArea: "",
       tanggal: "",
       jamMulai: "",
       jamSelesai: "",
@@ -180,14 +206,11 @@ export default function PeerCounselor() {
       deskripsi: "",
       kendala: "",
       support: "",
+      statusCase: "",
     });
   };
 
   const navigate = useNavigate();
-
-  const handleViewAll = () => {
-   navigate("/notifications");
-  };
 
   const handleLogout = () => {
     navigate("/login");
@@ -202,6 +225,7 @@ export default function PeerCounselor() {
       nimBuddy: selected.nim,
       namaBuddy: selected.nama,
       jurusan: selected.jurusan,
+      kampusArea: selected.kampusArea,
       tanggal: selected.tanggalKonseling,
       jamMulai: selected.jamMulai,
       jamSelesai: selected.jamSelesai,
@@ -209,6 +233,7 @@ export default function PeerCounselor() {
       deskripsi: selected.deskripsi,
       kendala: selected.kendala,
       support: selected.supportNeeded,
+      statusCase: selected.statusCase,
     });
 
     // Menghapus sementara dari localStorage agar tidak double atau menambah data baru saat disubmit lagi
@@ -218,10 +243,6 @@ export default function PeerCounselor() {
 
     alert("Silakan ubah data dan klik Simpan untuk memperbarui logbook.");
   };
-  
-  const toggleDropdown = () => {
-    setShowDropdown(!showDropdown);
-  };
 
   return (
     <div className="min-h-screen flex bg-gray-50">
@@ -230,7 +251,28 @@ export default function PeerCounselor() {
       <aside className="w-64 bg-white shadow-lg p-6">
         <h2 className="text-lg font-bold text-gray-800 mb-6">Peer Counselor</h2>
         <ul className="space-y-3 text-gray-700">
-          <li className="font-semibold text-blue-600">Dashboard</li>
+
+          <li
+            onClick={() => setActivePage("dashboard")}
+            className={`cursor-pointer font-semibold ${
+              activePage === "dashboard"
+                ? "text-blue-600"
+                : "hover:text-blue-500"
+            }`}
+          >
+            Dashboard
+          </li>
+
+          <li
+            onClick={() => setActivePage("evaluasi-kuesioner")}
+            className={`cursor-pointer font-semibold ${
+              activePage === "evaluasi-kuesioner"
+                ? "text-blue-600"
+                : "hover:text-blue-500"
+            }`}
+          >
+            Evaluasi dan kuesioner
+          </li>
         </ul>
       </aside>
 
@@ -249,47 +291,9 @@ export default function PeerCounselor() {
           </button>
 
           <div className="flex items-center space-x-6">
-            
-            {/* Notifikasi */}
-            <div
-              className="relative flex items-center justify-center p-2 rounded-full cursor-pointer hover:bg-gray-300 transition"
-              onClick={toggleDropdown}
-            >
-              <Bell className="text-gray-700 cursor-pointer" />
-
-              {showDropdown && (
-                <div className="absolute right-0 top-12 w-64 bg-white border rounded-lg shadow-lg z-20">
-                  <div className="px-4 py-2 border-b font-semibold text-gray-700">
-                    Notification
-                  </div>
-
-                  {notifications.length === 0 ? (
-                    <div className="px-4 py-6 text-center text-gray-500 text-sm">
-                      No New Notification
-                    </div>
-                  ) : (
-                    notifications.map((notif, i) => (
-                      <div
-                        key={i}
-                        className="px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer"
-                      >
-                        {notif.message}
-                      </div>
-                    ))
-                  )}
-
-                  <button
-                    onClick={handleViewAll}
-                    className="w-full text-center text-blue-600 py-2 border-t hover:bg-gray-50 text-sm font-medium"
-                  >
-                    VIEW ALL
-                  </button>
-                </div>
-              )}
-            </div>
 
             {/* Profile */}
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-4">
               <User className="text-gray-700" />
               <div>
                 <p className="font-semibold text-gray-800">
@@ -327,215 +331,312 @@ export default function PeerCounselor() {
           </div>
         )}
 
-        <h1 className="text-2xl font-bold mb-6 text-gray-800">
-          Logbook Kegiatan
-        </h1>
+        {activePage === "dashboard" && (
+          <>
+            <h1 className="text-2xl font-bold mb-6 text-gray-800">
+              Logbook Kegiatan
+            </h1>
 
-        {/* Input logbook kegiatan */}
-        <form
-          onSubmit={handleSubmit}
-          className="bg-white p-6 rounded-2xl shadow mb-8"
-        >
-          <div className="mb-4">
-            <label className="font-medium">NIM</label>
-            <input
-              type="text"
-              name="nimBuddy"
-              value={formData.nimBuddy}
-              onChange={handleChange}
-              className="w-full border p-2 rounded-lg"
-            />
-          </div>
-
-          <div className="mb-4">
-            <label className="font-medium">Nama</label>
-            <input
-              type="text"
-              name="namaBuddy"
-              value={formData.namaBuddy}
-              onChange={handleChange}
-              className="w-full border p-2 rounded-lg"
-            />
-          </div>
-
-          <div className="mb-4">
-            <label className="font-medium">Jurusan</label>
-            <input
-              type="text"
-              name="jurusan"
-              value={formData.jurusan}
-              onChange={handleChange}
-              className="w-full border p-2 rounded-lg"
-            />
-          </div>
-
-          <div className="mb-4">
-            <label className="font-medium">Tanggal Konseling</label>
-            <input
-              type="date"
-              name="tanggal"
-              value={formData.tanggal}
-              onChange={handleChange}
-              className="w-full border p-2 rounded-lg"
-            />
-          </div>
-
-          <div className="flex space-x-4">
-            <div className="flex-1">
-              <label className="font-medium">Jam Mulai</label>
-              <input
-                type="time"
-                name="jamMulai"
-                value={formData.jamMulai}
-                onChange={handleChange}
-                className="w-full border p-2 rounded-lg"
-              />
-            </div>
-            <div className="flex-1">
-              <label className="font-medium">Jam Selesai</label>
-              <input
-                type="time"
-                name="jamSelesai"
-                value={formData.jamSelesai}
-                onChange={handleChange}
-                className="w-full border p-2 rounded-lg"
-              />
-            </div>
-          </div>
-
-          <p className="text-gray-700 text-sm">
-            Durasi: <span className="font-semibold">{hitungDurasi()} menit</span>
-          </p>
-
-          <div className="mb-4">
-            <label className="font-medium">Metode Konseling</label>
-            <select
-              name="metode"
-              value={formData.metode}
-              onChange={handleChange}
-              className="w-full border p-2 rounded-lg"
+            {/* Input logbook kegiatan */}
+            <form
+              onSubmit={handleSubmit}
+              className="bg-white p-6 rounded-2xl shadow mb-8"
             >
-              <option value="">-- Pilih Metode --</option>
-              <option value="Zoom">Zoom</option>
-              <option value="Tatap Muka">Tatap Muka</option>
-              <option value="chat WA/Line">Chat WA/Line</option>
-              <option value="Telepon">Telepon</option>
-            </select>
-          </div>
+              <div className="mb-4">
+                <label className="font-medium">NIM</label>
+                <input
+                  type="text"
+                  name="nimBuddy"
+                  value={formData.nimBuddy}
+                  onChange={handleChange}
+                  className="w-full border p-2 rounded-lg"
+                  placeholder="Masukkan NIM..."
+                />
+              </div>
 
-          <div className="mb-4">
-            <label className="font-medium">Deskripsi Kegiatan</label>
-            <textarea
-              name="deskripsi"
-              value={formData.deskripsi}
-              onChange={handleChange}
-              className="w-full border p-2 rounded-lg"
-              placeholder="Isi kegiatan konseling..."
-            />
-          </div>
+              <div className="mb-4">
+                <label className="font-medium">Nama</label>
+                <input
+                  type="text"
+                  name="namaBuddy"
+                  value={formData.namaBuddy}
+                  onChange={handleChange}
+                  className="w-full border p-2 rounded-lg"
+                  placeholder="Masukkan Nama..."
+                />
+              </div>
 
-          <div className="mb-4">
-            <label className="font-medium">Kendala Saat Konseling</label>
-            <textarea
-              name="kendala"
-              value={formData.kendala}
-              onChange={handleChange}
-              className="w-full border p-2 rounded-lg"
-            />
-          </div>
+              <div className="mb-4">
+                <label className="font-medium">Jurusan</label>
+                <input
+                  type="text"
+                  name="jurusan"
+                  value={formData.jurusan}
+                  onChange={handleChange}
+                  className="w-full border p-2 rounded-lg"
+                  placeholder="Masukkan Jurusan..."
+                />
+              </div>
 
-          <div className="mb-4">
-            <label className="font-medium">Support Needed</label>
-            <textarea
-              name="support"
-              value={formData.support}
-              onChange={handleChange}
-              className="w-full border p-2 rounded-lg"
-            />
-          </div>
+              <div className="mb-4">
+                <label className="font-medium">Area Kampus</label>
+                <input
+                  type="text"
+                  name="kampusArea"
+                  value={formData.kampusArea}
+                  onChange={handleChange}
+                  className="w-full border p-2 rounded-lg"
+                  placeholder="Contoh: Binus Kemanggisan, Binus Alam Sutera..."
+                />
+              </div>
 
-          <button
-            type="submit"
-            className="w-full bg-blue-500 text-white p-2 rounded-lg hover:bg-blue-600 transition"
-          >
-            Simpan
-          </button>
-        </form>
+              <div className="mb-4">
+                <label className="font-medium">Tanggal Konseling</label>
+                <input
+                  type="date"
+                  name="tanggal"
+                  value={formData.tanggal}
+                  onChange={handleChange}
+                  className="w-full border p-2 rounded-lg"
+                />
+              </div>
 
-        {/* Riwayat data logbook */}
-        <div className="mt-10">
-          <h2 className="text-xl font-semibold mb-3">Data Logbook</h2>
-          <div
-            className="bg-white rounded-xl shadow overflow-auto"
-            style={{ maxHeight: "250px", position: "relative" }}
-          >
-            <table className="min-w-full text-left text-sm border-collapse">
-              <thead className="sticky top-0 bg-gray-200 z-10 shadow">
-                <tr className="border-b">
-                  <th className="py-2 px-3">NIM</th>
-                  <th className="py-2 px-3">Nama</th>
-                  <th className="py-2 px-3">Jurusan</th>
-                  <th className="py-2 px-3">Tanggal Konseling</th>
-                  <th className="py-2 px-3">Jam Mulai</th>
-                  <th className="py-2 px-3">Jam Selesai</th>
-                  <th className="py-2 px-3">Durasi</th>
-                  <th className="py-2 px-3">Metode</th>
-                  <th className="py-2 px-3">Deskripsi Kegiatan</th>
-                  <th className="py-2 px-3">Kendala Konseling</th>
-                  <th className="py-2 px-3">Support Needed</th>
-                  <th className="py-2 px-3">Status Verifikasi</th>
-                  <th className="py-2 px-3">Komentar</th>
-                  <th className="py-2 px-3 text-center">Aksi</th>
-                </tr>
-              </thead>
+              <div className="flex space-x-4">
+                <div className="flex-1">
+                  <label className="font-medium">Jam Mulai</label>
+                  <input
+                    type="time"
+                    name="jamMulai"
+                    value={formData.jamMulai}
+                    onChange={handleChange}
+                    className="w-full border p-2 rounded-lg"
+                  />
+                </div>
+                <div className="flex-1">
+                  <label className="font-medium">Jam Selesai</label>
+                  <input
+                    type="time"
+                    name="jamSelesai"
+                    value={formData.jamSelesai}
+                    onChange={handleChange}
+                    className="w-full border p-2 rounded-lg"
+                  />
+                </div>
+              </div>
 
-              <tbody>
-                {riwayat.map((item, i) => (
-                  <tr key={i} className="border-b hover:bg-gray-50">
-                    <td className="py-2 px-3">{item.nim}</td>
-                    <td className="py-2 px-3">{item.nama}</td>
-                    <td className="py-2 px-3">{item.jurusan}</td>
-                    <td className="py-2 px-3">{item.tanggalKonseling}</td>
-                    <td className="py-2 px-3">{item.jamMulai}</td>
-                    <td className="py-2 px-3">{item.jamSelesai}</td>
-                    <td className="py-2 px-3">{item.durasi} menit</td>
-                    <td className="py-2 px-3 capitalize">{item.metode}</td>
-                    <td className="py-2 px-3">{item.deskripsi}</td>
-                    <td className="py-2 px-3">{item.kendala}</td>
-                    <td className="py-2 px-3">{item.supportNeeded}</td>
-                    <td className="py-2 px-3">
-                      <span
-                        className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${
-                          item.status === "Disetujui"
-                            ? "bg-green-100 text-green-700"
-                            : item.status === "Tidak Disetujui"
-                            ? "bg-red-100 text-red-700"
-                            : item.status === "Decline"
-                            ? "bg-orange-100 text-orange-700"
-                            : "bg-yellow-100 text-yellow-700"
-                        }`}
-                      >
-                        {item.status || "Menunggu"}
-                      </span>
-                    </td>
-                    <td className="py-2 px-3">{item.komentarStaff || "-"}</td>
-                    <td className="py-2 px-3 text-center">
-                      {(item.status === "Menunggu" || item.status === "Decline") && (
-                        <button
-                          onClick={() => handleEdit(i)}
-                          className="bg-blue-500 text-white px-3 py-1 rounded-lg hover:bg-blue-600 transition"
-                        >
-                          Edit
-                        </button>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </main>
-    </div>
-  );
-}
+              <p className="text-gray-700 text-sm">
+                Durasi: <span className="font-semibold">{hitungDurasi()} menit</span>
+              </p>
+
+              <div className="mb-4 mt-4">
+                <label className="font-medium">Metode Konseling</label>
+                <select
+                  name="metode"
+                  value={formData.metode}
+                  onChange={handleChange}
+                  className="w-full border p-2 rounded-lg"
+                >
+                  <option value="">-- Pilih Metode --</option>
+                  <option value="Zoom">Zoom</option>
+                  <option value="Tatap Muka">Tatap Muka</option>
+                  <option value="chat WA/Line">Chat WA/Line</option>
+                  <option value="Telepon">Telepon</option>
+                </select>
+              </div>
+
+              <div className="mb-4">
+                <label className="font-medium">Deskripsi Kegiatan</label>
+                <textarea
+                  name="deskripsi"
+                  value={formData.deskripsi}
+                  onChange={handleChange}
+                  className="w-full border p-2 rounded-lg"
+                  placeholder="Isi kegiatan konseling..."
+                />
+              </div>
+
+              <div className="mb-4">
+                <label className="font-medium">Kendala Saat Konseling</label>
+                <textarea
+                  name="kendala"
+                  value={formData.kendala}
+                  onChange={handleChange}
+                  className="w-full border p-2 rounded-lg"
+                  placeholder="Isi kendala yang dihadapi saat konseling..."
+                />
+              </div>
+
+              <div className="mb-4">
+                <label className="font-medium">Support Needed</label>
+                <textarea
+                  name="support"
+                  value={formData.support}
+                  onChange={handleChange}
+                  className="w-full border p-2 rounded-lg"
+                  placeholder="Isi dukungan yang dibutuhkan..."
+                />
+              </div>
+
+              <div className="mb-4">
+                <label className="font-medium">Status Case</label>
+                <select
+                  name="statusCase"
+                  value={formData.statusCase}
+                  onChange={handleChange}
+                  className="w-full border p-2 rounded-lg"
+                >
+                  <option value="">-- Pilih Status --</option>
+                  <option value="Close">Close</option>
+                  <option value="River">River</option>
+                </select>
+              </div>
+
+              <button
+                type="submit"
+                className="w-full bg-blue-500 text-white p-2 rounded-lg hover:bg-blue-600 transition"
+              >
+                Simpan
+              </button>
+            </form>
+
+            {/* Riwayat data logbook */}
+            <div className="mt-10">
+              <h2 className="text-xl font-semibold mb-3">Data Logbook</h2>
+              <div
+                className="bg-white rounded-xl shadow overflow-auto"
+                style={{ maxHeight: "250px", position: "relative" }}
+              >
+                <table className="min-w-full text-left text-sm border-collapse">
+                  <thead className="sticky top-0 bg-gray-200 z-10 shadow">
+                    <tr className="border-b">
+                      <th className="py-2 px-3 text-center">NIM</th>
+                      <th className="py-2 px-3 text-center">Nama</th>
+                      <th className="py-2 px-3 text-center">Jurusan</th>
+                      <th className="py-2 px-3 text-center">Area Kampus</th>
+                      <th className="py-2 px-3 text-center">Tanggal Konseling</th>
+                      <th className="py-2 px-3 text-center">Jam Mulai</th>
+                      <th className="py-2 px-3 text-center">Jam Selesai</th>
+                      <th className="py-2 px-3 text-center">Durasi</th>
+                      <th className="py-2 px-3 text-center">Metode</th>
+                      <th className="py-2 px-3 text-center">Deskripsi Kegiatan</th>
+                      <th className="py-2 px-3 text-center">Kendala Konseling</th>
+                      <th className="py-2 px-3 text-center">Support Needed</th>
+                      <th className="py-2 px-3 text-center">Status Case</th>
+                      <th className="py-2 px-3 text-center">Status Verifikasi</th>
+                      <th className="py-2 px-3 text-center">Komentar</th>
+                      <th className="py-2 px-3 text-center">Aksi</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    {riwayat.map((item, i) => (
+                      <tr key={i} className="border-b hover:bg-gray-50">
+                        <td className="py-2 px-3 text-center">{item.nim}</td>
+                        <td className="py-2 px-3 text-center">{item.nama}</td>
+                        <td className="py-2 px-3 text-center">{item.jurusan}</td>
+                        <td className="py-2 px-3 text-center">{item.kampusArea}</td>
+                        <td className="py-2 px-3 text-center">{item.tanggalKonseling}</td>
+                        <td className="py-2 px-3 text-center">{item.jamMulai}</td>
+                        <td className="py-2 px-3 text-center">{item.jamSelesai}</td>
+                        <td className="py-2 px-3 text-center">{item.durasi} menit</td>
+                        <td className="py-2 px-3 text-center capitalize">{item.metode}</td>
+                        <td className="py-2 px-3 text-center">{item.deskripsi}</td>
+                        <td className="py-2 px-3 text-center">{item.kendala}</td>
+                        <td className="py-2 px-3 text-center">{item.supportNeeded}</td>
+                        <td className="py-2 px-3 text-center">{item.statusCase}</td>
+                        <td className="py-2 px-3 text-center">
+                          <span
+                            className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${
+                              item.status === "Disetujui"
+                                ? "bg-green-100 text-green-700"
+                                : item.status === "Tidak Disetujui"
+                                ? "bg-red-100 text-red-700"
+                                : item.status === "Decline"
+                                ? "bg-orange-100 text-orange-700"
+                                : "bg-yellow-100 text-yellow-700"
+                            }`}
+                          >
+                            {item.status || "Menunggu"}
+                          </span>
+                        </td>
+                        <td className="py-2 px-3 text-center">{item.komentarStaff || "-"}</td>
+                        <td className="py-2 px-3 text-center">
+                          {(item.status === "Menunggu" || item.status === "Decline") && (
+                            <button
+                              onClick={() => handleEdit(i)}
+                              className="bg-blue-500 text-white px-3 py-1 rounded-lg hover:bg-blue-600 transition"
+                            >
+                              Edit
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            </>
+            )}
+
+            {/* Evaluasi dan kuesioner */}
+            {activePage === "evaluasi-kuesioner" && (
+              <>
+                <h2 className="text-2xl font-bold mb-4">Evaluasi & Kuesioner</h2>
+
+                <div className="space-y-8">
+
+                  {/* Evaluasi Card */}
+                  <div className="bg-white shadow-lg rounded-xl p-6">
+                    <h3 className="text-xl font-bold mb-4 text-gray-900">Evaluasi</h3>
+
+                    {evaluation?.evaluations?.length === 0 ? (
+                      <p className="text-gray-500">Belum ada evaluasi.</p>
+                    ) : (
+                      <div className="space-y-4">
+                        {evaluation.evaluations.map((item, index) => (
+                          <div key={index} className="border p-4 rounded-lg">
+                            <h4 className="font-semibold">{item.title}</h4>
+                            <a
+                              href={item.link}
+                              target="_blank"
+                              className="text-blue-600 underline"
+                            >
+                              Buka Form
+                            </a>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Kuesioner card */}
+                  <div className="bg-white shadow-lg rounded-xl p-6">
+                    <h3 className="text-xl font-bold mb-4 text-gray-900">Kuesioner</h3>
+
+                    {evaluation?.questionnaires?.length === 0 ? (
+                      <p className="text-gray-500">Belum ada kuesioner.</p>
+                    ) : (
+                      <div className="space-y-4">
+                        {evaluation.questionnaires.map((item, index) => (
+                          <div key={index} className="border p-4 rounded-lg">
+                            <h4 className="font-semibold">{item.title}</h4>
+                            <a
+                              href={item.link}
+                              target="_blank"
+                              className="text-blue-600 underline"
+                            >
+                              Buka Form
+                            </a>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+                </>
+                )}
+              </main>
+            </div>
+          );
+        }

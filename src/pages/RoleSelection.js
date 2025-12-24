@@ -6,8 +6,7 @@ export default function RoleSelection() {
   const [role, setRole] = useState("");
   const [campus, setCampus] = useState("");
   const [pembina, setPembina] = useState("");
-  const [periodeMulai, setPeriodeMulai] = useState("");
-  const [periodeSelesai, setPeriodeSelesai] = useState("");
+  const [periode, setPeriode] = useState("");
   const [errors, setErrors] = useState({});
 
   const handleSubmit = (e) => {
@@ -16,7 +15,7 @@ export default function RoleSelection() {
     let newErrors = {};
     
     if (!role) newErrors.role = "Harap pilih peran terlebih dahulu!";
-    if (!periodeMulai || !periodeSelesai)
+    if (!periode)
       newErrors.periode = "Periode harus diisi!";
 
     if ((role === "peer-counselor" || role === "peer-partner") && !campus)
@@ -33,7 +32,7 @@ export default function RoleSelection() {
         role,
         campus,
         pembina,
-        periode: `${periodeMulai} - ${periodeSelesai}`,
+        periode: periode,
       };
       localStorage.setItem("roleData", JSON.stringify(dataPeran));
 
@@ -116,10 +115,14 @@ export default function RoleSelection() {
                 }`}
               >
                 <option value="">-- Pilih Pembina --</option>
-                {(JSON.parse(localStorage.getItem("pembinaList")) || []).map((nama, i) => (
-                  <option key={i} value={nama}>{nama}</option>
+                
+                {(JSON.parse(localStorage.getItem("pembinaList")) || []).map((p, i) => (
+                  <option key={i} value={p.nama}>
+                    {p.nama}
+                  </option>
                 ))}
               </select>
+              
               {errors.pembina && (
                 <p className="text-red-500 text-sm mt-1">{errors.pembina}</p>
               )}
@@ -127,33 +130,20 @@ export default function RoleSelection() {
           )}
 
           {/* Periode */}
-          <div>
+          <div className="text-center">
             <label className="block text-gray-900 font-medium mb-1">
               Periode Peran
             </label>
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center justify-center space-x-2">
               <input
                 type="number"
-                placeholder="2022"
-                value={periodeMulai}
+                placeholder="Contoh: 2025"
+                value={periode}
                 onChange={(e) => {
-                  setPeriodeMulai(e.target.value);
+                  setPeriode(e.target.value);
                   setErrors({ ...errors, periode: "" });
                 }}
-                className={`w-1/2 p-2 border rounded-lg ${
-                  errors.periode ? "border-red-500" : "border-gray-300"
-                }`}
-              />
-              <span>-</span>
-              <input
-                type="number"
-                placeholder="2026"
-                value={periodeSelesai}
-                onChange={(e) => {
-                  setPeriodeSelesai(e.target.value);
-                  setErrors({ ...errors, periode: "" });
-                }}
-                className={`w-1/2 p-2 border rounded-lg ${
+                className={`p-2 border rounded-lg text-center ${
                   errors.periode ? "border-red-500" : "border-gray-300"
                 }`}
               />
